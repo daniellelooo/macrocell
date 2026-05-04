@@ -60,7 +60,7 @@ export default function ProductCard({ product, index = 0 }: Props) {
           >
             <Heart
               size={14}
-              className={isWished ? "fill-[#CC0000] text-[#CC0000]" : "text-neutral-400"}
+              className={isWished ? "fill-[#3B9DD8] text-[#3B9DD8]" : "text-neutral-400"}
             />
           </button>
           <Image
@@ -75,7 +75,7 @@ export default function ProductCard({ product, index = 0 }: Props) {
 
       <div className="flex flex-col flex-1">
         <Link href={`/productos/${product.slug}`}>
-          <h3 className="font-semibold text-neutral-900 text-sm leading-snug mb-0.5 hover:text-[#CC0000] transition-colors">
+          <h3 className="font-semibold text-neutral-900 text-sm leading-snug mb-0.5 hover:text-[#3B9DD8] transition-colors">
             {product.name}
           </h3>
         </Link>
@@ -97,7 +97,7 @@ export default function ProductCard({ product, index = 0 }: Props) {
           ) : (
             <button
               onClick={() => addItem(product)}
-              className="flex items-center gap-1.5 bg-neutral-100 hover:bg-[#CC0000] hover:text-white text-neutral-600 text-[11px] font-semibold px-3 py-1.5 rounded-full transition-all active:scale-95"
+              className="flex items-center gap-1.5 bg-neutral-100 hover:bg-[#3B9DD8] hover:text-white text-neutral-600 text-[11px] font-semibold px-3 py-1.5 rounded-full transition-all active:scale-95"
               aria-label="Agregar al carrito"
             >
               <ShoppingBag size={12} />

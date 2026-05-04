@@ -65,7 +65,7 @@ export default function CategoryShowcase() {
             className="flex items-end justify-between gap-4"
           >
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#CC0000] mb-2">
+              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#3B9DD8] mb-2">
                 Compra por línea
               </p>
               <h2 className="text-2xl md:text-4xl font-bold tracking-tight text-neutral-900 leading-tight">
@@ -76,7 +76,7 @@ export default function CategoryShowcase() {
             </div>
             <Link
               href="/catalogo"
-              className="hidden sm:inline-flex items-center gap-1 text-xs md:text-sm font-semibold text-neutral-600 hover:text-[#CC0000] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#CC0000] rounded px-1"
+              className="hidden sm:inline-flex items-center gap-1 text-xs md:text-sm font-semibold text-neutral-600 hover:text-[#3B9DD8] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3B9DD8] rounded px-1"
             >
               Ver todo el catálogo
               <ArrowUpRight size={13} aria-hidden />
@@ -107,7 +107,7 @@ export default function CategoryShowcase() {
                       ? `, desde ${formatPrice(card.minPrice)}`
                       : ""
                   }`}
-                  className="group relative flex flex-col h-full bg-white border border-neutral-200 rounded-3xl overflow-hidden transition-all duration-300 hover:border-[#CC0000] hover:shadow-[0_10px_40px_-15px_rgba(204,0,0,0.25)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#CC0000] focus-visible:ring-offset-2"
+                  className="group relative flex flex-col h-full bg-white border border-neutral-200 rounded-3xl overflow-hidden transition-all duration-300 hover:border-[#3B9DD8] hover:shadow-[0_10px_40px_-15px_rgba(204,0,0,0.25)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3B9DD8] focus-visible:ring-offset-2"
                 >
                   {/* Imagen */}
                   <div className="relative aspect-[5/4] bg-[#F5F5F7] flex items-center justify-center p-5 overflow-hidden">
@@ -132,7 +132,7 @@ export default function CategoryShowcase() {
 
                   {/* Info */}
                   <div className="flex flex-col flex-1 px-4 py-3.5">
-                    <h3 className="text-base font-bold text-neutral-900 group-hover:text-[#CC0000] transition-colors">
+                    <h3 className="text-base font-bold text-neutral-900 group-hover:text-[#3B9DD8] transition-colors">
                       {card.label}
                     </h3>
                     <p className="text-[11px] text-neutral-500 mt-0.5 leading-snug">
@@ -170,7 +170,7 @@ export default function CategoryShowcase() {
         <div className="px-5 mt-5 sm:hidden">
           <Link
             href="/catalogo"
-            className="inline-flex items-center gap-1 text-xs font-semibold text-[#CC0000] hover:text-[#A00000] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#CC0000] rounded px-1"
+            className="inline-flex items-center gap-1 text-xs font-semibold text-[#3B9DD8] hover:text-[#2A84BE] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3B9DD8] rounded px-1"
           >
             Ver todo el catálogo
             <ArrowUpRight size={12} aria-hidden />

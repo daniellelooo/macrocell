@@ -131,6 +131,6 @@ export const useCartStore = create<CartStore>()(
       itemCount: () =>
         get().items.reduce((sum, item) => sum + item.quantity, 0),
     }),
-    { name: "prophone-cart-v2" }
+    { name: "macrocell-cart-v2" }
   )
 );

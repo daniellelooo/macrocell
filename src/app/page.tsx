@@ -51,7 +51,7 @@ function MobileCarousel({ images }: { images: string[] }) {
             {list[current] && (
               <Image
                 src={list[current]}
-                alt={`Prophone ${current + 1}`}
+                alt={`Macrocell ${current + 1}`}
                 fill
                 className="object-contain"
                 priority={current === 0}
@@ -68,7 +68,7 @@ function MobileCarousel({ images }: { images: string[] }) {
             key={i}
             onClick={() => setCurrent(i)}
             className={`rounded-full transition-all duration-500 ${
-              i === current ? "w-5 h-1.5 bg-[#CC0000]" : "w-1.5 h-1.5 bg-neutral-300"
+              i === current ? "w-5 h-1.5 bg-[#3B9DD8]" : "w-1.5 h-1.5 bg-neutral-300"
             }`}
             aria-label={`Imagen ${i + 1}`}
           />
@@ -104,7 +104,7 @@ function HeroCarousel({ images }: { images: string[] }) {
           {list[current] && (
             <Image
               src={list[current]}
-              alt={`Prophone Medellín ${current + 1}`}
+              alt={`Macrocell ${current + 1}`}
               fill
               className="object-contain"
               priority={current === 0}
@@ -185,7 +185,7 @@ export default function HomePage() {
                 <br />
                 más bajos
                 <br />
-                <span className="text-[#CC0000]">en iPhone.</span>
+                <span className="text-[#3B9DD8]">en iPhone.</span>
               </motion.h1>
 
               <motion.p
@@ -210,7 +210,7 @@ export default function HomePage() {
               >
                 <Link
                   href="/catalogo"
-                  className="bg-[#CC0000] text-white px-7 py-4 rounded-full font-semibold text-sm hover:bg-[#A00000] transition-colors active:scale-95 text-center"
+                  className="bg-[#3B9DD8] text-white px-7 py-4 rounded-full font-semibold text-sm hover:bg-[#2A84BE] transition-colors active:scale-95 text-center"
                 >
                   Ver catálogo y precios
                 </Link>
@@ -310,7 +310,7 @@ export default function HomePage() {
                   <p className="text-2xl font-bold text-neutral-900 mt-auto">
                     {formatPrice(item.price)}
                   </p>
-                  <span className="mt-3 flex items-center gap-1 text-sm text-[#CC0000] font-semibold">
+                  <span className="mt-3 flex items-center gap-1 text-sm text-[#3B9DD8] font-semibold">
                     Ver en catálogo <ArrowRight size={13} />
                   </span>
                 </div>
@@ -332,7 +332,7 @@ export default function HomePage() {
             </div>
             <Link
               href="/catalogo"
-              className="flex items-center gap-1 text-xs md:text-sm font-semibold text-[#CC0000] shrink-0 ml-4"
+              className="flex items-center gap-1 text-xs md:text-sm font-semibold text-[#3B9DD8] shrink-0 ml-4"
             >
               Ver todos <ArrowRight size={13} />
             </Link>
@@ -351,26 +351,26 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto">
           <AnimatedSection className="mb-8 px-5 md:px-12">
             <h2 className="text-2xl md:text-5xl font-bold tracking-tight text-neutral-900 mb-2">
-              ¿Por qué Prophone?
+              ¿Por qué Macrocell?
             </h2>
-            <p className="text-neutral-500 text-sm">El reseller de confianza en Antioquia</p>
+            <p className="text-neutral-500 text-sm">Tu tienda de smartphones de confianza</p>
           </AnimatedSection>
 
           {/* Mobile: horizontal scroll cards. Desktop: 3-col grid */}
           <div className="flex gap-4 overflow-x-auto no-scrollbar px-5 md:px-12 pb-2 md:grid md:grid-cols-3 md:overflow-visible">
             {[
               {
-                icon: <ShieldCheck size={22} className="text-[#CC0000]" />,
+                icon: <ShieldCheck size={22} className="text-[#3B9DD8]" />,
                 title: "Garantía Oficial",
                 description: "Todos nuestros equipos tienen garantía Apple de 1 año. Compra con total seguridad.",
               },
               {
-                icon: <BadgeDollarSign size={22} className="text-[#CC0000]" />,
+                icon: <BadgeDollarSign size={22} className="text-[#3B9DD8]" />,
                 title: "Los Mejores Precios",
                 description: "Sin intermediarios. Traemos lo mejor de Apple a los precios más bajos de Medellín.",
               },
               {
-                icon: <HeadphonesIcon size={22} className="text-[#CC0000]" />,
+                icon: <HeadphonesIcon size={22} className="text-[#3B9DD8]" />,
                 title: "Asesoría Personalizada",
                 description: "Te ayudamos a elegir el equipo ideal. Respondemos rápido por WhatsApp.",
               },
@@ -406,17 +406,17 @@ export default function HomePage() {
           <div className="grid grid-cols-3 gap-3 md:gap-5">
             {[
               {
-                icon: <Gift size={20} className="text-[#CC0000]" />,
+                icon: <Gift size={20} className="text-[#3B9DD8]" />,
                 title: "Vidrio Protector",
                 desc: "Membresía 1 año para cambio de vidrio.",
               },
               {
-                icon: <ShieldCheck size={20} className="text-[#CC0000]" />,
+                icon: <ShieldCheck size={20} className="text-[#3B9DD8]" />,
                 title: "Estuche",
                 desc: "Estuche protector sin costo adicional.",
               },
               {
-                icon: <BadgeCheck size={20} className="text-[#CC0000]" />,
+                icon: <BadgeCheck size={20} className="text-[#3B9DD8]" />,
                 title: "Garantía 1 Año",
                 desc: "Respaldo oficial Apple + soporte nuestro.",
               },
@@ -449,7 +449,7 @@ export default function HomePage() {
           <div className="bg-[#0C1014] rounded-3xl p-7 md:p-14 flex flex-col md:flex-row items-start md:items-center gap-8 md:gap-10">
             <div className="flex-1 w-full">
               <div className="flex items-center gap-3 mb-5">
-                <CreditCard size={18} className="text-[#CC0000]" />
+                <CreditCard size={18} className="text-[#3B9DD8]" />
                 <span className="text-neutral-400 text-xs font-medium">
                   Crédito disponible
                 </span>
@@ -457,7 +457,7 @@ export default function HomePage() {
               <h2 className="text-2xl md:text-4xl font-bold text-white mb-4 leading-snug">
                 ¿No tienes todo el efectivo?
                 <br />
-                <span className="text-[#CC0000]">Te financiamos.</span>
+                <span className="text-[#3B9DD8]">Te financiamos.</span>
               </h2>
 
               <div className="flex items-center gap-3 mb-4">
@@ -482,7 +482,7 @@ export default function HomePage() {
               <div className="grid grid-cols-2 gap-2 mb-6 md:hidden">
                 {["Aprobación rápida", "Cuotas flexibles", "Sin fiador", "Entrega inmediata"].map((b) => (
                   <div key={b} className="flex items-center gap-2 border border-white/10 rounded-xl px-3 py-2">
-                    <span className="w-1.5 h-1.5 bg-[#CC0000] rounded-full shrink-0" />
+                    <span className="w-1.5 h-1.5 bg-[#3B9DD8] rounded-full shrink-0" />
                     <span className="text-white text-xs">{b}</span>
                   </div>
                 ))}
@@ -492,7 +492,7 @@ export default function HomePage() {
                 href={WA_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-[#CC0000] text-white px-6 py-3.5 rounded-full text-sm font-semibold hover:bg-[#A00000] active:scale-95 transition-all w-full md:w-auto justify-center md:justify-start"
+                className="inline-flex items-center gap-2 bg-[#3B9DD8] text-white px-6 py-3.5 rounded-full text-sm font-semibold hover:bg-[#2A84BE] active:scale-95 transition-all w-full md:w-auto justify-center md:justify-start"
               >
                 Solicitar crédito por WhatsApp
               </a>
@@ -505,7 +505,7 @@ export default function HomePage() {
                   key={benefit}
                   className="flex items-center gap-3 border border-white/10 rounded-xl px-4 py-2.5"
                 >
-                  <span className="w-1.5 h-1.5 bg-[#CC0000] rounded-full shrink-0" />
+                  <span className="w-1.5 h-1.5 bg-[#3B9DD8] rounded-full shrink-0" />
                   <span className="text-white text-sm">{benefit}</span>
                 </div>
               ))}
@@ -536,7 +536,7 @@ export default function HomePage() {
               },
               {
                 name: "Sebastián M.",
-                text: "Ya llevo 3 años comprando en Prophone. Siempre garantía real y precios que no consigo en otro lado. 100% recomendados.",
+                text: "Ya llevo 3 años comprando en Macrocell. Siempre garantía real y precios que no consigo en otro lado. 100% recomendados.",
                 rating: 5,
               },
               {
@@ -586,7 +586,7 @@ export default function HomePage() {
                 delay={i * 0.08}
                 className="bg-white rounded-2xl p-4 md:p-6 border border-neutral-200 flex flex-col"
               >
-                <MapPin size={16} className="text-[#CC0000] mb-3" />
+                <MapPin size={16} className="text-[#3B9DD8] mb-3" />
                 <h3 className="text-xs md:text-sm font-bold text-neutral-900 mb-0.5">
                   {sede.name}
                 </h3>
@@ -610,14 +610,14 @@ export default function HomePage() {
           </h2>
           <p className="text-neutral-400 text-sm md:text-base mb-8 max-w-sm md:max-w-lg mx-auto leading-relaxed">
             Más de <strong className="text-white">200K seguidores</strong> confían
-            en Prophone. El número 1 en precios en Medellín.
+            en Macrocell. Los mejores precios en Colombia.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <a
               href={WA_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-[#CC0000] text-white px-8 py-4 rounded-full text-sm font-bold hover:bg-[#A00000] active:scale-95 transition-all"
+              className="bg-[#3B9DD8] text-white px-8 py-4 rounded-full text-sm font-bold hover:bg-[#2A84BE] active:scale-95 transition-all"
             >
               Hablar por WhatsApp
             </a>

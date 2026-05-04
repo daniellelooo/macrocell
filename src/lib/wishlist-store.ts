@@ -26,6 +26,6 @@ export const useWishlistStore = create<WishlistStore>()(
 
       clear: () => set({ slugs: [] }),
     }),
-    { name: "prophone-wishlist-v1" }
+    { name: "macrocell-wishlist-v1" }
   )
 );

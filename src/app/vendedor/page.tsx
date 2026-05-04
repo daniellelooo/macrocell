@@ -99,7 +99,7 @@ export default function VendedorPage() {
       <header className="bg-[#0C1014] text-white px-6 py-4 flex items-center justify-between">
         <div>
           <p className="text-[10px] uppercase tracking-widest text-neutral-500 font-semibold">Portal</p>
-          <h1 className="text-lg font-bold">Vendedor — Prophone</h1>
+          <h1 className="text-lg font-bold">Vendedor — Macrocell</h1>
         </div>
         <div className="flex items-center gap-3">
           <a
@@ -135,7 +135,7 @@ export default function VendedorPage() {
               value={query}
               onChange={(e) => { setQuery(e.target.value); setSelectedSku(null); }}
               placeholder="Buscar producto o SKU…"
-              className="w-full pl-9 pr-4 py-3 rounded-xl border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30"
+              className="w-full pl-9 pr-4 py-3 rounded-xl border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
             />
           </div>
 
@@ -170,7 +170,7 @@ export default function VendedorPage() {
 
           {/* Variante seleccionada */}
           {selectedVariant && (
-            <div className="border border-[#CC0000]/20 bg-red-50/40 rounded-xl p-4 space-y-4">
+            <div className="border border-[#3B9DD8]/20 bg-red-50/40 rounded-xl p-4 space-y-4">
               <div>
                 <p className="text-xs text-neutral-500 font-semibold uppercase tracking-wide mb-1">Producto seleccionado</p>
                 <p className="text-base font-bold text-neutral-900">{selectedVariant.product.name}</p>
@@ -211,7 +211,7 @@ export default function VendedorPage() {
                 <button
                   onClick={handleSale}
                   disabled={loading}
-                  className="flex-1 py-3 bg-[#CC0000] text-white font-semibold rounded-xl text-sm hover:bg-[#A00000] transition disabled:opacity-50 active:scale-95"
+                  className="flex-1 py-3 bg-[#3B9DD8] text-white font-semibold rounded-xl text-sm hover:bg-[#2A84BE] transition disabled:opacity-50 active:scale-95"
                 >
                   {loading ? "Registrando…" : `Registrar venta (−${qty} ud${qty > 1 ? "s" : ""})`}
                 </button>

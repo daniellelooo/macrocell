@@ -137,7 +137,7 @@ export default function CustomerAuthForm({
                   required={mode === "register"}
                   autoComplete="name"
                   placeholder="Juan Pérez"
-                  className="w-full pl-9 pr-3 py-3 bg-neutral-50 border border-neutral-200 rounded-xl text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30"
+                  className="w-full pl-9 pr-3 py-3 bg-neutral-50 border border-neutral-200 rounded-xl text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
                 />
               </Field>
               <Field
@@ -150,7 +150,7 @@ export default function CustomerAuthForm({
                   onChange={(e) => setPhone(e.target.value)}
                   autoComplete="tel"
                   placeholder="300 000 0000"
-                  className="w-full pl-9 pr-3 py-3 bg-neutral-50 border border-neutral-200 rounded-xl text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30"
+                  className="w-full pl-9 pr-3 py-3 bg-neutral-50 border border-neutral-200 rounded-xl text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
                 />
               </Field>
             </motion.div>
@@ -166,7 +166,7 @@ export default function CustomerAuthForm({
             autoComplete="email"
             autoFocus
             placeholder="tu@correo.com"
-            className="w-full pl-9 pr-3 py-3 bg-neutral-50 border border-neutral-200 rounded-xl text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30"
+            className="w-full pl-9 pr-3 py-3 bg-neutral-50 border border-neutral-200 rounded-xl text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
           />
         </Field>
 
@@ -181,7 +181,7 @@ export default function CustomerAuthForm({
                 mode === "register" ? "new-password" : "current-password"
               }
               placeholder="••••••••"
-              className="w-full pl-9 pr-3 py-3 bg-neutral-50 border border-neutral-200 rounded-xl text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30"
+              className="w-full pl-9 pr-3 py-3 bg-neutral-50 border border-neutral-200 rounded-xl text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
             />
             {mode === "register" && (
               <p className="text-[11px] text-neutral-400 mt-1.5">
@@ -215,7 +215,7 @@ export default function CustomerAuthForm({
         <button
           type="submit"
           disabled={submitting}
-          className="w-full bg-[#CC0000] hover:bg-[#A00000] text-white font-semibold py-3 rounded-xl text-sm transition active:scale-[0.98] disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#CC0000] focus-visible:ring-offset-2"
+          className="w-full bg-[#3B9DD8] hover:bg-[#2A84BE] text-white font-semibold py-3 rounded-xl text-sm transition active:scale-[0.98] disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3B9DD8] focus-visible:ring-offset-2"
         >
           {submitting
             ? "Procesando…"
@@ -238,7 +238,7 @@ export default function CustomerAuthForm({
                   setMode("register");
                   setError(null);
                 }}
-                className="font-semibold text-[#CC0000] hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[#CC0000] rounded"
+                className="font-semibold text-[#3B9DD8] hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3B9DD8] rounded"
               >
                 Regístrate
               </button>
@@ -250,7 +250,7 @@ export default function CustomerAuthForm({
                   setMode("reset");
                   setError(null);
                 }}
-                className="text-neutral-400 hover:text-neutral-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#CC0000] rounded"
+                className="text-neutral-400 hover:text-neutral-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3B9DD8] rounded"
               >
                 Olvidé mi contraseña
               </button>
@@ -266,7 +266,7 @@ export default function CustomerAuthForm({
                 setMode("login");
                 setError(null);
               }}
-              className="font-semibold text-[#CC0000] hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[#CC0000] rounded"
+              className="font-semibold text-[#3B9DD8] hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3B9DD8] rounded"
             >
               Inicia sesión
             </button>
@@ -280,7 +280,7 @@ export default function CustomerAuthForm({
                 setMode("login");
                 setError(null);
               }}
-              className="font-semibold text-[#CC0000] hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[#CC0000] rounded"
+              className="font-semibold text-[#3B9DD8] hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3B9DD8] rounded"
             >
               ← Volver a iniciar sesión
             </button>

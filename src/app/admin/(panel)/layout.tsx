@@ -219,8 +219,8 @@ export default function AdminPanelLayout({
       >
         <div className="p-5 flex items-center gap-3 border-b border-white/10">
           <Image
-            src="/prophone-profile-pic.jpg"
-            alt="Prophone"
+            src="/macrocell-logo.jpg"
+            alt="Macrocell"
             width={36}
             height={36}
             className="rounded-full object-cover"
@@ -230,7 +230,7 @@ export default function AdminPanelLayout({
               {panelLabel}
             </p>
             <p className="text-sm font-bold truncate">
-              {displayName || "Prophone"}
+              {displayName || "Macrocell"}
             </p>
           </div>
           <button
@@ -254,7 +254,7 @@ export default function AdminPanelLayout({
                 onClick={() => setMobileOpen(false)}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition ${
                   active
-                    ? "bg-[#CC0000] text-white shadow-md"
+                    ? "bg-[#3B9DD8] text-white shadow-md"
                     : "text-neutral-300 hover:bg-white/5"
                 }`}
               >
@@ -316,7 +316,7 @@ export default function AdminPanelLayout({
           >
             <Menu size={18} />
           </button>
-          <p className="text-sm font-semibold">Prophone {panelLabel}</p>
+          <p className="text-sm font-semibold">Macrocell {panelLabel}</p>
           {role !== "vendedor" ? (
             <Link
               href="/"

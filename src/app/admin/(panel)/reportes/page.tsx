@@ -228,7 +228,7 @@ export default function AdminReportesPage() {
       >
         <div>
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-neutral-900 flex items-center gap-2">
-            <FileBarChart size={22} className="text-[#CC0000]" /> Reportes
+            <FileBarChart size={22} className="text-[#3B9DD8]" /> Reportes
           </h1>
           <p className="text-sm text-neutral-500 mt-1">
             Vista anual con desglose mensual, por categoría y top productos.
@@ -316,7 +316,7 @@ export default function AdminReportesPage() {
                       <div className="flex items-center gap-2">
                         <div className="flex-1 h-1.5 bg-neutral-100 rounded-full overflow-hidden max-w-xs">
                           <div
-                            className="h-full bg-[#CC0000] rounded-full"
+                            className="h-full bg-[#3B9DD8] rounded-full"
                             style={{ width: `${pct}%` }}
                           />
                         </div>

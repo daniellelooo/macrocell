@@ -86,7 +86,7 @@ function BuscarContent() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="iPhone 16, MacBook Air, AirPods…"
-                className="w-full pl-11 pr-12 py-3.5 bg-neutral-100 rounded-2xl text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30"
+                className="w-full pl-11 pr-12 py-3.5 bg-neutral-100 rounded-2xl text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
                 autoFocus={!initialQ}
               />
               {query.length > 0 && (
@@ -127,7 +127,7 @@ function BuscarContent() {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="ml-auto appearance-none bg-neutral-100 text-neutral-700 text-xs py-1.5 pl-3 pr-7 rounded-full focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30 shrink-0"
+              className="ml-auto appearance-none bg-neutral-100 text-neutral-700 text-xs py-1.5 pl-3 pr-7 rounded-full focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30 shrink-0"
             >
               <option value="relevance">Relevancia</option>
               <option value="price-asc">Menor precio</option>

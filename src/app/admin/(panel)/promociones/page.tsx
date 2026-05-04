@@ -82,7 +82,7 @@ export default function AdminPromocionesPage() {
         <div className="flex items-start justify-between mb-4">
           <div>
             <h2 className="text-sm font-bold text-neutral-900 flex items-center gap-2">
-              <Sparkles size={14} className="text-[#CC0000]" />
+              <Sparkles size={14} className="text-[#3B9DD8]" />
               Banner del top (ticker)
             </h2>
             <p className="text-[11px] text-neutral-500 mt-0.5">
@@ -103,7 +103,7 @@ export default function AdminPromocionesPage() {
             <button
               onClick={handleBannerSave}
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition active:scale-95 ${
-                savedBanner ? "bg-green-500" : "bg-[#CC0000] hover:bg-[#A00000]"
+                savedBanner ? "bg-green-500" : "bg-[#3B9DD8] hover:bg-[#2A84BE]"
               }`}
             >
               {savedBanner ? (
@@ -122,7 +122,7 @@ export default function AdminPromocionesPage() {
         {/* Preview del ticker */}
         {draftEnabled && draftItems.filter((x) => x.trim()).length > 0 && (
           <div className="rounded-lg overflow-hidden mb-4 border border-neutral-200">
-            <div className="bg-[#CC0000] text-white text-[11px] font-semibold tracking-wide select-none px-3 py-1.5 truncate">
+            <div className="bg-[#3B9DD8] text-white text-[11px] font-semibold tracking-wide select-none px-3 py-1.5 truncate">
               {draftItems
                 .filter((x) => x.trim())
                 .join("   ·   ")}
@@ -148,14 +148,14 @@ export default function AdminPromocionesPage() {
                     return next;
                   })
                 }
-                className="flex-1 px-3 py-2 rounded-lg border border-neutral-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30"
+                className="flex-1 px-3 py-2 rounded-lg border border-neutral-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
                 placeholder="Texto del banner…"
               />
               <button
                 onClick={() =>
                   setDraftItems((d) => d.filter((_, idx) => idx !== i))
                 }
-                className="p-2 text-neutral-400 hover:text-[#CC0000] hover:bg-red-50 rounded-lg transition"
+                className="p-2 text-neutral-400 hover:text-[#3B9DD8] hover:bg-red-50 rounded-lg transition"
                 aria-label="Eliminar"
               >
                 <Trash2 size={13} />
@@ -166,7 +166,7 @@ export default function AdminPromocionesPage() {
 
         <button
           onClick={() => setDraftItems((d) => [...d, ""])}
-          className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-[#CC0000] hover:bg-red-50 px-3 py-1.5 rounded-lg transition"
+          className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-[#3B9DD8] hover:bg-red-50 px-3 py-1.5 rounded-lg transition"
         >
           <Plus size={13} /> Agregar línea
         </button>
@@ -276,7 +276,7 @@ export default function AdminPromocionesPage() {
                           }
                         }}
                         placeholder="—"
-                        className="w-full pl-7 pr-2 py-1.5 rounded-lg border border-neutral-200 bg-white text-xs focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30"
+                        className="w-full pl-7 pr-2 py-1.5 rounded-lg border border-neutral-200 bg-white text-xs focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
                       />
                     </div>
                   </td>

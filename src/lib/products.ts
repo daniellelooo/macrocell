@@ -1,4 +1,4 @@
-// Catálogo Prophone — modelo con variantes (precio por almacenamiento + condición).
+// Catálogo Macrocell — modelo con variantes (precio por almacenamiento + condición).
 // Las imágenes son placeholders (se reemplazan en la fase A2 con fotos reales de Apple/Mac Center).
 // Cuando un dato (color, feature, descripción) no está confirmado, se deja vacío en vez de inventarlo.
 
@@ -218,7 +218,7 @@ export const products: Product[] = [
     name: "iPhone 17 Pro",
     category: "iphone",
     family: "iPhone 17",
-    description: "iPhone 17 Pro en exhibición con 3.5 meses de garantía Prophone.",
+    description: "iPhone 17 Pro en exhibición con 3.5 meses de garantía Macrocell.",
     shortDescription: "Exhibición · 256 GB y 512 GB",
     image: IMG.iphone17Pro,
     images: [IMG.iphone17Pro, IMG.iphone17ProSilver, IMG.iphone17ProBlue],

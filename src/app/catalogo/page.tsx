@@ -201,7 +201,7 @@ function CatalogoContent() {
                 onClick={() => setActiveCategory(cat.id)}
                 role="tab"
                 aria-selected={activeCategory === cat.id}
-                className={`rounded-full font-semibold whitespace-nowrap transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#CC0000] focus-visible:ring-offset-2 ${filterScrolled ? "px-3 py-1 text-xs" : "px-5 py-2.5 text-sm"} ${
+                className={`rounded-full font-semibold whitespace-nowrap transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3B9DD8] focus-visible:ring-offset-2 ${filterScrolled ? "px-3 py-1 text-xs" : "px-5 py-2.5 text-sm"} ${
                   activeCategory === cat.id
                     ? "bg-neutral-900 text-white shadow-sm"
                     : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
@@ -225,9 +225,9 @@ function CatalogoContent() {
                   onClick={() => setActiveCondition(c.id)}
                   role="tab"
                   aria-selected={activeCondition === c.id}
-                  className={`px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#CC0000] ${
+                  className={`px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3B9DD8] ${
                     activeCondition === c.id
-                      ? "bg-[#CC0000] text-white shadow-sm"
+                      ? "bg-[#3B9DD8] text-white shadow-sm"
                       : "bg-neutral-50 text-neutral-500 hover:bg-neutral-100"
                   }`}
                 >
@@ -251,16 +251,16 @@ function CatalogoContent() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 aria-label="Buscar productos"
-                className={`w-full pl-10 pr-4 bg-neutral-100 rounded-full text-neutral-700 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30 transition-all duration-300 ${filterScrolled ? "py-1.5 text-xs" : "py-2.5 text-sm"}`}
+                className={`w-full pl-10 pr-4 bg-neutral-100 rounded-full text-neutral-700 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30 transition-all duration-300 ${filterScrolled ? "py-1.5 text-xs" : "py-2.5 text-sm"}`}
               />
             </div>
             <button
               onClick={() => setAdvancedOpen((v) => !v)}
               aria-expanded={advancedOpen}
               aria-controls="advanced-filters"
-              className={`relative flex items-center gap-2 rounded-full font-semibold transition-all shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#CC0000] ${filterScrolled ? "px-3 py-1.5 text-xs" : "px-4 py-2.5 text-sm"} ${
+              className={`relative flex items-center gap-2 rounded-full font-semibold transition-all shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3B9DD8] ${filterScrolled ? "px-3 py-1.5 text-xs" : "px-4 py-2.5 text-sm"} ${
                 advancedOpen || activeFilterCount > 0
-                  ? "bg-[#CC0000] text-white"
+                  ? "bg-[#3B9DD8] text-white"
                   : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
               }`}
             >
@@ -276,7 +276,7 @@ function CatalogoContent() {
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
               aria-label="Ordenar por"
-              className={`appearance-none bg-neutral-100 text-neutral-700 pl-4 pr-8 rounded-full focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30 shrink-0 cursor-pointer transition-all duration-300 ${filterScrolled ? "py-1.5 text-xs" : "py-2.5 text-sm"}`}
+              className={`appearance-none bg-neutral-100 text-neutral-700 pl-4 pr-8 rounded-full focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30 shrink-0 cursor-pointer transition-all duration-300 ${filterScrolled ? "py-1.5 text-xs" : "py-2.5 text-sm"}`}
             >
               <option value="featured">Destacados</option>
               <option value="price-asc">Menor precio</option>
@@ -340,7 +340,7 @@ function CatalogoContent() {
                           )
                         }
                         aria-label="Precio mínimo"
-                        className="w-full px-2.5 py-1.5 bg-neutral-100 rounded-lg text-xs text-neutral-700 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30"
+                        className="w-full px-2.5 py-1.5 bg-neutral-100 rounded-lg text-xs text-neutral-700 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
                       />
                       <span className="text-neutral-400 text-xs">—</span>
                       <input
@@ -354,7 +354,7 @@ function CatalogoContent() {
                           )
                         }
                         aria-label="Precio máximo"
-                        className="w-full px-2.5 py-1.5 bg-neutral-100 rounded-lg text-xs text-neutral-700 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30"
+                        className="w-full px-2.5 py-1.5 bg-neutral-100 rounded-lg text-xs text-neutral-700 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
                       />
                     </div>
                     <p className="text-[10px] text-neutral-400 mt-1">
@@ -386,9 +386,9 @@ function CatalogoContent() {
                           aria-pressed={activeColor === c.name}
                           aria-label={c.name}
                           title={c.name}
-                          className={`w-7 h-7 rounded-full border-2 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#CC0000] focus-visible:ring-offset-2 ${
+                          className={`w-7 h-7 rounded-full border-2 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3B9DD8] focus-visible:ring-offset-2 ${
                             activeColor === c.name
-                              ? "border-[#CC0000] scale-110"
+                              ? "border-[#3B9DD8] scale-110"
                               : "border-neutral-200 hover:scale-105"
                           }`}
                           style={{ backgroundColor: c.hex }}
@@ -407,7 +407,7 @@ function CatalogoContent() {
                     </p>
                     <button
                       onClick={clearAllFilters}
-                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#CC0000] hover:text-[#A00000] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#CC0000] rounded px-1"
+                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#3B9DD8] hover:text-[#2A84BE] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3B9DD8] rounded px-1"
                     >
                       <RotateCcw size={11} aria-hidden /> Limpiar todo
                     </button>
@@ -478,7 +478,7 @@ function FilterChip({
     <button
       onClick={onClick}
       aria-pressed={active}
-      className={`px-2.5 py-1 rounded-full text-[11px] font-semibold transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#CC0000] ${
+      className={`px-2.5 py-1 rounded-full text-[11px] font-semibold transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3B9DD8] ${
         active
           ? "bg-neutral-900 text-white"
           : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
@@ -524,7 +524,7 @@ function EmptyCatalog({
         {activeFilterCount > 0 || term ? (
           <button
             onClick={onClear}
-            className="inline-flex items-center gap-1.5 bg-white border border-neutral-200 hover:border-neutral-400 text-neutral-700 px-5 py-2.5 rounded-full text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#CC0000]"
+            className="inline-flex items-center gap-1.5 bg-white border border-neutral-200 hover:border-neutral-400 text-neutral-700 px-5 py-2.5 rounded-full text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3B9DD8]"
           >
             <X size={13} aria-hidden /> Limpiar filtros
           </button>

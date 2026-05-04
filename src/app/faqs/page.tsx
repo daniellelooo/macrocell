@@ -29,7 +29,7 @@ const FAQS: FaqCategory[] = [
             Los iPhone, iPad, Apple Watch y MacBook nuevos vienen con{" "}
             <strong>1 año de garantía oficial Apple</strong>. Los equipos de
             exhibición tienen{" "}
-            <strong>3.5 meses de garantía Prophone</strong>. Los AS-IS y open
+            <strong>3.5 meses de garantía Macrocell</strong>. Los AS-IS y open
             box pueden tener garantía limitada — siempre se aclara en la ficha
             del producto.
           </>
@@ -122,7 +122,7 @@ const FAQS: FaqCategory[] = [
               href="https://checkcoverage.apple.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[#CC0000] underline"
+              className="text-[#3B9DD8] underline"
             >
               checkcoverage.apple.com
             </a>
@@ -139,7 +139,7 @@ const FAQS: FaqCategory[] = [
             <br />
             <strong>Exhibición:</strong> equipo que estuvo en muestra dentro de
             la tienda, sin uso real. Estado impecable a precio menor, con 3.5
-            meses de garantía Prophone.
+            meses de garantía Macrocell.
           </>
         ),
       },
@@ -164,7 +164,7 @@ const FAQS: FaqCategory[] = [
   },
   {
     id: "tienda",
-    title: "Sobre Prophone",
+    title: "Sobre Macrocell",
     items: [
       {
         q: "¿Dónde están ubicados?",
@@ -208,7 +208,7 @@ export default function FAQsPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45 }}
           >
-            <div className="inline-flex items-center gap-2 bg-[#CC0000]/10 text-[#CC0000] text-xs font-semibold px-3 py-1 rounded-full mb-4">
+            <div className="inline-flex items-center gap-2 bg-[#3B9DD8]/10 text-[#3B9DD8] text-xs font-semibold px-3 py-1 rounded-full mb-4">
               <HelpCircle size={12} aria-hidden /> Centro de ayuda
             </div>
             <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-neutral-900 mb-3">
@@ -249,7 +249,7 @@ export default function FAQsPage() {
                         onClick={() => toggle(id)}
                         aria-expanded={open}
                         aria-controls={`${id}-panel`}
-                        className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left hover:bg-neutral-50 transition focus:outline-none focus-visible:bg-neutral-50 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#CC0000]"
+                        className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left hover:bg-neutral-50 transition focus:outline-none focus-visible:bg-neutral-50 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#3B9DD8]"
                       >
                         <span className="text-sm md:text-base font-semibold text-neutral-900 flex-1">
                           {item.q}
@@ -320,7 +320,7 @@ export default function FAQsPage() {
           <p className="text-center pt-4">
             <Link
               href="/catalogo"
-              className="text-sm text-[#CC0000] hover:text-[#A00000] font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-[#CC0000] rounded px-1"
+              className="text-sm text-[#3B9DD8] hover:text-[#2A84BE] font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3B9DD8] rounded px-1"
             >
               ← Volver al catálogo
             </Link>

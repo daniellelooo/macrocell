@@ -171,7 +171,7 @@ function AdminOrdenesContent() {
         <div className="flex items-start justify-between gap-4">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-neutral-900 flex items-center gap-2">
-              <ShoppingBag size={22} className="text-[#CC0000]" /> Pedidos
+              <ShoppingBag size={22} className="text-[#3B9DD8]" /> Pedidos
             </h1>
             <p className="text-sm text-neutral-500 mt-1">
               Todos los pedidos hechos en la tienda — invitados y clientes
@@ -242,7 +242,7 @@ function AdminOrdenesContent() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar por número de pedido, nombre, teléfono o email…"
-            className="w-full pl-9 pr-4 py-2.5 bg-white border border-neutral-200 rounded-xl text-sm text-neutral-700 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30"
+            className="w-full pl-9 pr-4 py-2.5 bg-white border border-neutral-200 rounded-xl text-sm text-neutral-700 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
           />
         </div>
 
@@ -253,7 +253,7 @@ function AdminOrdenesContent() {
               onClick={() => setStatusFilter(f.id)}
               className={`px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition ${
                 statusFilter === f.id
-                  ? "bg-[#CC0000] text-white"
+                  ? "bg-[#3B9DD8] text-white"
                   : "bg-white border border-neutral-200 text-neutral-600 hover:bg-neutral-50"
               }`}
             >
@@ -365,7 +365,7 @@ function OrderRowCard({
     minute: "2-digit",
   });
 
-  const waMsg = `Hola ${order.customerName.split(" ")[0]}, te escribimos sobre tu pedido ${order.orderNumber} en Prophone Medellín.`;
+  const waMsg = `Hola ${order.customerName.split(" ")[0]}, te escribimos sobre tu pedido ${order.orderNumber} en Macrocell.`;
   const waUrl = getWhatsappUrl(order.customerPhone || whatsappNumber, waMsg);
 
   return (
@@ -675,7 +675,7 @@ function KanbanBoard({
                 setDraggingId(null);
               }}
               className={`w-72 shrink-0 rounded-2xl border-2 ${col.color} ${
-                overCol === col.status ? "ring-2 ring-[#CC0000]/50" : ""
+                overCol === col.status ? "ring-2 ring-[#3B9DD8]/50" : ""
               } transition`}
             >
               <div className="px-3 py-2.5 border-b border-black/5 flex items-center justify-between">

@@ -139,7 +139,7 @@ export default function CuentaPage() {
           className="bg-white rounded-3xl p-6 md:p-8 shadow-sm mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4"
         >
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-[#CC0000]/10 rounded-full flex items-center justify-center text-[#CC0000] text-xl font-bold">
+            <div className="w-14 h-14 bg-[#3B9DD8]/10 rounded-full flex items-center justify-center text-[#3B9DD8] text-xl font-bold">
               {(profile.fullName || profile.email).charAt(0).toUpperCase()}
             </div>
             <div className="min-w-0">
@@ -158,14 +158,14 @@ export default function CuentaPage() {
             {profile.isAdmin && (
               <Link
                 href="/admin/productos"
-                className="text-xs font-semibold text-[#CC0000] bg-[#CC0000]/10 hover:bg-[#CC0000]/20 px-3 py-2 rounded-xl transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#CC0000]"
+                className="text-xs font-semibold text-[#3B9DD8] bg-[#3B9DD8]/10 hover:bg-[#3B9DD8]/20 px-3 py-2 rounded-xl transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3B9DD8]"
               >
                 Panel admin →
               </Link>
             )}
             <button
               onClick={handleLogout}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 px-3 py-2 rounded-xl transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#CC0000]"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 px-3 py-2 rounded-xl transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3B9DD8]"
             >
               <LogOut size={12} aria-hidden /> Cerrar sesión
             </button>
@@ -258,7 +258,7 @@ export default function CuentaPage() {
                     value={draftFullName}
                     onChange={(e) => setDraftFullName(e.target.value)}
                     placeholder="Juan Pérez"
-                    className="w-full px-3 py-2.5 bg-white border border-neutral-200 rounded-xl text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30"
+                    className="w-full px-3 py-2.5 bg-white border border-neutral-200 rounded-xl text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
                   />
                 </Field>
                 <Field label="Teléfono" icon={<Phone size={12} aria-hidden />}>
@@ -267,16 +267,16 @@ export default function CuentaPage() {
                     value={draftPhone}
                     onChange={(e) => setDraftPhone(e.target.value)}
                     placeholder="300 000 0000"
-                    className="w-full px-3 py-2.5 bg-white border border-neutral-200 rounded-xl text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30"
+                    className="w-full px-3 py-2.5 bg-white border border-neutral-200 rounded-xl text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
                   />
                 </Field>
                 <button
                   onClick={handleProfileSave}
                   disabled={savingProfile}
-                  className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#CC0000] focus-visible:ring-offset-2 ${
+                  className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3B9DD8] focus-visible:ring-offset-2 ${
                     profileSaved
                       ? "bg-green-500"
-                      : "bg-[#CC0000] hover:bg-[#A00000]"
+                      : "bg-[#3B9DD8] hover:bg-[#2A84BE]"
                   }`}
                 >
                   {profileSaved ? (
@@ -314,7 +314,7 @@ function TabButton({
       onClick={onClick}
       role="tab"
       aria-selected={active}
-      className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#CC0000] ${
+      className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3B9DD8] ${
         active
           ? "bg-neutral-900 text-white shadow-sm"
           : "bg-white text-neutral-600 hover:bg-neutral-100"
@@ -400,7 +400,7 @@ function OrderCard({ order }: { order: OrderRecord }) {
           const nameNode = productSlug ? (
             <Link
               href={`/productos/${productSlug}`}
-              className="font-medium text-neutral-900 hover:text-[#CC0000] transition-colors truncate"
+              className="font-medium text-neutral-900 hover:text-[#3B9DD8] transition-colors truncate"
             >
               {item.productName}
             </Link>
@@ -491,7 +491,7 @@ function EmptyOrders() {
       </p>
       <Link
         href="/catalogo"
-        className="inline-flex items-center gap-1.5 bg-[#CC0000] hover:bg-[#A00000] text-white px-5 py-2.5 rounded-full text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#CC0000] focus-visible:ring-offset-2"
+        className="inline-flex items-center gap-1.5 bg-[#3B9DD8] hover:bg-[#2A84BE] text-white px-5 py-2.5 rounded-full text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3B9DD8] focus-visible:ring-offset-2"
       >
         Ver catálogo <ChevronRight size={13} aria-hidden />
       </Link>

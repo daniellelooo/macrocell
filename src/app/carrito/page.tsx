@@ -62,7 +62,7 @@ export default function CartPage() {
             </p>
             <Link
               href="/catalogo"
-              className="bg-[#CC0000] text-white px-8 py-3 rounded-full font-medium hover:bg-[#A00000] transition-colors inline-block"
+              className="bg-[#3B9DD8] text-white px-8 py-3 rounded-full font-medium hover:bg-[#2A84BE] transition-colors inline-block"
             >
               Ver catálogo
             </Link>
@@ -95,7 +95,7 @@ export default function CartPage() {
                     <div className="flex-1 min-w-0">
                       <Link
                         href={`/productos/${item.product.slug}`}
-                        className="font-semibold text-neutral-900 hover:text-[#CC0000] transition-colors"
+                        className="font-semibold text-neutral-900 hover:text-[#3B9DD8] transition-colors"
                       >
                         {item.product.name}
                       </Link>
@@ -210,7 +210,7 @@ export default function CartPage() {
                   </a>
                   <Link
                     href="/checkout"
-                    className="flex items-center justify-center gap-2 w-full bg-[#CC0000] text-white py-3.5 rounded-2xl font-semibold text-sm hover:bg-[#A00000] transition-colors"
+                    className="flex items-center justify-center gap-2 w-full bg-[#3B9DD8] text-white py-3.5 rounded-2xl font-semibold text-sm hover:bg-[#2A84BE] transition-colors"
                   >
                     Finalizar compra
                   </Link>

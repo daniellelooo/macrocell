@@ -62,8 +62,8 @@ export default function AdminLoginPage() {
         <div className="bg-[#13181E] border border-white/10 rounded-3xl p-8 shadow-2xl">
           <div className="flex items-center gap-3 mb-7">
             <Image
-              src="/prophone-profile-pic.jpg"
-              alt="Prophone"
+              src="/macrocell-logo.jpg"
+              alt="Macrocell"
               width={42}
               height={42}
               className="rounded-full object-cover"
@@ -72,7 +72,7 @@ export default function AdminLoginPage() {
               <p className="text-xs uppercase tracking-wider text-neutral-500 font-semibold">
                 Panel
               </p>
-              <p className="text-base font-bold text-white">Prophone Admin</p>
+              <p className="text-base font-bold text-white">Macrocell Admin</p>
             </div>
           </div>
 
@@ -92,7 +92,7 @@ export default function AdminLoginPage() {
                 onChange={(e) => setUser(e.target.value)}
                 required
                 autoFocus
-                className="w-full bg-[#0C1014] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-[#CC0000]/50 focus:border-[#CC0000]/50 transition"
+                className="w-full bg-[#0C1014] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/50 focus:border-[#3B9DD8]/50 transition"
                 placeholder="tu@correo.com"
               />
             </div>
@@ -105,7 +105,7 @@ export default function AdminLoginPage() {
                 value={pass}
                 onChange={(e) => setPass(e.target.value)}
                 required
-                className="w-full bg-[#0C1014] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-[#CC0000]/50 focus:border-[#CC0000]/50 transition"
+                className="w-full bg-[#0C1014] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/50 focus:border-[#3B9DD8]/50 transition"
                 placeholder="••••••••"
               />
             </div>
@@ -119,7 +119,7 @@ export default function AdminLoginPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full flex items-center justify-center gap-2 bg-[#CC0000] hover:bg-[#A00000] text-white font-semibold text-sm py-3 rounded-xl transition active:scale-95 disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-2 bg-[#3B9DD8] hover:bg-[#2A84BE] text-white font-semibold text-sm py-3 rounded-xl transition active:scale-95 disabled:opacity-50"
             >
               <Lock size={14} /> Entrar
             </button>

@@ -19,7 +19,7 @@ export default function GlobalError({ error, reset }: Props) {
     <div className="min-h-screen bg-[#F5F5F7] flex items-center justify-center px-6 py-24">
       <div className="max-w-md w-full text-center">
         <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6">
-          <AlertTriangle size={28} className="text-[#CC0000]" />
+          <AlertTriangle size={28} className="text-[#3B9DD8]" />
         </div>
         <h1 className="text-2xl font-bold tracking-tight text-neutral-900 mb-3">
           Algo se cayó
@@ -36,7 +36,7 @@ export default function GlobalError({ error, reset }: Props) {
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <button
             onClick={reset}
-            className="flex items-center justify-center gap-2 bg-[#CC0000] text-white px-6 py-3 rounded-2xl text-sm font-semibold hover:bg-[#A00000] transition-all active:scale-95"
+            className="flex items-center justify-center gap-2 bg-[#3B9DD8] text-white px-6 py-3 rounded-2xl text-sm font-semibold hover:bg-[#2A84BE] transition-all active:scale-95"
           >
             <RotateCcw size={15} />
             Reintentar

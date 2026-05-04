@@ -212,7 +212,7 @@ export default function VentasLocalPage() {
       >
         <div>
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-neutral-900 flex items-center gap-2">
-            <Store size={22} className="text-[#CC0000]" /> Ventas del local
+            <Store size={22} className="text-[#3B9DD8]" /> Ventas del local
           </h1>
           <p className="text-sm text-neutral-500 mt-1">
             Solo ventas físicas registradas por los vendedores · {periodInfo.label}
@@ -257,7 +257,7 @@ export default function VentasLocalPage() {
       <div className="bg-white rounded-2xl border border-neutral-200 p-5">
         <div className="flex items-center justify-between mb-5">
           <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 flex items-center gap-1.5">
-            <Trophy size={12} className="text-[#CC0000]" /> Ranking de vendedores
+            <Trophy size={12} className="text-[#3B9DD8]" /> Ranking de vendedores
           </p>
           <span className="text-[10px] text-neutral-400">por ingresos del período</span>
         </div>
@@ -295,7 +295,7 @@ export default function VentasLocalPage() {
                     </span>
                     <Link
                       href={`/admin/vendedor/${s.sellerId}`}
-                      className="p-1.5 rounded-lg text-neutral-400 hover:text-[#CC0000] hover:bg-red-50 transition shrink-0"
+                      className="p-1.5 rounded-lg text-neutral-400 hover:text-[#3B9DD8] hover:bg-red-50 transition shrink-0"
                       title="Ver detalle del vendedor"
                     >
                       <ArrowRight size={13} />
@@ -304,7 +304,7 @@ export default function VentasLocalPage() {
                   <div className="flex items-center gap-2 pl-12">
                     <div className="flex-1 h-1.5 bg-neutral-100 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-[#CC0000] rounded-full"
+                        className="h-full bg-[#3B9DD8] rounded-full"
                         style={{ width: `${pct}%` }}
                       />
                     </div>
@@ -364,7 +364,7 @@ export default function VentasLocalPage() {
             </p>
             <Link
               href="/admin/ordenes?canal=local"
-              className="text-[11px] text-[#CC0000] font-semibold hover:underline flex items-center gap-1"
+              className="text-[11px] text-[#3B9DD8] font-semibold hover:underline flex items-center gap-1"
             >
               Ver todas <ArrowRight size={11} />
             </Link>

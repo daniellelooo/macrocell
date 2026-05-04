@@ -164,7 +164,7 @@ export default function ProductDetails({ product, variant }: Props) {
           </p>
           <ul className="text-xs text-neutral-500 space-y-1 pt-2 border-t border-neutral-100 mt-3">
             <li>• Equipos nuevos: 1 año oficial Apple.</li>
-            <li>• Equipos en exhibición: 3.5 meses Prophone.</li>
+            <li>• Equipos en exhibición: 3.5 meses Macrocell.</li>
             <li>• Open box: garantía Apple restante.</li>
             <li>• AS-IS: sin garantía oficial.</li>
           </ul>

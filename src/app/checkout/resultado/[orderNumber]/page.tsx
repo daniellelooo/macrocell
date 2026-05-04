@@ -150,7 +150,7 @@ export default function ResultadoPage() {
         {state.kind === "error" && (
           <>
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-5">
-              <XCircle size={28} className="text-[#CC0000]" aria-hidden />
+              <XCircle size={28} className="text-[#3B9DD8]" aria-hidden />
             </div>
             <h1 className="text-xl font-bold text-neutral-900 mb-2">
               No pudimos verificar tu pago
@@ -213,7 +213,7 @@ export default function ResultadoPage() {
         {isDeclined && state.kind === "ok" && (
           <>
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-5">
-              <XCircle size={28} className="text-[#CC0000]" aria-hidden />
+              <XCircle size={28} className="text-[#3B9DD8]" aria-hidden />
             </div>
             <h1 className="text-xl font-bold text-neutral-900 mb-2">
               Pago no completado
@@ -237,7 +237,7 @@ export default function ResultadoPage() {
         <div className="flex flex-col sm:flex-row gap-2 mt-6">
           <Link
             href="/cuenta"
-            className="flex-1 inline-flex items-center justify-center gap-1.5 bg-[#CC0000] hover:bg-[#A00000] text-white px-5 py-3 rounded-full text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#CC0000] focus-visible:ring-offset-2"
+            className="flex-1 inline-flex items-center justify-center gap-1.5 bg-[#3B9DD8] hover:bg-[#2A84BE] text-white px-5 py-3 rounded-full text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3B9DD8] focus-visible:ring-offset-2"
           >
             Ver mis pedidos <ArrowRight size={13} aria-hidden />
           </Link>

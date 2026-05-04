@@ -18,46 +18,40 @@ const outfit = Outfit({
   weight: ["300", "400", "500", "600", "700", "800"],
 });
 
-const SITE_URL = "https://prophone-medellin.vercel.app";
+const SITE_URL = "https://macrocell.vercel.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Prophone Medellín | iPhone, iPad, MacBook y Apple Watch al mejor precio",
-    template: "%s | Prophone Medellín",
+    default: "Macrocell | Smartphones y accesorios al mejor precio",
+    template: "%s | Macrocell",
   },
   description:
-    "Los precios más baratos en iPhone, iPad, Apple Watch y MacBook en Medellín. Crédito con Banco de Bogotá, garantía oficial y envíos gratis a todo Colombia. +200K seguidores verificados.",
+    "Los mejores precios en smartphones y accesorios en Colombia. Garantía oficial, crédito disponible y envíos gratis a todo el país.",
   keywords: [
-    "iPhone Medellín precios baratos",
-    "comprar iPhone barato Colombia",
-    "mejor precio iPhone Medellín",
-    "iPhone crédito Medellín",
-    "Apple Watch Medellín",
-    "iPad Medellín precio",
-    "MacBook Medellín",
-    "Prophone Medellín",
-    "iPhone Poblado Monterrey",
-    "iPhone exhibición Medellín",
-    "iPhone usado Colombia",
-    "accesorios Apple Medellín",
+    "smartphones Colombia precios baratos",
+    "comprar iPhone Colombia",
+    "mejor precio celular Colombia",
+    "Macrocell",
+    "accesorios celular Colombia",
+    "celulares crédito Colombia",
   ],
-  authors: [{ name: "Prophone Medellín" }],
-  creator: "Prophone Medellín",
+  authors: [{ name: "Macrocell" }],
+  creator: "Macrocell",
   openGraph: {
     type: "website",
-    siteName: "Prophone Medellín",
+    siteName: "Macrocell",
     locale: "es_CO",
     url: SITE_URL,
-    title: "Prophone Medellín | iPhone, iPad, MacBook y Apple Watch al mejor precio",
+    title: "Macrocell | Smartphones y accesorios al mejor precio",
     description:
-      "Los precios más baratos en iPhone en Medellín. Garantía oficial, crédito disponible y envíos a toda Colombia.",
+      "Los mejores precios en smartphones y accesorios en Colombia. Garantía oficial, crédito disponible y envíos a todo el país.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Prophone Medellín | iPhone al mejor precio",
+    title: "Macrocell | Smartphones al mejor precio",
     description:
-      "Los precios más baratos en iPhone, iPad, Apple Watch y MacBook en Medellín.",
+      "Los mejores precios en smartphones y accesorios en Colombia.",
   },
   robots: {
     index: true,
@@ -72,21 +66,17 @@ export const metadata: Metadata = {
 const orgJsonLd = {
   "@context": "https://schema.org",
   "@type": "Store",
-  name: "Prophone Medellín",
-  description: "Tienda especializada en productos Apple — iPhone, iPad, Apple Watch y MacBook en Medellín.",
-  url: "https://prophone-medellin.vercel.app",
-  telephone: "+573148941200",
+  name: "Macrocell",
+  description: "Tienda especializada en smartphones y accesorios en Colombia.",
+  url: SITE_URL,
+  telephone: "",
   address: {
     "@type": "PostalAddress",
     addressLocality: "Medellín",
     addressRegion: "Antioquia",
     addressCountry: "CO",
   },
-  openingHoursSpecification: [
-    { "@type": "OpeningHoursSpecification", dayOfWeek: ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"], opens: "10:00", closes: "19:30" },
-    { "@type": "OpeningHoursSpecification", dayOfWeek: ["Sunday"], opens: "11:00", closes: "17:00" },
-  ],
-  sameAs: ["https://www.instagram.com/prophone_medellin"],
+  sameAs: ["https://www.instagram.com/macrocellm1"],
 };
 
 export default function RootLayout({

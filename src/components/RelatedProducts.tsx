@@ -80,7 +80,7 @@ export default function RelatedProducts({ current, limit = 4 }: Props) {
         </div>
         <Link
           href={`/catalogo?cat=${current.category}`}
-          className="hidden sm:inline-flex items-center gap-1 text-xs font-semibold text-[#CC0000] hover:text-[#A00000] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#CC0000] rounded px-1"
+          className="hidden sm:inline-flex items-center gap-1 text-xs font-semibold text-[#3B9DD8] hover:text-[#2A84BE] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3B9DD8] rounded px-1"
         >
           Ver todos <ArrowRight size={12} aria-hidden />
         </Link>

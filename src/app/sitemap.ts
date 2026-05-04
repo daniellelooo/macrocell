@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { createClient } from "@supabase/supabase-js";
 
-const SITE_URL = "https://prophone-medellin.vercel.app";
+const SITE_URL = "https://macrocell.vercel.app";
 
 const STATIC_ROUTES = [
   { path: "/", priority: 1.0, changeFrequency: "daily" },

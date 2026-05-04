@@ -102,15 +102,15 @@ export default function SeguimientoPage() {
         </Link>
         <div>
           <h1 className="text-base font-bold text-neutral-900">Seguimiento de pedido</h1>
-          <p className="text-xs text-neutral-500">Prophone Medellín</p>
+          <p className="text-xs text-neutral-500">Macrocell</p>
         </div>
       </header>
 
       <main className="max-w-lg mx-auto px-5 py-10 space-y-6">
         <div className="bg-white rounded-2xl border border-neutral-200 p-6 space-y-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#CC0000]/10 flex items-center justify-center">
-              <Search size={18} className="text-[#CC0000]" />
+            <div className="w-10 h-10 rounded-xl bg-[#3B9DD8]/10 flex items-center justify-center">
+              <Search size={18} className="text-[#3B9DD8]" />
             </div>
             <div>
               <p className="text-sm font-bold text-neutral-900">Consultar pedido</p>
@@ -125,7 +125,7 @@ export default function SeguimientoPage() {
               onChange={(e) => setOrderNumber(e.target.value.toUpperCase())}
               placeholder="Número de pedido (ej. ORD-00012)"
               required
-              className="w-full px-3 py-3 rounded-xl border border-neutral-200 text-sm font-mono uppercase focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30"
+              className="w-full px-3 py-3 rounded-xl border border-neutral-200 text-sm font-mono uppercase focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
             />
             <input
               type="tel"
@@ -133,12 +133,12 @@ export default function SeguimientoPage() {
               onChange={(e) => setPhone(e.target.value)}
               placeholder="Teléfono de contacto"
               required
-              className="w-full px-3 py-3 rounded-xl border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30"
+              className="w-full px-3 py-3 rounded-xl border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
             />
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-[#CC0000] text-white font-semibold rounded-xl text-sm hover:bg-[#A00000] transition disabled:opacity-50"
+              className="w-full py-3 bg-[#3B9DD8] text-white font-semibold rounded-xl text-sm hover:bg-[#2A84BE] transition disabled:opacity-50"
             >
               {loading ? "Buscando…" : "Consultar pedido"}
             </button>
@@ -264,7 +264,7 @@ export default function SeguimientoPage() {
                 href={getWhatsappUrl(whatsappNumber, whatsappDefaultMessage)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#CC0000] hover:underline"
+                className="text-[#3B9DD8] hover:underline"
               >
                 Contáctanos por WhatsApp
               </a>

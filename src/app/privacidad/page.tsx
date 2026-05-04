@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Política de Privacidad",
   description:
-    "Política de privacidad y tratamiento de datos personales de Prophone Medellín, conforme a la Ley 1581 de 2012 (Colombia).",
+    "Política de privacidad y tratamiento de datos personales de Macrocell, conforme a la Ley 1581 de 2012 (Colombia).",
 };
 
 export default function PrivacidadPage() {
@@ -24,16 +24,16 @@ export default function PrivacidadPage() {
             <section>
               <h2 className="text-base font-bold text-neutral-900 mb-2">1. Responsable del tratamiento</h2>
               <p>
-                <strong>Prophone Medellín</strong> (en adelante «Prophone»), con establecimientos
+                <strong>Macrocell</strong> (en adelante «Macrocell»), con establecimientos
                 comerciales en el Área Metropolitana de Medellín, es el responsable del tratamiento
                 de los datos personales recolectados a través de este sitio web
-                (<strong>prophone-medellin.vercel.app</strong>) y de sus canales de atención
+                (<strong>macrocell.vercel.app</strong>) y de sus canales de atención
                 (WhatsApp, Instagram).
               </p>
               <p>
                 Contacto del responsable:{" "}
-                <a href="mailto:prophone.medellin@gmail.com" className="text-[#CC0000] hover:underline">
-                  prophone.medellin@gmail.com
+                <a href="mailto:hola@macrocell.co" className="text-[#3B9DD8] hover:underline">
+                  hola@macrocell.co
                 </a>
               </p>
             </section>
@@ -53,7 +53,7 @@ export default function PrivacidadPage() {
               <ul className="list-disc list-inside space-y-1 text-sm">
                 <li><strong>Datos de registro:</strong> nombre completo, número de celular, correo electrónico.</li>
                 <li><strong>Datos de compra:</strong> dirección de envío, ciudad, departamento, notas del pedido.</li>
-                <li><strong>Datos de pago:</strong> Prophone <em>no</em> almacena información de tarjetas de crédito ni cuentas bancarias; este proceso lo gestiona exclusivamente <strong>Wompi</strong> (Bancolombia S.A.) bajo sus propias políticas de seguridad.</li>
+                <li><strong>Datos de pago:</strong> Macrocell <em>no</em> almacena información de tarjetas de crédito ni cuentas bancarias; este proceso lo gestiona exclusivamente <strong>Wompi</strong> (Bancolombia S.A.) bajo sus propias políticas de seguridad.</li>
                 <li><strong>Datos técnicos:</strong> dirección IP, tipo de dispositivo, navegador, páginas visitadas (a través de logs estándar del servidor).</li>
               </ul>
             </section>
@@ -96,8 +96,8 @@ export default function PrivacidadPage() {
               </ul>
               <p className="mt-2 text-sm">
                 Para ejercer estos derechos, envía un correo a{" "}
-                <a href="mailto:prophone.medellin@gmail.com" className="text-[#CC0000] hover:underline">
-                  prophone.medellin@gmail.com
+                <a href="mailto:hola@macrocell.co" className="text-[#3B9DD8] hover:underline">
+                  hola@macrocell.co
                 </a>{" "}
                 con el asunto «Derechos ARCO». Respondemos en un plazo máximo de{" "}
                 <strong>10 días hábiles</strong>.
@@ -153,7 +153,7 @@ export default function PrivacidadPage() {
                   href="https://www.sic.gov.co"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[#CC0000] hover:underline"
+                  className="text-[#3B9DD8] hover:underline"
                 >
                   www.sic.gov.co
                 </a>
@@ -163,7 +163,7 @@ export default function PrivacidadPage() {
           </div>
 
           <div className="mt-10 pt-6 border-t border-neutral-100 flex flex-wrap gap-4">
-            <Link href="/terminos" className="text-sm text-[#CC0000] hover:underline font-medium">
+            <Link href="/terminos" className="text-sm text-[#3B9DD8] hover:underline font-medium">
               → Ver términos de uso
             </Link>
             <Link href="/" className="text-sm text-neutral-500 hover:text-neutral-900">

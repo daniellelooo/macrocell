@@ -5,8 +5,8 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Cookie, X } from "lucide-react";
 
-const STORAGE_KEY = "prophone-cookie-consent-v1";
-const CONSENT_EVENT = "prophone:cookie-consent-changed";
+const STORAGE_KEY = "macrocell-cookie-consent-v1";
+const CONSENT_EVENT = "macrocell:cookie-consent-changed";
 
 export type ConsentStatus = "granted" | "denied" | "unknown";
 

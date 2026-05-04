@@ -103,7 +103,7 @@ export default function MisVentasPage() {
     <div className="space-y-6 max-w-3xl">
       <div>
         <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-neutral-900 flex items-center gap-2">
-          <TrendingUp size={22} className="text-[#CC0000]" /> Mis ventas
+          <TrendingUp size={22} className="text-[#3B9DD8]" /> Mis ventas
         </h1>
         <p className="text-sm text-neutral-500 mt-1">
           Ventas físicas que registraste en el local.
@@ -145,7 +145,7 @@ export default function MisVentasPage() {
           <p className="text-sm text-neutral-500">Todavía no has registrado ninguna venta.</p>
           <a
             href="/vendedor"
-            className="mt-3 inline-block text-sm font-semibold text-[#CC0000] hover:underline"
+            className="mt-3 inline-block text-sm font-semibold text-[#3B9DD8] hover:underline"
           >
             Ir al portal de ventas →
           </a>

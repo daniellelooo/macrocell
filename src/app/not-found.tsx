@@ -33,7 +33,7 @@ export default function NotFound() {
             transition={{ duration: 0.8, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
           >
-            <div className="bg-[#CC0000] text-white text-xs md:text-sm font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-lg">
+            <div className="bg-[#3B9DD8] text-white text-xs md:text-sm font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-lg">
               Página agotada
             </div>
           </motion.div>
@@ -72,7 +72,7 @@ export default function NotFound() {
           </Link>
           <Link
             href="/catalogo"
-            className="flex items-center justify-center gap-2 bg-[#CC0000] text-white px-5 py-3 rounded-2xl text-sm font-semibold hover:bg-[#A00000] transition-all active:scale-95"
+            className="flex items-center justify-center gap-2 bg-[#3B9DD8] text-white px-5 py-3 rounded-2xl text-sm font-semibold hover:bg-[#2A84BE] transition-all active:scale-95"
           >
             <ShoppingBag size={16} />
             Ver catálogo

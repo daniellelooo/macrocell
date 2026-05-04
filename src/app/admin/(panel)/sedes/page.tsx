@@ -85,7 +85,7 @@ export default function AdminSedesPage() {
         <button
           onClick={handleSave}
           className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition active:scale-95 ${
-            saved ? "bg-green-500" : "bg-[#CC0000] hover:bg-[#A00000]"
+            saved ? "bg-green-500" : "bg-[#3B9DD8] hover:bg-[#2A84BE]"
           }`}
         >
           {saved ? (
@@ -109,7 +109,7 @@ export default function AdminSedesPage() {
           >
             <div className="md:col-span-1 flex md:justify-center">
               <div className="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center">
-                <MapPin size={16} className="text-[#CC0000]" />
+                <MapPin size={16} className="text-[#3B9DD8]" />
               </div>
             </div>
             <div className="md:col-span-4">
@@ -139,7 +139,7 @@ export default function AdminSedesPage() {
             <div className="md:col-span-1 flex md:justify-end">
               <button
                 onClick={() => handleRemove(sede.id)}
-                className="p-2 text-neutral-400 hover:text-[#CC0000] hover:bg-red-50 rounded-lg transition"
+                className="p-2 text-neutral-400 hover:text-[#3B9DD8] hover:bg-red-50 rounded-lg transition"
                 aria-label="Eliminar sede"
               >
                 <Trash2 size={14} />
@@ -149,7 +149,7 @@ export default function AdminSedesPage() {
         ))}
         <button
           onClick={handleAdd}
-          className="w-full py-3 border-2 border-dashed border-neutral-300 rounded-2xl text-sm font-semibold text-neutral-500 hover:bg-white hover:border-[#CC0000] hover:text-[#CC0000] transition flex items-center justify-center gap-1.5"
+          className="w-full py-3 border-2 border-dashed border-neutral-300 rounded-2xl text-sm font-semibold text-neutral-500 hover:bg-white hover:border-[#3B9DD8] hover:text-[#3B9DD8] transition flex items-center justify-center gap-1.5"
         >
           <Plus size={14} />
           Agregar sede
@@ -204,7 +204,7 @@ function Input({
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30"
+      className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
     />
   );
 }

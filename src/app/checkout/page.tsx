@@ -289,7 +289,7 @@ export default function CheckoutPage() {
       .join("\n");
 
     const orderRef = created.ok ? created.order.orderNumber : "";
-    const msg = `🛒 *Nuevo pedido - Prophone Medellín*${
+    const msg = `🛒 *Nuevo pedido - Macrocell*${
       orderRef ? `\n*Pedido:* ${orderRef}` : ""
     }
 
@@ -350,7 +350,7 @@ ${orderLines}
                 {" "}Puedes seguir su estado en{" "}
                 <Link
                   href="/cuenta"
-                  className="text-[#CC0000] font-semibold hover:underline"
+                  className="text-[#3B9DD8] font-semibold hover:underline"
                 >
                   Mi cuenta
                 </Link>
@@ -360,7 +360,7 @@ ${orderLines}
           </p>
           <Link
             href={profile ? "/cuenta" : "/"}
-            className="bg-[#CC0000] text-white px-8 py-3 rounded-full font-medium hover:bg-[#A00000] transition-colors inline-block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#CC0000] focus-visible:ring-offset-2"
+            className="bg-[#3B9DD8] text-white px-8 py-3 rounded-full font-medium hover:bg-[#2A84BE] transition-colors inline-block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3B9DD8] focus-visible:ring-offset-2"
           >
             {profile ? "Ver mis pedidos" : "Volver al inicio"}
           </Link>
@@ -492,7 +492,7 @@ ${orderLines}
                         value={form.departamento}
                         onChange={handleChange}
                         required
-                        className="w-full px-4 py-3 rounded-xl border border-neutral-200 text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#CC0000] focus:border-transparent transition-all bg-white"
+                        className="w-full px-4 py-3 rounded-xl border border-neutral-200 text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#3B9DD8] focus:border-transparent transition-all bg-white"
                       >
                         {DEPARTAMENTOS.map((d) => (
                           <option key={d} value={d}>
@@ -536,13 +536,13 @@ ${orderLines}
                       onChange={handleChange}
                       rows={3}
                       placeholder="Instrucciones especiales para la entrega..."
-                      className="w-full px-4 py-3 rounded-xl border border-neutral-200 text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#CC0000] focus:border-transparent transition-all resize-none"
+                      className="w-full px-4 py-3 rounded-xl border border-neutral-200 text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#3B9DD8] focus:border-transparent transition-all resize-none"
                     />
                   </div>
 
                   <button
                     type="submit"
-                    className="w-full bg-[#CC0000] text-white py-4 rounded-2xl font-semibold text-base hover:bg-[#A00000] active:scale-98 transition-all"
+                    className="w-full bg-[#3B9DD8] text-white py-4 rounded-2xl font-semibold text-base hover:bg-[#2A84BE] active:scale-98 transition-all"
                   >
                     Continuar al resumen
                   </button>
@@ -591,7 +591,7 @@ ${orderLines}
                         setSubmitError(null);
                         setStep("form");
                       }}
-                      className="mt-5 text-sm text-[#CC0000] hover:underline"
+                      className="mt-5 text-sm text-[#3B9DD8] hover:underline"
                     >
                       Editar datos
                     </button>
@@ -626,7 +626,7 @@ ${orderLines}
                     <button
                       onClick={handlePayWompi}
                       disabled={submitting}
-                      className="w-full text-left bg-[#0C1014] hover:bg-black text-white p-5 rounded-2xl transition-all active:scale-[0.99] disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#CC0000] focus-visible:ring-offset-2 mb-3"
+                      className="w-full text-left bg-[#0C1014] hover:bg-black text-white p-5 rounded-2xl transition-all active:scale-[0.99] disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3B9DD8] focus-visible:ring-offset-2 mb-3"
                     >
                       <div className="flex items-center gap-3 mb-2">
                         <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
@@ -635,7 +635,7 @@ ${orderLines}
                         <div className="flex-1 min-w-0">
                           <p className="font-bold text-sm flex items-center gap-2">
                             Pagar con tarjeta o PSE
-                            <span className="text-[9px] uppercase tracking-wider bg-[#CC0000] text-white px-1.5 py-0.5 rounded-full">
+                            <span className="text-[9px] uppercase tracking-wider bg-[#3B9DD8] text-white px-1.5 py-0.5 rounded-full">
                               Recomendado
                             </span>
                           </p>
@@ -815,7 +815,7 @@ function Field({
         className={`w-full px-4 py-3 rounded-xl border text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all ${
           error
             ? "border-red-300 focus:ring-red-400 bg-red-50/40"
-            : "border-neutral-200 focus:ring-[#CC0000]"
+            : "border-neutral-200 focus:ring-[#3B9DD8]"
         }`}
       />
       {error ? (

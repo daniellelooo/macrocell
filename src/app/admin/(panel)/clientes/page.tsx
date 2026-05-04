@@ -188,7 +188,7 @@ export default function AdminClientesPage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `clientes-prophone-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = `clientes-macrocell-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -224,7 +224,7 @@ export default function AdminClientesPage() {
       >
         <div>
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-neutral-900 flex items-center gap-2">
-            <Users size={22} className="text-[#CC0000]" /> Clientes
+            <Users size={22} className="text-[#3B9DD8]" /> Clientes
           </h1>
           <p className="text-sm text-neutral-500 mt-1">
             Personas registradas en la tienda. Click para ver pedidos, promover o
@@ -257,7 +257,7 @@ export default function AdminClientesPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar por nombre, teléfono o email…"
-            className="w-full pl-9 pr-4 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl text-sm placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30"
+            className="w-full pl-9 pr-4 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl text-sm placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
           />
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -288,7 +288,7 @@ export default function AdminClientesPage() {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as SortKey)}
-              className="bg-white border border-neutral-200 rounded-lg px-2 py-1 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30"
+              className="bg-white border border-neutral-200 rounded-lg px-2 py-1 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
             >
               <option value="spend">Total gastado</option>
               <option value="orders">N° pedidos</option>
@@ -341,7 +341,7 @@ export default function AdminClientesPage() {
                         {c.fullName || "(sin nombre)"}
                       </p>
                       {c.role !== "cliente" && (
-                        <span className="inline-flex items-center gap-1 text-[9px] uppercase tracking-wider font-bold bg-[#CC0000]/10 text-[#CC0000] px-1.5 py-0.5 rounded-full">
+                        <span className="inline-flex items-center gap-1 text-[9px] uppercase tracking-wider font-bold bg-[#3B9DD8]/10 text-[#3B9DD8] px-1.5 py-0.5 rounded-full">
                           <Shield size={9} /> {c.role}
                         </span>
                       )}
@@ -429,7 +429,7 @@ export default function AdminClientesPage() {
                   <a
                     href={getWhatsappUrl(
                       whatsappNumber,
-                      `Hola ${detail.fullName.split(" ")[0]}, te escribo de Prophone.`
+                      `Hola ${detail.fullName.split(" ")[0]}, te escribo de Macrocell.`
                     )}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -454,7 +454,7 @@ export default function AdminClientesPage() {
                   value={detail.role}
                   onChange={(e) => promoteRole(detail.userId, e.target.value)}
                   disabled={savingRole}
-                  className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30 disabled:opacity-50"
+                  className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30 disabled:opacity-50"
                 >
                   <option value="cliente">Cliente</option>
                   <option value="vendedor">Promover a vendedor</option>
@@ -471,7 +471,7 @@ export default function AdminClientesPage() {
                   {detail.ordersCount > 0 && (
                     <Link
                       href={`/admin/ordenes?cliente=${encodeURIComponent(detail.userId)}`}
-                      className="text-[11px] text-[#CC0000] font-semibold hover:underline"
+                      className="text-[11px] text-[#3B9DD8] font-semibold hover:underline"
                     >
                       Ver todos
                     </Link>

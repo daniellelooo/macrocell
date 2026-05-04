@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Favoritos",
-  description: "Tus productos Apple guardados en Prophone Medellín.",
+  description: "Tus productos Apple guardados en Macrocell.",
   robots: { index: false },
 };
 

@@ -331,7 +331,7 @@ export default function ProductEditorPage() {
             className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition active:scale-95 ${
               saved
                 ? "bg-green-500"
-                : "bg-[#CC0000] hover:bg-[#A00000]"
+                : "bg-[#3B9DD8] hover:bg-[#2A84BE]"
             }`}
           >
             {saved ? (
@@ -400,7 +400,7 @@ export default function ProductEditorPage() {
                     )}
                     <button
                       onClick={() => removeImage(i)}
-                      className="p-1.5 bg-white text-[#CC0000] rounded-full hover:bg-red-50 transition"
+                      className="p-1.5 bg-white text-[#3B9DD8] rounded-full hover:bg-red-50 transition"
                       aria-label="Eliminar imagen"
                       title="Eliminar"
                     >
@@ -416,7 +416,7 @@ export default function ProductEditorPage() {
                   <select
                     value={obj.color ?? ""}
                     onChange={(e) => setImageColor(i, e.target.value)}
-                    className="w-full text-xs px-1.5 py-1 bg-white border border-neutral-200 rounded focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30"
+                    className="w-full text-xs px-1.5 py-1 bg-white border border-neutral-200 rounded focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
                   >
                     <option value="">— Genérica —</option>
                     {draft.colors.map((c) => (
@@ -432,7 +432,7 @@ export default function ProductEditorPage() {
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="aspect-square rounded-xl border-2 border-dashed border-neutral-300 bg-neutral-50 hover:bg-neutral-100 hover:border-[#CC0000] transition flex flex-col items-center justify-center gap-1.5 text-neutral-500 hover:text-[#CC0000]"
+            className="aspect-square rounded-xl border-2 border-dashed border-neutral-300 bg-neutral-50 hover:bg-neutral-100 hover:border-[#3B9DD8] transition flex flex-col items-center justify-center gap-1.5 text-neutral-500 hover:text-[#3B9DD8]"
           >
             <Upload size={18} />
             <span className="text-[11px] font-semibold">Subir</span>
@@ -501,7 +501,7 @@ export default function ProductEditorPage() {
               onChange={(e) =>
                 update("category", e.target.value as ProductCategory)
               }
-              className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30"
+              className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
             >
               {CATEGORY_OPTIONS.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -525,7 +525,7 @@ export default function ProductEditorPage() {
               onChange={(e) => update("description", e.target.value)}
               rows={3}
               placeholder="Texto descriptivo que aparece en la ficha del producto."
-              className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30 resize-none"
+              className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30 resize-none"
             />
           </Field>
         </div>
@@ -615,7 +615,7 @@ export default function ProductEditorPage() {
                           onChange={(e) =>
                             updateVariant(v.sku, { color: e.target.value || undefined })
                           }
-                          className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30"
+                          className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
                         >
                           <option value="">— sin color —</option>
                           {draft.colors.map((c) => (
@@ -640,7 +640,7 @@ export default function ProductEditorPage() {
                             condition: e.target.value as ProductCondition,
                           })
                         }
-                        className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30"
+                        className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
                       >
                         {CONDITIONS.map((c) => (
                           <option key={c} value={c}>
@@ -712,7 +712,7 @@ export default function ProductEditorPage() {
                       <button
                         type="button"
                         onClick={() => removeVariant(v.sku)}
-                        className="p-1.5 rounded-lg text-neutral-400 hover:text-[#CC0000] hover:bg-red-50 transition"
+                        className="p-1.5 rounded-lg text-neutral-400 hover:text-[#3B9DD8] hover:bg-red-50 transition"
                         aria-label="Eliminar variante"
                         title="Eliminar variante"
                       >
@@ -728,7 +728,7 @@ export default function ProductEditorPage() {
         <button
           type="button"
           onClick={addVariant}
-          className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-[#CC0000] hover:bg-red-50 px-3 py-2 rounded-lg transition"
+          className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-[#3B9DD8] hover:bg-red-50 px-3 py-2 rounded-lg transition"
         >
           <Plus size={14} /> Agregar variante
         </button>
@@ -769,7 +769,7 @@ export default function ProductEditorPage() {
                       draft.colors.filter((_, idx) => idx !== i)
                     )
                   }
-                  className="p-2 text-neutral-400 hover:text-[#CC0000] hover:bg-red-50 rounded-lg transition shrink-0"
+                  className="p-2 text-neutral-400 hover:text-[#3B9DD8] hover:bg-red-50 rounded-lg transition shrink-0"
                   aria-label="Eliminar color"
                 >
                   <X size={14} />
@@ -783,7 +783,7 @@ export default function ProductEditorPage() {
           onClick={() =>
             update("colors", [...draft.colors, { name: "", hex: "#888888" }])
           }
-          className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#CC0000] hover:bg-red-50 px-3 py-2 rounded-lg transition"
+          className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#3B9DD8] hover:bg-red-50 px-3 py-2 rounded-lg transition"
         >
           <Plus size={14} /> Agregar color
         </button>
@@ -814,7 +814,7 @@ export default function ProductEditorPage() {
                       draft.features.filter((_, idx) => idx !== i)
                     )
                   }
-                  className="p-2 text-neutral-400 hover:text-[#CC0000] hover:bg-red-50 rounded-lg transition shrink-0"
+                  className="p-2 text-neutral-400 hover:text-[#3B9DD8] hover:bg-red-50 rounded-lg transition shrink-0"
                   aria-label="Eliminar feature"
                 >
                   <X size={14} />
@@ -826,7 +826,7 @@ export default function ProductEditorPage() {
         <button
           type="button"
           onClick={() => update("features", [...draft.features, ""])}
-          className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#CC0000] hover:bg-red-50 px-3 py-2 rounded-lg transition"
+          className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#3B9DD8] hover:bg-red-50 px-3 py-2 rounded-lg transition"
         >
           <Plus size={14} /> Agregar feature
         </button>
@@ -843,7 +843,7 @@ export default function ProductEditorPage() {
         <button
           onClick={handleSave}
           className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition active:scale-95 ${
-            saved ? "bg-green-500" : "bg-[#CC0000] hover:bg-[#A00000]"
+            saved ? "bg-green-500" : "bg-[#3B9DD8] hover:bg-[#2A84BE]"
           }`}
         >
           {saved ? (
@@ -926,7 +926,7 @@ function Input({
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className={`w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30 ${
+      className={`w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30 ${
         mono ? "font-mono text-xs" : ""
       }`}
     />
@@ -950,7 +950,7 @@ function Toggle({
       onClick={() => onChange(!value)}
       className={`text-left p-3 rounded-xl border transition ${
         value
-          ? "border-[#CC0000] bg-red-50/50"
+          ? "border-[#3B9DD8] bg-red-50/50"
           : "border-neutral-200 bg-white hover:border-neutral-400"
       }`}
     >
@@ -965,7 +965,7 @@ function Toggle({
         </div>
         <span
           className={`shrink-0 w-10 h-6 rounded-full p-0.5 transition ${
-            value ? "bg-[#CC0000]" : "bg-neutral-300"
+            value ? "bg-[#3B9DD8]" : "bg-neutral-300"
           }`}
         >
           <span

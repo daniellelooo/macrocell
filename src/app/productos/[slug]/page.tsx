@@ -395,13 +395,13 @@ export default function ProductPage() {
                     }
                     className={`shrink-0 w-14 sm:order-last flex items-center justify-center rounded-2xl border-2 transition-all active:scale-95 ${
                       isWished
-                        ? "border-[#CC0000] bg-red-50 text-[#CC0000]"
-                        : "border-neutral-200 text-neutral-400 hover:border-[#CC0000] hover:text-[#CC0000]"
+                        ? "border-[#3B9DD8] bg-red-50 text-[#3B9DD8]"
+                        : "border-neutral-200 text-neutral-400 hover:border-[#3B9DD8] hover:text-[#3B9DD8]"
                     }`}
                   >
                     <Heart
                       size={20}
-                      className={isWished ? "fill-[#CC0000]" : ""}
+                      className={isWished ? "fill-[#3B9DD8]" : ""}
                     />
                   </button>
                 </div>
@@ -458,7 +458,7 @@ export default function ProductPage() {
             onClick={handleAddToCart}
             disabled={!selectedVariant?.inStock}
             className={`flex-1 flex items-center justify-center gap-1.5 py-3 rounded-2xl font-semibold text-sm transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed ${
-              added ? "bg-green-500 text-white" : "bg-[#CC0000] text-white"
+              added ? "bg-green-500 text-white" : "bg-[#3B9DD8] text-white"
             }`}
           >
             {added ? (

@@ -25,7 +25,7 @@ export default function WishlistPage() {
         >
           <div>
             <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-neutral-900 flex items-center gap-2">
-              <Heart size={22} className="fill-[#CC0000] text-[#CC0000]" />
+              <Heart size={22} className="fill-[#3B9DD8] text-[#3B9DD8]" />
               Favoritos
             </h1>
             <p className="text-sm text-neutral-500 mt-1">
@@ -64,7 +64,7 @@ export default function WishlistPage() {
             </p>
             <Link
               href="/catalogo"
-              className="inline-flex items-center gap-2 bg-[#CC0000] text-white px-6 py-3 rounded-full text-sm font-semibold hover:bg-[#A00000] transition-colors"
+              className="inline-flex items-center gap-2 bg-[#3B9DD8] text-white px-6 py-3 rounded-full text-sm font-semibold hover:bg-[#2A84BE] transition-colors"
             >
               <ShoppingBag size={15} /> Explorar catálogo
             </Link>

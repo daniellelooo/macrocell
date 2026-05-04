@@ -20,7 +20,7 @@ import {
  *
  * Configurar la URL del webhook en https://comercios.wompi.co/ →
  * Desarrolladores → Eventos. Apuntar a:
- *   https://prophone-medellin.vercel.app/api/wompi/webhook
+ *   https://macrocell.vercel.app/api/wompi/webhook
  */
 export const runtime = "nodejs";
 

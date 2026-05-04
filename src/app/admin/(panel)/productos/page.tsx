@@ -103,7 +103,7 @@ export default function AdminProductosPage() {
           </button>
           <Link
             href="/admin/productos/nuevo"
-            className="inline-flex items-center gap-2 bg-[#CC0000] text-white px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#A00000] active:scale-95 transition"
+            className="inline-flex items-center gap-2 bg-[#3B9DD8] text-white px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#2A84BE] active:scale-95 transition"
           >
             <Plus size={15} />
             Crear producto
@@ -156,7 +156,7 @@ export default function AdminProductosPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar por nombre, id, familia…"
-            className="w-full pl-9 pr-4 py-2.5 bg-neutral-100 rounded-xl text-sm text-neutral-700 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30"
+            className="w-full pl-9 pr-4 py-2.5 bg-neutral-100 rounded-xl text-sm text-neutral-700 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
           />
         </div>
         <div className="flex gap-2 overflow-x-auto no-scrollbar">
@@ -285,7 +285,7 @@ export default function AdminProductosPage() {
                           </span>
                         )}
                         {p.badge && (
-                          <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-[#CC0000]/10 text-[#CC0000] uppercase tracking-wider flex items-center gap-1">
+                          <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-[#3B9DD8]/10 text-[#3B9DD8] uppercase tracking-wider flex items-center gap-1">
                             <Tag size={9} /> {p.badge}
                           </span>
                         )}
@@ -312,7 +312,7 @@ export default function AdminProductosPage() {
                         </Link>
                         <button
                           onClick={() => setConfirmDelete(p.id)}
-                          className="p-2 text-neutral-500 hover:text-[#CC0000] hover:bg-red-50 rounded-lg transition"
+                          className="p-2 text-neutral-500 hover:text-[#3B9DD8] hover:bg-red-50 rounded-lg transition"
                           aria-label="Eliminar"
                           title="Eliminar"
                         >
@@ -354,7 +354,7 @@ export default function AdminProductosPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mb-4">
-              <Trash2 size={20} className="text-[#CC0000]" />
+              <Trash2 size={20} className="text-[#3B9DD8]" />
             </div>
             <h3 className="text-lg font-bold text-neutral-900 mb-2">
               Eliminar producto
@@ -384,7 +384,7 @@ export default function AdminProductosPage() {
                   }
                   setConfirmDelete(null);
                 }}
-                className="flex-1 bg-[#CC0000] hover:bg-[#A00000] text-white py-2.5 rounded-xl text-sm font-semibold transition"
+                className="flex-1 bg-[#3B9DD8] hover:bg-[#2A84BE] text-white py-2.5 rounded-xl text-sm font-semibold transition"
               >
                 Eliminar
               </button>

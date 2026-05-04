@@ -9,7 +9,7 @@ import { ArrowRight, Clock, Search, Sparkles, X } from "lucide-react";
 import { formatPrice, getMinPrice, hasMultipleVariants } from "@/lib/products";
 import { useCatalogStore } from "@/lib/catalog-store";
 
-const RECENT_KEY = "prophone:recent-searches";
+const RECENT_KEY = "macrocell:recent-searches";
 const MAX_RECENT = 5;
 const POPULAR = ["iPhone 16", "iPhone 14", "iPad A16", "MacBook Air M5", "AirPods 4"];
 
@@ -217,14 +217,14 @@ export default function SearchModal({ open, onClose }: Props) {
                         </div>
                         <ArrowRight
                           size={14}
-                          className="text-neutral-300 group-hover:text-[#CC0000] group-hover:translate-x-0.5 transition-all"
+                          className="text-neutral-300 group-hover:text-[#3B9DD8] group-hover:translate-x-0.5 transition-all"
                         />
                       </Link>
                     ))}
                     <button
                       type="button"
                       onClick={() => submit(query)}
-                      className="w-full text-left px-5 py-3 text-sm font-semibold text-[#CC0000] hover:bg-neutral-50 border-t border-neutral-100 transition flex items-center justify-between"
+                      className="w-full text-left px-5 py-3 text-sm font-semibold text-[#3B9DD8] hover:bg-neutral-50 border-t border-neutral-100 transition flex items-center justify-between"
                     >
                       Ver todos los resultados para &ldquo;{query}&rdquo;
                       <ArrowRight size={14} />

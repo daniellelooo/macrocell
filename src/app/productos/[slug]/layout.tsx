@@ -5,7 +5,7 @@ type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const SITE_URL = "https://prophone-medellin.vercel.app";
+  const SITE_URL = "https://macrocell.vercel.app";
 
   try {
     const supabase = createClient(
@@ -30,8 +30,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const cat = categoryLabel[product.category] ?? "Apple";
     const title = `${product.name} — precio en Medellín`;
     const description = product.short_description
-      ? `${product.short_description}. Compra ${product.name} con garantía oficial en Prophone Medellín. Envíos a toda Colombia.`
-      : `Compra ${product.name} (${cat}) con garantía oficial en Prophone Medellín. Envíos gratis a toda Colombia.`;
+      ? `${product.short_description}. Compra ${product.name} con garantía oficial en Macrocell. Envíos a toda Colombia.`
+      : `Compra ${product.name} (${cat}) con garantía oficial en Macrocell. Envíos gratis a toda Colombia.`;
 
     return {
       title,
@@ -53,7 +53,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   } catch {
     return {
-      title: "Producto | Prophone Medellín",
+      title: "Producto | Macrocell",
       description: "Productos Apple al mejor precio en Medellín.",
     };
   }

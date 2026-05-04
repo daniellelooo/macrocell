@@ -87,7 +87,7 @@ export default function AdminConfiguracionPage() {
 
       {/* Hero / Header del home */}
       <Section
-        icon={<ImageIcon size={16} className="text-[#CC0000]" />}
+        icon={<ImageIcon size={16} className="text-[#3B9DD8]" />}
         title="Header del home"
         desc="Carruseles e imagenes destacadas que ven los clientes al entrar."
         onSave={() =>
@@ -108,7 +108,7 @@ export default function AdminConfiguracionPage() {
                 value={draftHeroTitle}
                 onChange={(e) => setDraftHeroTitle(e.target.value)}
                 placeholder="iPhone 17 Pro disponible"
-                className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30"
+                className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
               />
             </div>
             <div>
@@ -117,7 +117,7 @@ export default function AdminConfiguracionPage() {
                 value={draftHeroSub}
                 onChange={(e) => setDraftHeroSub(e.target.value)}
                 placeholder="Garantía oficial · Envío gratis"
-                className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30"
+                className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
               />
             </div>
           </div>
@@ -173,7 +173,7 @@ export default function AdminConfiguracionPage() {
             <input
               value={draftWA}
               onChange={(e) => setDraftWA(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30"
+              className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
               placeholder="573148941200"
             />
             <p className="text-[11px] text-neutral-400 mt-1.5">
@@ -186,8 +186,8 @@ export default function AdminConfiguracionPage() {
               value={draftWAMsg}
               onChange={(e) => setDraftWAMsg(e.target.value)}
               rows={2}
-              className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30 resize-none"
-              placeholder="Hola, me interesa un producto de Prophone…"
+              className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30 resize-none"
+              placeholder="Hola, me interesa un producto de Macrocell…"
             />
           </div>
           <a
@@ -226,8 +226,8 @@ export default function AdminConfiguracionPage() {
             <input
               value={draftIG}
               onChange={(e) => setDraftIG(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30"
-              placeholder="https://www.instagram.com/prophone_medellin/"
+              className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
+              placeholder="https://www.instagram.com/macrocellm1/"
             />
           </div>
           <div>
@@ -235,8 +235,8 @@ export default function AdminConfiguracionPage() {
             <input
               value={draftTT}
               onChange={(e) => setDraftTT(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30"
-              placeholder="https://www.tiktok.com/@prophone"
+              className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
+              placeholder="https://www.tiktok.com/@macrocellm1"
             />
           </div>
           <div>
@@ -244,8 +244,8 @@ export default function AdminConfiguracionPage() {
             <input
               value={draftFB}
               onChange={(e) => setDraftFB(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30"
-              placeholder="https://facebook.com/prophone"
+              className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
+              placeholder="https://facebook.com/macrocellm1"
             />
           </div>
         </div>
@@ -274,7 +274,7 @@ export default function AdminConfiguracionPage() {
               <input
                 value={draftHoursWeek}
                 onChange={(e) => setDraftHoursWeek(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30"
+                className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
               />
             </div>
             <div>
@@ -282,7 +282,7 @@ export default function AdminConfiguracionPage() {
               <input
                 value={draftHoursWeekend}
                 onChange={(e) => setDraftHoursWeekend(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30"
+                className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
               />
             </div>
           </div>
@@ -291,7 +291,7 @@ export default function AdminConfiguracionPage() {
             <input
               value={draftFooter}
               onChange={(e) => setDraftFooter(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30"
+              className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
               placeholder="Reseller Apple en Medellín, Colombia."
             />
           </div>
@@ -320,7 +320,7 @@ export default function AdminConfiguracionPage() {
             <input
               value={draftSeoTitle}
               onChange={(e) => setDraftSeoTitle(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30"
+              className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
             />
             <p className="text-[10px] text-neutral-400 mt-1">
               {draftSeoTitle.length}/60
@@ -332,7 +332,7 @@ export default function AdminConfiguracionPage() {
               value={draftSeoDesc}
               onChange={(e) => setDraftSeoDesc(e.target.value)}
               rows={2}
-              className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30 resize-none"
+              className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30 resize-none"
             />
             <p className="text-[10px] text-neutral-400 mt-1">
               {draftSeoDesc.length}/160
@@ -343,7 +343,7 @@ export default function AdminConfiguracionPage() {
             <input
               value={draftOgImage}
               onChange={(e) => setDraftOgImage(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30"
+              className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
               placeholder="https://… o /og.png"
             />
           </div>
@@ -371,7 +371,7 @@ export default function AdminConfiguracionPage() {
             <input
               value={draftPixel}
               onChange={(e) => setDraftPixel(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30"
+              className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
               placeholder="123456789012345"
             />
             <p className="text-[11px] text-neutral-400 mt-1.5">
@@ -384,7 +384,7 @@ export default function AdminConfiguracionPage() {
             <input
               value={draftGa}
               onChange={(e) => setDraftGa(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30"
+              className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
               placeholder="G-XXXXXXXXXX"
             />
           </div>
@@ -412,7 +412,7 @@ export default function AdminConfiguracionPage() {
             min={0}
             value={draftLowStock}
             onChange={(e) => setDraftLowStock(Number(e.target.value) || 0)}
-            className="w-32 px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30"
+            className="w-32 px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
           />
           <p className="text-[11px] text-neutral-400 mt-1.5">
             Variantes con stock ≤ este valor se marcan como críticas en
@@ -460,7 +460,7 @@ function Section({
           <button
             onClick={onSave}
             className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition active:scale-95 ${
-              saved ? "bg-green-500" : "bg-[#CC0000] hover:bg-[#A00000]"
+              saved ? "bg-green-500" : "bg-[#3B9DD8] hover:bg-[#2A84BE]"
             }`}
           >
             {saved ? (
@@ -557,7 +557,7 @@ function ImageGallery({
             type="button"
             onClick={() => fileRef.current?.click()}
             disabled={uploading}
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#CC0000] hover:bg-red-50 px-3 py-1.5 rounded-lg transition disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#3B9DD8] hover:bg-red-50 px-3 py-1.5 rounded-lg transition disabled:opacity-50"
           >
             <Upload size={12} /> {uploading ? "Subiendo…" : "Subir imágenes"}
           </button>
@@ -615,7 +615,7 @@ function ImageGallery({
                 <button
                   type="button"
                   onClick={() => removeAt(i)}
-                  className="p-1.5 bg-white text-[#CC0000] rounded-full hover:bg-red-50"
+                  className="p-1.5 bg-white text-[#3B9DD8] rounded-full hover:bg-red-50"
                   title="Eliminar"
                 >
                   <Trash2 size={12} />
@@ -634,7 +634,7 @@ function ImageGallery({
           value={pasteUrl}
           onChange={(e) => setPasteUrl(e.target.value)}
           placeholder="Pegar URL de imagen…"
-          className="flex-1 px-3 py-1.5 rounded-lg border border-neutral-200 bg-white text-xs focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30"
+          className="flex-1 px-3 py-1.5 rounded-lg border border-neutral-200 bg-white text-xs focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
         />
         <button
           type="button"

@@ -98,14 +98,14 @@ export default function BottomNav() {
                   item.accent
                     ? "text-[#25D366]"
                     : item.active
-                    ? "text-[#CC0000]"
+                    ? "text-[#3B9DD8]"
                     : "text-neutral-500"
                 }`}
               >
                 <span className="relative">
                   {item.icon}
                   {typeof item.badge === "number" && item.badge > 0 && (
-                    <span className="absolute -top-1 -right-2 min-w-[16px] h-[16px] px-1 rounded-full bg-[#CC0000] text-white text-[9px] font-bold flex items-center justify-center">
+                    <span className="absolute -top-1 -right-2 min-w-[16px] h-[16px] px-1 rounded-full bg-[#3B9DD8] text-white text-[9px] font-bold flex items-center justify-center">
                       {item.badge}
                     </span>
                   )}

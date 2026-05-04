@@ -310,7 +310,7 @@ export default function UsuariosPage() {
           </h1>
           <p className="text-sm text-neutral-500 mt-1">
             Admins, vendedores y gestores. Los clientes registrados están en{" "}
-            <Link href="/admin/clientes" className="text-[#CC0000] underline">
+            <Link href="/admin/clientes" className="text-[#3B9DD8] underline">
               Clientes
             </Link>
             .
@@ -326,7 +326,7 @@ export default function UsuariosPage() {
           </button>
           <button
             onClick={() => setShowCreate((v) => !v)}
-            className="inline-flex items-center gap-1.5 bg-[#CC0000] hover:bg-[#A00000] text-white px-3.5 py-2 rounded-xl text-sm font-semibold transition"
+            className="inline-flex items-center gap-1.5 bg-[#3B9DD8] hover:bg-[#2A84BE] text-white px-3.5 py-2 rounded-xl text-sm font-semibold transition"
           >
             {showCreate ? (
               <>
@@ -394,7 +394,7 @@ export default function UsuariosPage() {
       {showCreate && (
         <div className="bg-white rounded-2xl border border-neutral-200 p-5">
           <h2 className="text-sm font-bold text-neutral-800 mb-4 flex items-center gap-2">
-            <UserPlus size={15} className="text-[#CC0000]" />
+            <UserPlus size={15} className="text-[#3B9DD8]" />
             Crear nuevo miembro
           </h2>
           <form onSubmit={handleCreate} className="space-y-3">
@@ -404,7 +404,7 @@ export default function UsuariosPage() {
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 placeholder="Nombre completo"
-                className="px-3 py-2.5 rounded-xl border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30"
+                className="px-3 py-2.5 rounded-xl border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
               />
               <input
                 type="email"
@@ -412,7 +412,7 @@ export default function UsuariosPage() {
                 onChange={(e) => setCreateEmail(e.target.value)}
                 placeholder="correo@ejemplo.com"
                 required
-                className="px-3 py-2.5 rounded-xl border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30"
+                className="px-3 py-2.5 rounded-xl border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
               />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -424,7 +424,7 @@ export default function UsuariosPage() {
                   placeholder="Contraseña (mín. 8 caracteres)"
                   required
                   minLength={8}
-                  className="w-full pr-10 px-3 py-2.5 rounded-xl border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30"
+                  className="w-full pr-10 px-3 py-2.5 rounded-xl border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
                 />
                 <button
                   type="button"
@@ -437,7 +437,7 @@ export default function UsuariosPage() {
               <select
                 value={createRole}
                 onChange={(e) => setCreateRole(e.target.value)}
-                className="px-3 py-2.5 rounded-xl border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30 bg-white"
+                className="px-3 py-2.5 rounded-xl border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30 bg-white"
               >
                 <option value="vendedor">Vendedor</option>
                 <option value="gestor_inventario">Gestor de inventario</option>
@@ -447,7 +447,7 @@ export default function UsuariosPage() {
             <button
               type="submit"
               disabled={creating}
-              className="px-5 py-2.5 bg-[#CC0000] text-white rounded-xl text-sm font-semibold hover:bg-[#A00000] transition disabled:opacity-50"
+              className="px-5 py-2.5 bg-[#3B9DD8] text-white rounded-xl text-sm font-semibold hover:bg-[#2A84BE] transition disabled:opacity-50"
             >
               {creating ? "Creando…" : "Crear usuario"}
             </button>
@@ -472,7 +472,7 @@ export default function UsuariosPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={`Buscar entre ${team.length} miembros…`}
-              className="w-full pl-9 pr-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30"
+              className="w-full pl-9 pr-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
             />
           </div>
         </div>
@@ -531,7 +531,7 @@ export default function UsuariosPage() {
               <input
                 value={editName}
                 onChange={(e) => setEditName(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30"
+                className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
               />
             </Field>
             <Field label="Teléfono">
@@ -539,7 +539,7 @@ export default function UsuariosPage() {
                 value={editPhone}
                 onChange={(e) => setEditPhone(e.target.value)}
                 placeholder="+57 314 894 1200"
-                className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30"
+                className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
               />
             </Field>
             <Field label="Email">
@@ -547,7 +547,7 @@ export default function UsuariosPage() {
                 type="email"
                 value={editEmail}
                 onChange={(e) => setEditEmail(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30"
+                className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
               />
               <p className="text-[10px] text-neutral-400 mt-1">
                 Cambiar el email afecta el login del usuario.
@@ -562,7 +562,7 @@ export default function UsuariosPage() {
               <button
                 type="submit"
                 disabled={editing}
-                className="flex-1 py-2.5 bg-[#CC0000] text-white rounded-xl text-sm font-semibold hover:bg-[#A00000] transition disabled:opacity-50"
+                className="flex-1 py-2.5 bg-[#3B9DD8] text-white rounded-xl text-sm font-semibold hover:bg-[#2A84BE] transition disabled:opacity-50"
               >
                 {editing ? "Guardando…" : "Guardar cambios"}
               </button>
@@ -594,7 +594,7 @@ export default function UsuariosPage() {
                 placeholder="Nueva contraseña (mín. 8 caracteres)"
                 required
                 minLength={8}
-                className="w-full pr-10 px-3 py-2.5 rounded-xl border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30"
+                className="w-full pr-10 px-3 py-2.5 rounded-xl border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
               />
               <button
                 type="button"
@@ -638,7 +638,7 @@ export default function UsuariosPage() {
               <button
                 type="submit"
                 disabled={resetting}
-                className="flex-1 py-2.5 bg-[#CC0000] text-white rounded-xl text-sm font-semibold hover:bg-[#A00000] transition disabled:opacity-50"
+                className="flex-1 py-2.5 bg-[#3B9DD8] text-white rounded-xl text-sm font-semibold hover:bg-[#2A84BE] transition disabled:opacity-50"
               >
                 {resetting ? "Guardando…" : "Actualizar contraseña"}
               </button>
@@ -679,7 +679,7 @@ export default function UsuariosPage() {
               <button
                 onClick={handleDelete}
                 disabled={deleting}
-                className="flex-1 py-2.5 bg-[#CC0000] text-white rounded-xl text-sm font-semibold hover:bg-[#A00000] transition disabled:opacity-50 inline-flex items-center justify-center gap-1.5"
+                className="flex-1 py-2.5 bg-[#3B9DD8] text-white rounded-xl text-sm font-semibold hover:bg-[#2A84BE] transition disabled:opacity-50 inline-flex items-center justify-center gap-1.5"
               >
                 <Trash2 size={14} />
                 {deleting ? "Eliminando…" : "Sí, eliminar"}
@@ -782,7 +782,7 @@ function TeamRow({
           value={p.role}
           onChange={(e) => onChangeRole(e.target.value)}
           disabled={saving || isMe}
-          className="appearance-none pr-7 pl-3 py-1.5 text-xs font-semibold rounded-lg border border-neutral-200 bg-white text-neutral-800 hover:border-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#CC0000]/30 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition"
+          className="appearance-none pr-7 pl-3 py-1.5 text-xs font-semibold rounded-lg border border-neutral-200 bg-white text-neutral-800 hover:border-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition"
           title={isMe ? "No puedes cambiar tu propio rol" : "Cambiar rol"}
         >
           <option value="admin">Admin</option>
@@ -799,7 +799,7 @@ function TeamRow({
       {p.role === "vendedor" && (
         <Link
           href={`/admin/vendedor/${p.id}`}
-          className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-white text-[11px] font-semibold text-neutral-700 hover:border-[#CC0000] hover:text-[#CC0000] hover:bg-red-50 transition shrink-0"
+          className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-white text-[11px] font-semibold text-neutral-700 hover:border-[#3B9DD8] hover:text-[#3B9DD8] hover:bg-red-50 transition shrink-0"
           title="Ver historial de ventas"
         >
           <TrendingUp size={12} /> Ventas
@@ -810,7 +810,7 @@ function TeamRow({
         onClick={onDelete}
         disabled={isMe}
         title={isMe ? "No puedes eliminarte a ti mismo" : "Eliminar miembro"}
-        className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-white text-[11px] font-semibold text-neutral-500 hover:border-[#CC0000] hover:text-[#CC0000] hover:bg-red-50 transition disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-neutral-200 disabled:hover:text-neutral-500 disabled:hover:bg-white shrink-0"
+        className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-white text-[11px] font-semibold text-neutral-500 hover:border-[#3B9DD8] hover:text-[#3B9DD8] hover:bg-red-50 transition disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-neutral-200 disabled:hover:text-neutral-500 disabled:hover:bg-white shrink-0"
       >
         <Trash2 size={12} />
         <span className="hidden lg:inline">Eliminar</span>
@@ -898,7 +898,7 @@ function MenuItem({
         disabled
           ? "text-neutral-300 cursor-not-allowed"
           : danger
-            ? "text-[#CC0000] hover:bg-red-50"
+            ? "text-[#3B9DD8] hover:bg-red-50"
             : "text-neutral-700 hover:bg-neutral-50"
       }`}
     >

@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/admin", "/admin/", "/api/", "/checkout/resultado/"],
       },
     ],
-    sitemap: "https://prophone-medellin.vercel.app/sitemap.xml",
+    sitemap: "https://macrocell.vercel.app/sitemap.xml",
   };
 }

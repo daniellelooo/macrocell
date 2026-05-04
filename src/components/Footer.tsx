@@ -23,7 +23,7 @@ export default function Footer() {
       const u = new URL(instagramUrl);
       return `@${u.pathname.replace(/\//g, "")}`;
     } catch {
-      return "@prophone_medellin";
+      return "@macrocellm1";
     }
   })();
 
@@ -37,19 +37,19 @@ export default function Footer() {
         <div className="flex items-center justify-between mb-8 md:hidden">
           <div className="flex items-center gap-2.5">
             <Image
-              src="/prophone-profile-pic.jpg"
-              alt="Prophone Medellín"
+              src="/macrocell-logo.jpg"
+              alt="Macrocell"
               width={38}
               height={38}
               className="rounded-full object-cover"
             />
-            <span className="font-bold text-neutral-900 text-base">Prophone</span>
+            <span className="font-bold text-neutral-900 text-base">Macrocell</span>
           </div>
           <a
             href={waUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1.5 bg-[#CC0000] text-white px-4 py-2 rounded-full text-xs font-semibold"
+            className="flex items-center gap-1.5 bg-[#3B9DD8] text-white px-4 py-2 rounded-full text-xs font-semibold"
           >
             <Phone size={12} />
             WhatsApp
@@ -61,19 +61,19 @@ export default function Footer() {
           <div className="md:col-span-2">
             <div className="flex items-center gap-3 mb-4">
               <Image
-                src="/prophone-profile-pic.jpg"
-                alt="Prophone Medellín"
+                src="/macrocell-logo.jpg"
+                alt="Macrocell"
                 width={44}
                 height={44}
                 className="rounded-full object-cover"
               />
               <h3 className="text-lg font-bold text-neutral-900 tracking-tight">
-                Prophone Medellín
+                Macrocell
               </h3>
             </div>
             <p className="text-sm text-neutral-500 max-w-xs leading-relaxed mb-5">
-              Los precios más baratos en iPhone de Medellín. Garantía oficial,
-              crédito disponible y envíos a toda Colombia.
+              Los mejores precios en smartphones y accesorios en Colombia. Garantía oficial,
+              crédito disponible y envíos a todo el país.
             </p>
             <div className="flex flex-col gap-2 mb-5">
               <a
@@ -82,7 +82,7 @@ export default function Footer() {
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 text-sm text-neutral-600 hover:text-neutral-900 transition-colors"
               >
-                <Phone size={14} className="text-[#CC0000]" />
+                <Phone size={14} className="text-[#3B9DD8]" />
                 {waLabel}
               </a>
             </div>
@@ -90,7 +90,7 @@ export default function Footer() {
               href={instagramUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm text-neutral-600 hover:text-[#CC0000] transition-colors font-medium"
+              className="text-sm text-neutral-600 hover:text-[#3B9DD8] transition-colors font-medium"
             >
               {igHandle}
             </a>
@@ -117,7 +117,7 @@ export default function Footer() {
             <ul className="space-y-3">
               {sedes.map((sede) => (
                 <li key={sede.id} className="flex items-start gap-2">
-                  <MapPin size={13} className="text-[#CC0000] mt-0.5 flex-shrink-0" />
+                  <MapPin size={13} className="text-[#3B9DD8] mt-0.5 flex-shrink-0" />
                   <div>
                     <span className="text-xs text-neutral-700 block leading-snug">
                       {sede.name}
@@ -150,7 +150,7 @@ export default function Footer() {
           <div className="grid grid-cols-2 gap-2 mb-6">
             {sedes.map((sede) => (
               <div key={sede.id} className="flex items-start gap-1.5 bg-white rounded-xl p-3 border border-neutral-100">
-                <MapPin size={12} className="text-[#CC0000] mt-0.5 flex-shrink-0" />
+                <MapPin size={12} className="text-[#3B9DD8] mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="text-[11px] font-semibold text-neutral-800 leading-tight">
                     {sede.name}
@@ -170,7 +170,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="pt-6 border-t border-neutral-200 flex flex-col md:flex-row justify-between items-center gap-3">
           <p className="text-xs text-neutral-400">
-            © {new Date().getFullYear()} Prophone Medellín. Todos los derechos reservados.
+            © {new Date().getFullYear()} Macrocell. Todos los derechos reservados.
           </p>
           <div className="flex flex-wrap gap-x-5 gap-y-2 justify-center md:justify-end">
             <Link href="/faqs" className="text-xs text-neutral-400 hover:text-neutral-700 transition-colors">FAQs</Link>

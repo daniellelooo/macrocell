@@ -210,7 +210,7 @@ export default function CartDrawer() {
                 <Link
                   href="/checkout"
                   onClick={closeCart}
-                  className="flex items-center justify-center gap-2 w-full bg-[#CC0000] text-white py-4 rounded-2xl font-bold text-base hover:bg-[#A00000] active:scale-[0.98] transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#CC0000] focus-visible:ring-offset-2"
+                  className="flex items-center justify-center gap-2 w-full bg-[#3B9DD8] text-white py-4 rounded-2xl font-bold text-base hover:bg-[#2A84BE] active:scale-[0.98] transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3B9DD8] focus-visible:ring-offset-2"
                   aria-label={`Finalizar compra · Total ${formatPrice(cartTotal)}`}
                 >
                   Finalizar compra · {formatPrice(cartTotal)}

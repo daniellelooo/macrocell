@@ -403,7 +403,7 @@ export default function AdminDashboardPage() {
       >
         <div>
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-neutral-900 flex items-center gap-2">
-            <BarChart3 size={22} className="text-[#CC0000]" /> Dashboard
+            <BarChart3 size={22} className="text-[#3B9DD8]" /> Dashboard
           </h1>
           <p className="text-sm text-neutral-500 mt-1">
             Solo ventas web · {periodInfo.label}
@@ -631,7 +631,7 @@ export default function AdminDashboardPage() {
         <div className="bg-white rounded-2xl border border-neutral-200 p-5">
           <div className="flex items-center justify-between mb-5">
             <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 flex items-center gap-1.5">
-              <Star size={12} className="text-[#CC0000]" /> Top productos
+              <Star size={12} className="text-[#3B9DD8]" /> Top productos
             </p>
             <span className="text-[10px] text-neutral-400">por unidades vendidas</span>
           </div>
@@ -660,7 +660,7 @@ export default function AdminDashboardPage() {
                     <div className="flex items-center gap-2 pl-6">
                       <div className="flex-1 h-1 bg-neutral-100 rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-[#CC0000] rounded-full"
+                          className="h-full bg-[#3B9DD8] rounded-full"
                           style={{ width: `${pct}%` }}
                         />
                       </div>
@@ -678,7 +678,7 @@ export default function AdminDashboardPage() {
         <div className="bg-white rounded-2xl border border-neutral-200 p-5">
           <div className="flex items-center justify-between mb-5">
             <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 flex items-center gap-1.5">
-              <Users size={12} className="text-[#CC0000]" /> Mejores clientes
+              <Users size={12} className="text-[#3B9DD8]" /> Mejores clientes
             </p>
             <span className="text-[10px] text-neutral-400">por gasto en período</span>
           </div>
@@ -737,7 +737,7 @@ export default function AdminDashboardPage() {
             </p>
             <Link
               href="/admin/ordenes"
-              className="text-[11px] text-[#CC0000] font-semibold hover:underline flex items-center gap-1"
+              className="text-[11px] text-[#3B9DD8] font-semibold hover:underline flex items-center gap-1"
             >
               Ver todos <ArrowRight size={11} />
             </Link>
@@ -1077,8 +1077,8 @@ function SeriesChart({
         >
           <defs>
             <linearGradient id="dashArea" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#CC0000" stopOpacity="0.18" />
-              <stop offset="100%" stopColor="#CC0000" stopOpacity="0" />
+              <stop offset="0%" stopColor="#3B9DD8" stopOpacity="0.18" />
+              <stop offset="100%" stopColor="#3B9DD8" stopOpacity="0" />
             </linearGradient>
           </defs>
           {/* grid lines */}
@@ -1106,7 +1106,7 @@ function SeriesChart({
           {/* area */}
           <path d={areaPath} fill="url(#dashArea)" />
           {/* line */}
-          <path d={linePath} fill="none" stroke="#CC0000" strokeWidth="2" />
+          <path d={linePath} fill="none" stroke="#3B9DD8" strokeWidth="2" />
           {/* points */}
           {series.map((p, i) => (
             <circle
@@ -1114,7 +1114,7 @@ function SeriesChart({
               cx={x(i)}
               cy={y(metric === "revenue" ? p.revenue : p.orders)}
               r={hoverIdx === i ? 4 : 2.5}
-              fill="#CC0000"
+              fill="#3B9DD8"
             />
           ))}
           {/* hover guide */}
@@ -1124,7 +1124,7 @@ function SeriesChart({
               x2={x(hoverIdx)}
               y1={PAD_T}
               y2={PAD_T + innerH}
-              stroke="#CC0000"
+              stroke="#3B9DD8"
               strokeOpacity="0.3"
               strokeDasharray="2 2"
             />

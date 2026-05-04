@@ -152,7 +152,7 @@ export default function FrequentlyBoughtTogether({ current }: Props) {
               <div
                 className={`relative w-20 h-20 md:w-28 md:h-28 rounded-xl bg-white border-2 transition shrink-0 ${
                   selected[p.id]
-                    ? "border-[#CC0000]"
+                    ? "border-[#3B9DD8]"
                     : "border-neutral-200 opacity-40"
                 }`}
               >
@@ -164,7 +164,7 @@ export default function FrequentlyBoughtTogether({ current }: Props) {
                   unoptimized
                 />
                 {selected[p.id] && (
-                  <span className="absolute -top-2 -right-2 w-5 h-5 bg-[#CC0000] text-white rounded-full flex items-center justify-center">
+                  <span className="absolute -top-2 -right-2 w-5 h-5 bg-[#3B9DD8] text-white rounded-full flex items-center justify-center">
                     <Check size={12} />
                   </span>
                 )}
@@ -187,11 +187,11 @@ export default function FrequentlyBoughtTogether({ current }: Props) {
                     type="checkbox"
                     checked={!!selected[p.id]}
                     onChange={() => toggle(p.id)}
-                    className="mt-1 w-4 h-4 rounded border-neutral-300 text-[#CC0000] focus:ring-2 focus:ring-[#CC0000]/30 cursor-pointer"
+                    className="mt-1 w-4 h-4 rounded border-neutral-300 text-[#3B9DD8] focus:ring-2 focus:ring-[#3B9DD8]/30 cursor-pointer"
                   />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-baseline gap-2 flex-wrap">
-                      <p className="text-sm font-semibold text-neutral-900 group-hover:text-[#CC0000] transition">
+                      <p className="text-sm font-semibold text-neutral-900 group-hover:text-[#3B9DD8] transition">
                         {p.name}
                       </p>
                       {isCurrent && (
@@ -231,7 +231,7 @@ export default function FrequentlyBoughtTogether({ current }: Props) {
             className={`inline-flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-semibold transition active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed ${
               done
                 ? "bg-green-500 text-white"
-                : "bg-[#CC0000] text-white hover:bg-[#A00000]"
+                : "bg-[#3B9DD8] text-white hover:bg-[#2A84BE]"
             }`}
           >
             {done ? (

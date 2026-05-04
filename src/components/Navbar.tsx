@@ -85,14 +85,14 @@ export default function Navbar() {
             className="flex items-center gap-2.5 hover:opacity-85 transition-opacity"
           >
             <Image
-              src="/prophone-profile-pic.jpg"
-              alt="Prophone Medellín"
+              src="/macrocell-logo.jpg"
+              alt="Macrocell"
               width={36}
               height={36}
               className="rounded-full object-cover"
             />
             <span className="text-lg font-bold tracking-tight text-neutral-900">
-              Prophone
+              Macrocell
             </span>
           </Link>
 
@@ -131,7 +131,7 @@ export default function Navbar() {
 
             <Link
               href="/cuenta"
-              className="p-2 rounded-full hover:bg-neutral-100 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#CC0000]"
+              className="p-2 rounded-full hover:bg-neutral-100 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3B9DD8]"
               aria-label="Mi cuenta"
               title="Mi cuenta"
             >
@@ -140,7 +140,7 @@ export default function Navbar() {
 
             <Link
               href="/wishlist"
-              className="relative p-2 rounded-full hover:bg-neutral-100 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#CC0000]"
+              className="relative p-2 rounded-full hover:bg-neutral-100 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3B9DD8]"
               aria-label="Favoritos"
               title="Favoritos"
             >
@@ -152,7 +152,7 @@ export default function Navbar() {
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     exit={{ scale: 0 }}
-                    className="absolute -top-0.5 -right-0.5 w-4.5 h-4.5 bg-[#CC0000] text-white text-[10px] font-bold rounded-full flex items-center justify-center min-w-[18px] min-h-[18px] px-[3px]"
+                    className="absolute -top-0.5 -right-0.5 w-4.5 h-4.5 bg-[#3B9DD8] text-white text-[10px] font-bold rounded-full flex items-center justify-center min-w-[18px] min-h-[18px] px-[3px]"
                   >
                     {wishlistCount}
                   </motion.span>
@@ -162,7 +162,7 @@ export default function Navbar() {
 
             <button
               onClick={toggleCart}
-              className="relative p-2 rounded-full hover:bg-neutral-100 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#CC0000]"
+              className="relative p-2 rounded-full hover:bg-neutral-100 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3B9DD8]"
               aria-label="Carrito"
             >
               <ShoppingBag size={20} className="text-neutral-700" />
@@ -173,7 +173,7 @@ export default function Navbar() {
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     exit={{ scale: 0 }}
-                    className="absolute -top-0.5 -right-0.5 w-4.5 h-4.5 bg-[#CC0000] text-white text-[10px] font-bold rounded-full flex items-center justify-center min-w-[18px] min-h-[18px] px-[3px]"
+                    className="absolute -top-0.5 -right-0.5 w-4.5 h-4.5 bg-[#3B9DD8] text-white text-[10px] font-bold rounded-full flex items-center justify-center min-w-[18px] min-h-[18px] px-[3px]"
                   >
                     {itemCount}
                   </motion.span>
@@ -185,7 +185,7 @@ export default function Navbar() {
               href={waUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden md:flex bg-[#CC0000] text-white px-5 py-2 rounded-full text-sm font-medium hover:bg-[#A00000] active:scale-95 transition-all duration-200"
+              className="hidden md:flex bg-[#3B9DD8] text-white px-5 py-2 rounded-full text-sm font-medium hover:bg-[#2A84BE] active:scale-95 transition-all duration-200"
             >
               WhatsApp
             </a>
@@ -229,7 +229,7 @@ export default function Navbar() {
                 href={waUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-3 bg-[#CC0000] text-white px-5 py-3 rounded-full text-sm font-medium text-center"
+                className="mt-3 bg-[#3B9DD8] text-white px-5 py-3 rounded-full text-sm font-medium text-center"
               >
                 Contactar por WhatsApp
               </a>
