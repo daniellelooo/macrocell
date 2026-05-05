@@ -12,6 +12,7 @@ import {
   ImagePlus,
   Plus,
   Save,
+  Sparkles,
   Star,
   Trash2,
   Upload,
@@ -28,7 +29,6 @@ import {
   type Variant,
   categories,
   conditionLabels,
-  formatPrice,
 } from "@/lib/products";
 
 const CONDITIONS: ProductCondition[] = [
@@ -61,9 +61,9 @@ function emptyProduct(): Product {
   };
 }
 
-function emptyVariant(): Variant {
+function emptyVariant(productId?: string): Variant {
   return {
-    sku: `sku-${Math.random().toString(36).slice(2, 9)}`,
+    sku: productId ? `${productId}-${Math.random().toString(36).slice(2, 6)}` : `sku-${Math.random().toString(36).slice(2, 9)}`,
     storage: "",
     ram: "",
     size: "",
@@ -73,6 +73,7 @@ function emptyVariant(): Variant {
     notes: "",
     inStock: true,
     stockQuantity: 1,
+    commissionPct: 0,
   };
 }
 
@@ -84,6 +85,136 @@ function slugify(input: string): string {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
 }
+
+/** Genera un SKU determinístico: <productId>-<storage>-<condition_short>-<seq?> */
+function autoSku(
+  productId: string,
+  variant: Pick<Variant, "storage" | "ram" | "condition" | "color">,
+  existing: string[]
+): string {
+  const conditionShort: Record<string, string> = {
+    nuevo: "nuevo",
+    exhibicion: "exh",
+    "open-box": "ob",
+    "as-is": "asis",
+    preventa: "pre",
+  };
+  const parts = [
+    productId || "sku",
+    (variant.storage ?? "").toLowerCase().replace(/\s+/g, "").replace("gb", "").replace("tb", "tb") || null,
+    variant.ram ? `${(variant.ram ?? "").toLowerCase().replace(/\s+/g, "").replace("gb", "")}r` : null,
+    variant.color ? slugify(variant.color).slice(0, 6) : null,
+    conditionShort[variant.condition] ?? variant.condition,
+  ].filter(Boolean);
+  const base = parts.join("-");
+  // Si colisiona, agregar sufijo
+  let candidate = base;
+  let i = 2;
+  while (existing.includes(candidate)) {
+    candidate = `${base}-${i++}`;
+  }
+  return candidate;
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Plantillas: precargan variantes típicas según familia/categoría.
+// El usuario solo ajusta precios.
+// ─────────────────────────────────────────────────────────────────────
+type Template = {
+  id: string;
+  label: string;
+  description: string;
+  category: ProductCategory;
+  family?: string;
+  shortDescription?: string;
+  features?: string[];
+  variantSpecs: Array<{
+    storage?: string;
+    ram?: string;
+    size?: string;
+    condition: ProductCondition;
+    notes?: string;
+    /** Precio sugerido (el usuario lo ajustará). 0 = vacío. */
+    price?: number;
+  }>;
+};
+
+const TEMPLATES: Template[] = [
+  {
+    id: "iphone-pro",
+    label: "iPhone Pro/Pro Max",
+    description: "3 almacenamientos × 2 condiciones (nuevo + exhibición) = 6 variantes",
+    category: "iphone",
+    shortDescription: "Chip Pro · Cámara avanzada · Titanio",
+    features: ["Pantalla Super Retina XDR", "Cámara Pro", "Chip serie A Pro", "Titanio"],
+    variantSpecs: [
+      { storage: "256 GB", condition: "nuevo" },
+      { storage: "256 GB", condition: "exhibicion", notes: "Garantía 3.5 meses" },
+      { storage: "512 GB", condition: "nuevo" },
+      { storage: "512 GB", condition: "exhibicion", notes: "Garantía 3.5 meses" },
+      { storage: "1 TB", condition: "nuevo" },
+      { storage: "1 TB", condition: "exhibicion", notes: "Garantía 3.5 meses" },
+    ],
+  },
+  {
+    id: "iphone-std",
+    label: "iPhone estándar",
+    description: "2 almacenamientos × 2 condiciones (nuevo + exhibición) = 4 variantes",
+    category: "iphone",
+    shortDescription: "Chip serie A · Cámara dual · Diseño aluminio",
+    features: ["Pantalla Super Retina", "Cámara dual", "Carga MagSafe"],
+    variantSpecs: [
+      { storage: "128 GB", condition: "nuevo" },
+      { storage: "128 GB", condition: "exhibicion", notes: "Garantía 3.5 meses" },
+      { storage: "256 GB", condition: "nuevo" },
+      { storage: "256 GB", condition: "exhibicion", notes: "Garantía 3.5 meses" },
+    ],
+  },
+  {
+    id: "ipad",
+    label: "iPad",
+    description: "2 almacenamientos × 1 condición (nuevo) = 2 variantes",
+    category: "ipad",
+    shortDescription: "Pantalla Retina · Compatible con Apple Pencil",
+    features: ["Pantalla Liquid Retina", "Compatible con Apple Pencil", "Touch ID"],
+    variantSpecs: [
+      { storage: "128 GB", condition: "nuevo" },
+      { storage: "256 GB", condition: "nuevo" },
+    ],
+  },
+  {
+    id: "macbook",
+    label: "MacBook",
+    description: "RAM × Storage × condiciones — 4 variantes",
+    category: "macbook",
+    shortDescription: "Chip Apple Silicon · Pantalla Retina",
+    features: ["Apple Silicon", "Pantalla Liquid Retina", "Hasta 18h batería"],
+    variantSpecs: [
+      { storage: "256 GB", ram: "8 GB", condition: "nuevo" },
+      { storage: "512 GB", ram: "8 GB", condition: "nuevo" },
+      { storage: "512 GB", ram: "16 GB", condition: "nuevo" },
+      { storage: "1 TB", ram: "16 GB", condition: "nuevo" },
+    ],
+  },
+  {
+    id: "watch",
+    label: "Apple Watch",
+    description: "1 variante única (nuevo)",
+    category: "watch",
+    shortDescription: "Wearable de Apple con monitoreo de salud",
+    features: ["GPS", "Monitor cardíaco", "Resistente al agua"],
+    variantSpecs: [{ condition: "nuevo" }],
+  },
+  {
+    id: "accesorio",
+    label: "Accesorio",
+    description: "1 variante única (nuevo)",
+    category: "accesorios",
+    shortDescription: "",
+    features: [],
+    variantSpecs: [{ condition: "nuevo" }],
+  },
+];
 
 export default function ProductEditorPage() {
   const params = useParams<{ id: string }>();
@@ -100,7 +231,49 @@ export default function ProductEditorPage() {
   // El editor mantiene un draft local; sólo se commitea al store al guardar.
   const [draft, setDraft] = useState<Product>(initial ?? emptyProduct());
   const [saved, setSaved] = useState(false);
+  const [showTemplates, setShowTemplates] = useState(isCreating);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [dragOver, setDragOver] = useState(false);
+
+  /** Aplica una plantilla: precarga categoría, descripciones y variantes típicas. */
+  const applyTemplate = (tpl: Template) => {
+    setDraft((d) => {
+      const productId = d.id || slugify(d.name) || `nuevo-${Date.now()}`;
+      const variants: Variant[] = [];
+      const skus: string[] = [];
+      for (const spec of tpl.variantSpecs) {
+        const sku = autoSku(productId, {
+          storage: spec.storage,
+          ram: spec.ram,
+          condition: spec.condition,
+          color: undefined,
+        }, skus);
+        skus.push(sku);
+        variants.push({
+          sku,
+          storage: spec.storage,
+          ram: spec.ram,
+          size: spec.size,
+          color: undefined,
+          condition: spec.condition,
+          price: spec.price ?? 0,
+          notes: spec.notes,
+          inStock: true,
+          stockQuantity: 1,
+          commissionPct: 0,
+        });
+      }
+      return {
+        ...d,
+        category: tpl.category,
+        family: d.family || tpl.family,
+        shortDescription: d.shortDescription || tpl.shortDescription || "",
+        features: d.features.length === 0 && tpl.features ? tpl.features : d.features,
+        variants: [...d.variants, ...variants],
+      };
+    });
+    setShowTemplates(false);
+  };
 
   // Si la ruta apunta a un id que no existe (y no es "nuevo"), 404.
   if (!isCreating && !initial) {
@@ -141,21 +314,56 @@ export default function ProductEditorPage() {
     }));
 
   const addVariant = () =>
-    setDraft((d) => ({ ...d, variants: [...d.variants, emptyVariant()] }));
+    setDraft((d) => {
+      const productId = d.id || slugify(d.name) || "sku";
+      const skus = d.variants.map((v) => v.sku);
+      const newV = emptyVariant(productId);
+      // Si las otras variantes ya tienen condición, heredarla (suele ser igual)
+      if (d.variants.length > 0) {
+        newV.condition = d.variants[d.variants.length - 1].condition;
+      }
+      newV.sku = autoSku(productId, newV, skus);
+      return { ...d, variants: [...d.variants, newV] };
+    });
 
   const duplicateVariant = (sku: string) =>
     setDraft((d) => {
       const orig = d.variants.find((v) => v.sku === sku);
       if (!orig) return d;
+      const productId = d.id || slugify(d.name) || "sku";
+      const skus = d.variants.map((v) => v.sku);
       const copy: Variant = {
         ...orig,
-        sku: `sku-${Math.random().toString(36).slice(2, 9)}`,
+        sku: autoSku(productId, orig, skus),
       };
       const idx = d.variants.findIndex((v) => v.sku === sku);
       const next = [...d.variants];
       next.splice(idx + 1, 0, copy);
       return { ...d, variants: next };
     });
+
+  /** Re-generar SKU automáticamente cuando cambia un atributo identificador. */
+  const updateVariantWithAutoSku = (
+    sku: string,
+    patch: Partial<Variant>,
+    autoRegenSku = false
+  ) => {
+    setDraft((d) => {
+      const productId = d.id || slugify(d.name) || "sku";
+      return {
+        ...d,
+        variants: d.variants.map((v) => {
+          if (v.sku !== sku) return v;
+          const merged = { ...v, ...patch };
+          if (autoRegenSku) {
+            const otherSkus = d.variants.filter((vv) => vv.sku !== sku).map((vv) => vv.sku);
+            merged.sku = autoSku(productId, merged, otherSkus);
+          }
+          return merged;
+        }),
+      };
+    });
+  };
 
   const handleImageUpload = async (files: FileList | null) => {
     if (!files) return;
@@ -347,12 +555,72 @@ export default function ProductEditorPage() {
         </div>
       </div>
 
+      {/* Plantillas (sólo al crear) */}
+      {isCreating && showTemplates && (
+        <motion.section
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gradient-to-br from-[#3B9DD8]/5 to-transparent rounded-2xl border border-[#3B9DD8]/20 p-5"
+        >
+          <div className="flex items-start justify-between gap-3 mb-4">
+            <div>
+              <h2 className="text-sm font-bold text-neutral-900 flex items-center gap-1.5">
+                <Sparkles size={14} className="text-[#3B9DD8]" /> Empezar desde una plantilla
+              </h2>
+              <p className="text-[11px] text-neutral-500 mt-0.5">
+                Cada plantilla precarga categoría, descripción y variantes típicas.
+                Solo ajustas precios y guardas.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowTemplates(false)}
+              className="text-[11px] text-neutral-500 hover:text-neutral-900"
+            >
+              Crear desde cero
+            </button>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+            {TEMPLATES.map((tpl) => (
+              <button
+                key={tpl.id}
+                type="button"
+                onClick={() => applyTemplate(tpl)}
+                className="text-left p-3 bg-white rounded-xl border border-neutral-200 hover:border-[#3B9DD8] hover:shadow-sm transition group"
+              >
+                <p className="text-sm font-bold text-neutral-900 group-hover:text-[#3B9DD8]">
+                  {tpl.label}
+                </p>
+                <p className="text-[10px] text-neutral-500 mt-0.5">
+                  {tpl.description}
+                </p>
+                <p className="text-[10px] text-neutral-400 mt-1.5">
+                  {tpl.variantSpecs.length} variante{tpl.variantSpecs.length === 1 ? "" : "s"}
+                </p>
+              </button>
+            ))}
+          </div>
+        </motion.section>
+      )}
+
       {/* Galería de imágenes */}
       <Section
         title="Imágenes"
-        desc="La primera imagen es la portada. Asocia cada imagen a un color para que el cliente vea fotos del color que selecciona."
+        desc="La primera imagen es la portada. Arrastra imágenes para subirlas. Asocia cada imagen a un color."
       >
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+        <div
+          onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+          onDragLeave={() => setDragOver(false)}
+          onDrop={(e) => {
+            e.preventDefault();
+            setDragOver(false);
+            const files = e.dataTransfer.files;
+            if (files && files.length > 0) handleImageUpload(files);
+          }}
+          className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 rounded-xl transition ${
+            dragOver ? "ring-2 ring-[#3B9DD8] ring-offset-4 bg-[#3B9DD8]/5" : ""
+          }`}
+        >
           {draft.images.map((img, i) => {
             const obj = toImageObject(img);
             return (
@@ -556,10 +824,10 @@ export default function ProductEditorPage() {
         </div>
       </Section>
 
-      {/* Variantes */}
+      {/* Variantes — grilla editable */}
       <Section
-        title="Variantes (precio + condición)"
-        desc="Cada combinación de almacenamiento, RAM, tamaño o condición se vende como una variante con su propio precio y stock."
+        title={`Variantes (${draft.variants.length})`}
+        desc="Cada SKU es una variante con precio y stock propios. Al cambiar Storage/RAM/Color/Condición el SKU se regenera automáticamente."
       >
         {draft.variants.length === 0 ? (
           <div className="text-center py-8 border-2 border-dashed border-neutral-200 rounded-xl">
@@ -569,169 +837,182 @@ export default function ProductEditorPage() {
             <p className="text-xs text-neutral-400 mb-4">
               Agrega al menos una para que el producto sea comprable.
             </p>
+            <button
+              type="button"
+              onClick={addVariant}
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#3B9DD8] hover:bg-blue-50 px-3 py-2 rounded-lg transition"
+            >
+              <Plus size={14} /> Agregar primera variante
+            </button>
           </div>
         ) : (
-          <div className="space-y-3">
-            {draft.variants.map((v) => {
-              const qty = Math.max(0, Number(v.stockQuantity ?? 0));
-              const stockBadge =
-                qty === 0
-                  ? { label: "Agotado", cls: "bg-red-100 text-red-700" }
-                  : qty <= 2
-                    ? { label: `${qty} en stock`, cls: "bg-amber-100 text-amber-700" }
-                    : { label: `${qty} en stock`, cls: "bg-green-100 text-green-700" };
-              return (
-                <div
-                  key={v.sku}
-                  className="bg-neutral-50 rounded-xl p-4 border border-neutral-200 space-y-3"
-                >
-                  {/* Fila 1: especificaciones */}
-                  <div className="grid grid-cols-2 md:grid-cols-12 gap-3">
-                    <Field label="Almacenamiento" className="md:col-span-3">
-                      <Input
-                        value={v.storage ?? ""}
-                        onChange={(val) => updateVariant(v.sku, { storage: val })}
-                        placeholder="256 GB"
-                      />
-                    </Field>
-                    <Field label="RAM" className="md:col-span-2">
-                      <Input
-                        value={v.ram ?? ""}
-                        onChange={(val) => updateVariant(v.sku, { ram: val })}
-                        placeholder="16 GB"
-                      />
-                    </Field>
-                    <Field label="Tamaño" className="md:col-span-2">
-                      <Input
-                        value={v.size ?? ""}
-                        onChange={(val) => updateVariant(v.sku, { size: val })}
-                        placeholder='14"'
-                      />
-                    </Field>
-                    <Field label="Color" className="md:col-span-2">
-                      {draft.colors.length > 0 ? (
+          <div className="overflow-x-auto -mx-5 px-5">
+            <table className="w-full min-w-[920px] text-sm">
+              <thead className="bg-neutral-50 border-y border-neutral-200">
+                <tr className="text-left text-[10px] uppercase tracking-wider text-neutral-500">
+                  <th className="px-2 py-2 font-semibold">Almacen.</th>
+                  <th className="px-2 py-2 font-semibold">RAM</th>
+                  <th className="px-2 py-2 font-semibold">Tamaño</th>
+                  <th className="px-2 py-2 font-semibold">Color</th>
+                  <th className="px-2 py-2 font-semibold">Condición</th>
+                  <th className="px-2 py-2 font-semibold text-right">Precio</th>
+                  <th className="px-2 py-2 font-semibold text-right">Stock</th>
+                  <th className="px-2 py-2 font-semibold text-right">Com %</th>
+                  <th className="px-2 py-2 font-semibold">Notas</th>
+                  <th className="px-2 py-2 font-semibold w-20"></th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-neutral-100">
+                {draft.variants.map((v) => {
+                  const qty = Math.max(0, Number(v.stockQuantity ?? 0));
+                  const lowStock = qty === 0
+                    ? "border-l-red-400"
+                    : qty <= 2
+                      ? "border-l-amber-400"
+                      : "border-l-green-400";
+                  return (
+                    <tr key={v.sku} className={`group hover:bg-neutral-50 border-l-2 ${lowStock}`}>
+                      <td className="px-1 py-1.5">
+                        <CellInput
+                          value={v.storage ?? ""}
+                          onChange={(val) => updateVariantWithAutoSku(v.sku, { storage: val }, true)}
+                          placeholder="256 GB"
+                          className="w-20"
+                        />
+                      </td>
+                      <td className="px-1 py-1.5">
+                        <CellInput
+                          value={v.ram ?? ""}
+                          onChange={(val) => updateVariantWithAutoSku(v.sku, { ram: val }, true)}
+                          placeholder="16 GB"
+                          className="w-16"
+                        />
+                      </td>
+                      <td className="px-1 py-1.5">
+                        <CellInput
+                          value={v.size ?? ""}
+                          onChange={(val) => updateVariant(v.sku, { size: val })}
+                          placeholder='14"'
+                          className="w-12"
+                        />
+                      </td>
+                      <td className="px-1 py-1.5">
+                        {draft.colors.length > 0 ? (
+                          <select
+                            value={v.color ?? ""}
+                            onChange={(e) =>
+                              updateVariantWithAutoSku(v.sku, { color: e.target.value || undefined }, true)
+                            }
+                            className="w-24 px-2 py-1.5 rounded border border-neutral-200 bg-white text-xs focus:outline-none focus:ring-1 focus:ring-[#3B9DD8]"
+                          >
+                            <option value="">—</option>
+                            {draft.colors.map((c) => (
+                              <option key={c.name} value={c.name}>{c.name}</option>
+                            ))}
+                          </select>
+                        ) : (
+                          <CellInput
+                            value={v.color ?? ""}
+                            onChange={(val) => updateVariantWithAutoSku(v.sku, { color: val }, true)}
+                            placeholder="Negro"
+                            className="w-20"
+                          />
+                        )}
+                      </td>
+                      <td className="px-1 py-1.5">
                         <select
-                          value={v.color ?? ""}
+                          value={v.condition}
                           onChange={(e) =>
-                            updateVariant(v.sku, { color: e.target.value || undefined })
+                            updateVariantWithAutoSku(v.sku, { condition: e.target.value as ProductCondition }, true)
                           }
-                          className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
+                          className="w-28 px-2 py-1.5 rounded border border-neutral-200 bg-white text-xs focus:outline-none focus:ring-1 focus:ring-[#3B9DD8]"
                         >
-                          <option value="">— sin color —</option>
-                          {draft.colors.map((c) => (
-                            <option key={c.name} value={c.name}>
-                              {c.name}
-                            </option>
+                          {CONDITIONS.map((c) => (
+                            <option key={c} value={c}>{conditionLabels[c]}</option>
                           ))}
                         </select>
-                      ) : (
-                        <Input
-                          value={v.color ?? ""}
-                          onChange={(val) => updateVariant(v.sku, { color: val })}
-                          placeholder="Negro"
+                      </td>
+                      <td className="px-1 py-1.5">
+                        <CellInput
+                          type="number"
+                          value={String(v.price)}
+                          onChange={(val) => updateVariant(v.sku, { price: Number(val) || 0 })}
+                          placeholder="0"
+                          className="w-24 text-right"
                         />
-                      )}
-                    </Field>
-                    <Field label="Condición" className="md:col-span-3">
-                      <select
-                        value={v.condition}
-                        onChange={(e) =>
-                          updateVariant(v.sku, {
-                            condition: e.target.value as ProductCondition,
-                          })
-                        }
-                        className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
-                      >
-                        {CONDITIONS.map((c) => (
-                          <option key={c} value={c}>
-                            {conditionLabels[c]}
-                          </option>
-                        ))}
-                      </select>
-                    </Field>
-                  </div>
-
-                  {/* Fila 2: precio · stock · notas */}
-                  <div className="grid grid-cols-2 md:grid-cols-12 gap-3">
-                    <Field label="Precio (COP)" className="md:col-span-3">
-                      <Input
-                        type="number"
-                        value={String(v.price)}
-                        onChange={(val) =>
-                          updateVariant(v.sku, { price: Number(val) || 0 })
-                        }
-                        placeholder="2950000"
-                      />
-                    </Field>
-                    <Field label="Stock (unidades)" className="md:col-span-2">
-                      <Input
-                        type="number"
-                        value={String(v.stockQuantity ?? 0)}
-                        onChange={(val) =>
-                          updateVariant(v.sku, {
+                      </td>
+                      <td className="px-1 py-1.5">
+                        <CellInput
+                          type="number"
+                          value={String(v.stockQuantity ?? 0)}
+                          onChange={(val) => updateVariant(v.sku, {
                             stockQuantity: Math.max(0, Number(val) || 0),
-                          })
-                        }
-                        placeholder="1"
-                      />
-                    </Field>
-                    <Field label="Notas" className="md:col-span-7">
-                      <Input
-                        value={v.notes ?? ""}
-                        onChange={(val) => updateVariant(v.sku, { notes: val })}
-                        placeholder="Sim física, batería 100%, …"
-                      />
-                    </Field>
-                  </div>
-
-                  {/* Footer: badge stock · resumen · acciones */}
-                  <div className="flex items-center justify-between flex-wrap gap-2 pt-2 border-t border-neutral-200">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span
-                        className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${stockBadge.cls}`}
-                      >
-                        {stockBadge.label}
-                      </span>
-                      <span className="text-[11px] font-mono text-neutral-400">
-                        {v.sku}
-                      </span>
-                      <span className="text-[11px] font-semibold text-neutral-600">
-                        {formatPrice(v.price)} · {conditionLabels[v.condition]}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <button
-                        type="button"
-                        onClick={() => duplicateVariant(v.sku)}
-                        className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-700 hover:bg-white transition"
-                        title="Duplicar variante"
-                        aria-label="Duplicar variante"
-                      >
-                        <Copy size={13} />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => removeVariant(v.sku)}
-                        className="p-1.5 rounded-lg text-neutral-400 hover:text-[#3B9DD8] hover:bg-red-50 transition"
-                        aria-label="Eliminar variante"
-                        title="Eliminar variante"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+                          })}
+                          placeholder="0"
+                          className="w-14 text-right"
+                        />
+                      </td>
+                      <td className="px-1 py-1.5">
+                        <CellInput
+                          type="number"
+                          value={String(v.commissionPct ?? 0)}
+                          onChange={(val) => updateVariant(v.sku, {
+                            commissionPct: Math.max(0, Math.min(100, Number(val) || 0)),
+                          })}
+                          placeholder="0"
+                          className="w-12 text-right"
+                        />
+                      </td>
+                      <td className="px-1 py-1.5">
+                        <CellInput
+                          value={v.notes ?? ""}
+                          onChange={(val) => updateVariant(v.sku, { notes: val })}
+                          placeholder="—"
+                          className="w-40"
+                        />
+                      </td>
+                      <td className="px-1 py-1.5">
+                        <div className="flex items-center justify-end gap-0.5 opacity-0 group-hover:opacity-100 transition">
+                          <button
+                            type="button"
+                            onClick={() => duplicateVariant(v.sku)}
+                            className="p-1 rounded text-neutral-400 hover:text-neutral-900 hover:bg-white transition"
+                            title="Duplicar"
+                          >
+                            <Copy size={12} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => removeVariant(v.sku)}
+                            className="p-1 rounded text-neutral-400 hover:text-red-600 hover:bg-red-50 transition"
+                            title="Eliminar"
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+            {/* Resumen y acciones bajo la tabla */}
+            <div className="flex flex-wrap items-center justify-between gap-2 mt-3 px-1">
+              <div className="text-[11px] text-neutral-500">
+                {draft.variants.filter((v) => (v.stockQuantity ?? 0) > 0).length} con stock ·{" "}
+                {draft.variants.filter((v) => (v.stockQuantity ?? 0) === 0).length} agotadas ·
+                Total stock: {draft.variants.reduce((s, v) => s + (v.stockQuantity ?? 0), 0)}
+              </div>
+              <button
+                type="button"
+                onClick={addVariant}
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#3B9DD8] hover:bg-blue-50 px-3 py-1.5 rounded-lg transition"
+              >
+                <Plus size={13} /> Agregar variante
+              </button>
+            </div>
           </div>
         )}
-        <button
-          type="button"
-          onClick={addVariant}
-          className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-[#3B9DD8] hover:bg-red-50 px-3 py-2 rounded-lg transition"
-        >
-          <Plus size={14} /> Agregar variante
-        </button>
       </Section>
 
       {/* Colores */}
@@ -929,6 +1210,31 @@ function Input({
       className={`w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30 ${
         mono ? "font-mono text-xs" : ""
       }`}
+    />
+  );
+}
+
+/** Input compacto para usar dentro de la grilla de variantes. */
+function CellInput({
+  value,
+  onChange,
+  placeholder,
+  type = "text",
+  className = "",
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  type?: "text" | "number";
+  className?: string;
+}) {
+  return (
+    <input
+      type={type}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      className={`px-2 py-1.5 rounded border border-neutral-200 bg-white text-xs focus:outline-none focus:ring-1 focus:ring-[#3B9DD8] ${className}`}
     />
   );
 }

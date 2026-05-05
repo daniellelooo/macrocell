@@ -27,6 +27,7 @@ export function rowToVariant(v: VariantRow): Variant {
     notes: v.notes ?? undefined,
     inStock: v.in_stock,
     stockQuantity: v.stock_quantity ?? (v.in_stock ? 1 : 0),
+    commissionPct: v.commission_pct ?? 0,
   };
 }
 
@@ -149,6 +150,7 @@ export function productToRows(p: Product): {
       in_stock: v.inStock,
       stock_quantity: v.stockQuantity ?? 1,
       notes: v.notes ?? null,
+      commission_pct: v.commissionPct ?? 0,
       sort_order: i,
     })),
     images: p.images.map((img, i) => {

@@ -4,8 +4,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Search, Plus, ExternalLink, Pencil, Tag, Trash2, AlertTriangle } from "lucide-react";
+import { Search, Plus, ExternalLink, Pencil, Tag, Trash2, AlertTriangle, Copy, Upload } from "lucide-react";
 import { useCatalogStore } from "@/lib/catalog-store";
+import type { Product } from "@/lib/products";
+import { useRouter } from "next/navigation";
 import { useSiteConfigStore } from "@/lib/site-config-store";
 import {
   formatPrice,
@@ -17,8 +19,10 @@ import {
 } from "@/lib/products";
 
 export default function AdminProductosPage() {
+  const router = useRouter();
   const products = useCatalogStore((s) => s.products);
   const removeProduct = useCatalogStore((s) => s.remove);
+  const upsertProduct = useCatalogStore((s) => s.upsert);
   const resetCatalog = useCatalogStore((s) => s.reset);
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<"todos" | ProductCategory>(
@@ -26,7 +30,68 @@ export default function AdminProductosPage() {
   );
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [onlyLowStock, setOnlyLowStock] = useState(false);
+  const [duplicating, setDuplicating] = useState<string | null>(null);
+  const [importing, setImporting] = useState(false);
+  const [importMsg, setImportMsg] = useState<string | null>(null);
   const lowStockThreshold = useSiteConfigStore((s) => s.stockLowThreshold);
+
+  const handleDuplicate = async (orig: Product) => {
+    setDuplicating(orig.id);
+    try {
+      // randSuffix se calcula dentro del handler (no en render) — eslint
+      // react-hooks/purity flagged Math.random aquí porque la regla no
+      // distingue handlers de event de funciones de render.
+      const rand = (n: number) =>
+        Math.random().toString(36).slice(2, 2 + n);
+      const newId = `${orig.id}-copia-${rand(3)}`;
+      const dupSuffix = (sku: string) => `${sku}-c${rand(2)}`;
+      const dup: Product = {
+        ...orig,
+        id: newId,
+        slug: newId,
+        name: `${orig.name} (copia)`,
+        isFeatured: false,
+        variants: orig.variants.map((v) => ({
+          ...v,
+          sku: dupSuffix(v.sku),
+        })),
+      };
+      await upsertProduct(dup);
+      router.push(`/admin/productos/${dup.id}`);
+    } catch (err) {
+      alert("Error al duplicar: " + (err as Error).message);
+    } finally {
+      setDuplicating(null);
+    }
+  };
+
+  const handleImportCsv = async (file: File) => {
+    setImporting(true);
+    setImportMsg(null);
+    try {
+      const text = await file.text();
+      const result = parseProductsCsv(text);
+      if (result.errors.length > 0) {
+        setImportMsg(`Errores en CSV: ${result.errors.slice(0, 3).join("; ")}`);
+        setImporting(false);
+        return;
+      }
+      let okCount = 0;
+      for (const p of result.products) {
+        try {
+          await upsertProduct(p);
+          okCount++;
+        } catch (err) {
+          console.error("import skip", p.id, err);
+        }
+      }
+      setImportMsg(`✓ Importados ${okCount}/${result.products.length} productos`);
+      setTimeout(() => setImportMsg(null), 4000);
+    } catch (err) {
+      setImportMsg("Error: " + (err as Error).message);
+    }
+    setImporting(false);
+  };
 
   const filtered = useMemo(() => {
     return products.filter((p) => {
@@ -81,7 +146,25 @@ export default function AdminProductosPage() {
             Gestiona el catálogo: precios, variantes, stock y condición.
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <label
+            className="inline-flex items-center gap-2 bg-white border border-neutral-200 text-neutral-700 px-3 py-2.5 rounded-xl text-xs font-semibold hover:border-neutral-400 transition cursor-pointer"
+            title="Importar CSV"
+          >
+            <Upload size={13} />
+            {importing ? "Importando…" : "Importar CSV"}
+            <input
+              type="file"
+              accept=".csv,text/csv"
+              className="hidden"
+              disabled={importing}
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) handleImportCsv(f);
+                if (e.target) e.target.value = "";
+              }}
+            />
+          </label>
           <button
             onClick={async () => {
               if (
@@ -110,6 +193,16 @@ export default function AdminProductosPage() {
           </Link>
         </div>
       </motion.div>
+
+      {importMsg && (
+        <div className={`rounded-xl px-4 py-3 text-sm font-medium border ${
+          importMsg.startsWith("✓")
+            ? "bg-green-50 border-green-200 text-green-800"
+            : "bg-red-50 border-red-200 text-red-800"
+        }`}>
+          {importMsg}
+        </div>
+      )}
 
       {/* KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -311,6 +404,15 @@ export default function AdminProductosPage() {
                           <Pencil size={14} />
                         </Link>
                         <button
+                          onClick={() => handleDuplicate(p)}
+                          disabled={duplicating === p.id}
+                          className="p-2 text-neutral-500 hover:text-[#3B9DD8] hover:bg-blue-50 rounded-lg transition disabled:opacity-40"
+                          aria-label="Duplicar"
+                          title="Duplicar producto (incluye variantes)"
+                        >
+                          <Copy size={14} />
+                        </button>
+                        <button
                           onClick={() => setConfirmDelete(p.id)}
                           className="p-2 text-neutral-500 hover:text-[#3B9DD8] hover:bg-red-50 rounded-lg transition"
                           aria-label="Eliminar"
@@ -405,4 +507,149 @@ function Kpi({ label, value }: { label: string; value: string }) {
       <p className="text-xl font-bold text-neutral-900">{value}</p>
     </div>
   );
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Importador CSV
+// ─────────────────────────────────────────────────────────────────────
+//
+// Formato esperado (encabezados, una fila por VARIANTE):
+//   product_id, product_name, category, family, short_description,
+//   sku, storage, ram, size, color, condition, price_cop, stock,
+//   commission_pct, notes
+//
+// Las filas con el mismo product_id se agrupan en un solo producto con
+// múltiples variantes. Los productos existentes se sobrescriben (upsert).
+
+// Encabezados esperados (solo doc — el parser lee por nombre):
+//   product_id, product_name, category, family, short_description,
+//   sku, storage, ram, size, color, condition, price_cop,
+//   stock, commission_pct, notes
+
+const VALID_CATEGORIES = ["iphone", "ipad", "watch", "macbook", "accesorios"];
+const VALID_CONDITIONS = ["nuevo", "exhibicion", "open-box", "as-is", "preventa"];
+
+function parseProductsCsv(text: string): {
+  products: Product[];
+  errors: string[];
+} {
+  const errors: string[] = [];
+  const lines = text.split(/\r?\n/).filter((l) => l.trim());
+  if (lines.length < 2) return { products: [], errors: ["CSV vacío"] };
+
+  const headers = parseCsvLine(lines[0]).map((h) => h.toLowerCase().trim());
+  const required = ["product_id", "product_name", "category", "sku", "condition", "price_cop"];
+  for (const r of required) {
+    if (!headers.includes(r)) errors.push(`Falta columna requerida: ${r}`);
+  }
+  if (errors.length > 0) return { products: [], errors };
+
+  const indexOf = (col: string) => headers.indexOf(col);
+  const grouped = new Map<string, Product>();
+
+  for (let i = 1; i < lines.length; i++) {
+    const cols = parseCsvLine(lines[i]);
+    if (cols.length === 0 || (cols.length === 1 && cols[0] === "")) continue;
+    const get = (col: string) => {
+      const idx = indexOf(col);
+      return idx >= 0 ? (cols[idx] ?? "").trim() : "";
+    };
+    const productId = get("product_id");
+    const productName = get("product_name");
+    const category = get("category");
+    const sku = get("sku");
+    const condition = get("condition");
+    const priceCop = Number(get("price_cop"));
+
+    if (!productId || !productName) {
+      errors.push(`Fila ${i + 1}: falta product_id/product_name`);
+      continue;
+    }
+    if (!VALID_CATEGORIES.includes(category)) {
+      errors.push(`Fila ${i + 1}: categoría inválida "${category}" (válidas: ${VALID_CATEGORIES.join(", ")})`);
+      continue;
+    }
+    if (!VALID_CONDITIONS.includes(condition)) {
+      errors.push(`Fila ${i + 1}: condición inválida "${condition}"`);
+      continue;
+    }
+    if (!sku) {
+      errors.push(`Fila ${i + 1}: SKU vacío`);
+      continue;
+    }
+    if (Number.isNaN(priceCop)) {
+      errors.push(`Fila ${i + 1}: price_cop inválido`);
+      continue;
+    }
+
+    const stock = Math.max(0, Number(get("stock")) || 0);
+    const commission = Math.max(0, Math.min(100, Number(get("commission_pct")) || 0));
+
+    let prod = grouped.get(productId);
+    if (!prod) {
+      prod = {
+        id: productId,
+        slug: productId,
+        name: productName,
+        category: category as ProductCategory,
+        family: get("family") || undefined,
+        shortDescription: get("short_description") || "",
+        description: "",
+        image: "",
+        images: [],
+        colors: [],
+        features: [],
+        variants: [],
+        isFeatured: false,
+        isNew: false,
+      };
+      grouped.set(productId, prod);
+    }
+    prod.variants.push({
+      sku,
+      storage: get("storage") || undefined,
+      ram: get("ram") || undefined,
+      size: get("size") || undefined,
+      color: get("color") || undefined,
+      condition: condition as Product["variants"][number]["condition"],
+      price: priceCop,
+      notes: get("notes") || undefined,
+      inStock: stock > 0,
+      stockQuantity: stock,
+      commissionPct: commission,
+    });
+  }
+
+  return { products: Array.from(grouped.values()), errors };
+}
+
+/** Parse simple de CSV (soporta comillas dobles para escapar comas y "\""). */
+function parseCsvLine(line: string): string[] {
+  const out: string[] = [];
+  let cur = "";
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (inQuotes) {
+      if (ch === '"' && line[i + 1] === '"') {
+        cur += '"';
+        i++;
+      } else if (ch === '"') {
+        inQuotes = false;
+      } else {
+        cur += ch;
+      }
+    } else {
+      if (ch === ',') {
+        out.push(cur);
+        cur = "";
+      } else if (ch === '"') {
+        inQuotes = true;
+      } else {
+        cur += ch;
+      }
+    }
+  }
+  out.push(cur);
+  return out;
 }

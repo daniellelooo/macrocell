@@ -8,6 +8,8 @@ import {
   Calendar,
   TrendingUp,
   Package,
+  FileSpreadsheet,
+  FileText,
 } from "lucide-react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { formatPrice } from "@/lib/products";
@@ -194,6 +196,146 @@ export default function AdminReportesPage() {
     URL.revokeObjectURL(url);
   };
 
+  const exportXlsx = async () => {
+    const XLSX = await import("xlsx");
+    const wb = XLSX.utils.book_new();
+
+    // Hoja 1: Resumen mensual
+    const monthlyData = [
+      ["Mes", "Ingresos (COP)", "Pedidos", "Ticket promedio (COP)"],
+      ...monthly.map((m) => [
+        m.label,
+        m.revenue,
+        m.orders,
+        m.orders > 0 ? Math.round(m.revenue / m.orders) : 0,
+      ]),
+      [],
+      ["Total", yearTotals.revenue, yearTotals.count, yearTotals.count > 0 ? Math.round(yearTotals.revenue / yearTotals.count) : 0],
+    ];
+    const wsMonthly = XLSX.utils.aoa_to_sheet(monthlyData);
+    wsMonthly["!cols"] = [{ wch: 14 }, { wch: 18 }, { wch: 12 }, { wch: 22 }];
+    XLSX.utils.book_append_sheet(wb, wsMonthly, "Mensual");
+
+    // Hoja 2: Por categoría
+    const catData = [
+      ["Categoría", "Ingresos (COP)", "Unidades vendidas"],
+      ...byCategory.map((c) => [c.cat, c.revenue, c.qty]),
+    ];
+    const wsCat = XLSX.utils.aoa_to_sheet(catData);
+    wsCat["!cols"] = [{ wch: 18 }, { wch: 18 }, { wch: 18 }];
+    XLSX.utils.book_append_sheet(wb, wsCat, "Por categoría");
+
+    // Hoja 3: Top productos
+    const topData = [
+      ["Producto", "Unidades", "Ingresos (COP)"],
+      ...topProducts.map((p) => [p.name, p.qty, p.revenue]),
+    ];
+    const wsTop = XLSX.utils.aoa_to_sheet(topData);
+    wsTop["!cols"] = [{ wch: 36 }, { wch: 12 }, { wch: 18 }];
+    XLSX.utils.book_append_sheet(wb, wsTop, "Top productos");
+
+    // Hoja 4: Metadata
+    const channelLabel = channel === "all" ? "Web + Local" : channel === "web" ? "Solo web" : "Solo local";
+    const meta = [
+      ["Reporte Macrocell"],
+      ["Año", year],
+      ["Canal", channelLabel],
+      ["Generado", new Date().toLocaleString("es-CO")],
+    ];
+    const wsMeta = XLSX.utils.aoa_to_sheet(meta);
+    XLSX.utils.book_append_sheet(wb, wsMeta, "Info");
+
+    XLSX.writeFile(wb, `reporte-macrocell-${year}-${channel}.xlsx`);
+  };
+
+  const exportPdf = async () => {
+    const { default: jsPDF } = await import("jspdf");
+    const { default: autoTable } = await import("jspdf-autotable");
+    const doc = new jsPDF({ unit: "pt", format: "a4" });
+    const channelLabel = channel === "all" ? "Web + Local" : channel === "web" ? "Solo web" : "Solo local";
+
+    // Header
+    doc.setFontSize(18);
+    doc.setFont("helvetica", "bold");
+    doc.text("Reporte de ventas — Macrocell", 40, 50);
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(100);
+    doc.text(`Año ${year} · Canal: ${channelLabel}`, 40, 68);
+    doc.text(`Generado: ${new Date().toLocaleString("es-CO")}`, 40, 82);
+
+    // KPIs
+    doc.setFontSize(12);
+    doc.setTextColor(0);
+    doc.setFont("helvetica", "bold");
+    doc.text("Resumen del año", 40, 115);
+
+    const kpiRows = [
+      ["Ingresos totales", formatPrice(yearTotals.revenue)],
+      ["Pedidos", String(yearTotals.count)],
+      ["Ticket promedio", formatPrice(yearTotals.count > 0 ? Math.round(yearTotals.revenue / yearTotals.count) : 0)],
+    ];
+    autoTable(doc, {
+      startY: 125,
+      head: [["Métrica", "Valor"]],
+      body: kpiRows,
+      theme: "grid",
+      styles: { fontSize: 10 },
+      headStyles: { fillColor: [59, 157, 216] },
+    });
+
+    // Mensual
+    const lastY1 = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 25;
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.text("Por mes", 40, lastY1);
+    autoTable(doc, {
+      startY: lastY1 + 10,
+      head: [["Mes", "Ingresos", "Pedidos", "Ticket promedio"]],
+      body: monthly.map((m) => [
+        m.label,
+        formatPrice(m.revenue),
+        String(m.orders),
+        formatPrice(m.orders > 0 ? Math.round(m.revenue / m.orders) : 0),
+      ]),
+      theme: "striped",
+      styles: { fontSize: 9 },
+      headStyles: { fillColor: [59, 157, 216] },
+    });
+
+    // Por categoría
+    const lastY2 = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 25;
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.text("Por categoría", 40, lastY2);
+    autoTable(doc, {
+      startY: lastY2 + 10,
+      head: [["Categoría", "Ingresos", "Unidades"]],
+      body: byCategory.map((c) => [c.cat, formatPrice(c.revenue), String(c.qty)]),
+      theme: "striped",
+      styles: { fontSize: 9 },
+      headStyles: { fillColor: [59, 157, 216] },
+    });
+
+    // Top productos en una página nueva si hace falta
+    const lastY3 = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 25;
+    if (lastY3 > 720) doc.addPage();
+    const topY = lastY3 > 720 ? 50 : lastY3;
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.text("Top productos", 40, topY);
+    autoTable(doc, {
+      startY: topY + 10,
+      head: [["Producto", "Unidades", "Ingresos"]],
+      body: topProducts.map((p) => [p.name, String(p.qty), formatPrice(p.revenue)]),
+      theme: "striped",
+      styles: { fontSize: 9 },
+      headStyles: { fillColor: [59, 157, 216] },
+    });
+
+    doc.save(`reporte-macrocell-${year}-${channel}.pdf`);
+  };
+
   if (error) {
     return (
       <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-800">
@@ -270,12 +412,29 @@ export default function AdminReportesPage() {
               </button>
             ))}
           </div>
-          <button
-            onClick={exportCsv}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-neutral-200 bg-white text-xs font-semibold text-neutral-600 hover:bg-neutral-50 transition"
-          >
-            <Download size={13} /> CSV
-          </button>
+          <div className="inline-flex bg-white border border-neutral-200 rounded-xl overflow-hidden divide-x divide-neutral-200">
+            <button
+              onClick={exportCsv}
+              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-neutral-600 hover:bg-neutral-50 transition"
+              title="Descargar CSV simple"
+            >
+              <Download size={13} /> CSV
+            </button>
+            <button
+              onClick={exportXlsx}
+              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-neutral-600 hover:bg-neutral-50 transition"
+              title="Descargar Excel con varias hojas"
+            >
+              <FileSpreadsheet size={13} className="text-green-600" /> Excel
+            </button>
+            <button
+              onClick={exportPdf}
+              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-neutral-600 hover:bg-neutral-50 transition"
+              title="Descargar PDF imprimible"
+            >
+              <FileText size={13} className="text-red-600" /> PDF
+            </button>
+          </div>
         </div>
       </motion.div>
 

@@ -10,8 +10,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
@@ -195,27 +193,33 @@ export type Database = {
       }
       product_images: {
         Row: {
+          alt: string | null
           color: string | null
           created_at: string
           id: string
           position: number
           product_id: string
+          sort_order: number
           url: string
         }
         Insert: {
+          alt?: string | null
           color?: string | null
           created_at?: string
           id?: string
           position?: number
           product_id: string
+          sort_order?: number
           url: string
         }
         Update: {
+          alt?: string | null
           color?: string | null
           created_at?: string
           id?: string
           position?: number
           product_id?: string
+          sort_order?: number
           url?: string
         }
         Relationships: [
@@ -231,6 +235,7 @@ export type Database = {
       products: {
         Row: {
           badge: string | null
+          brand: string
           category: string
           colors: Json
           created_at: string
@@ -239,6 +244,7 @@ export type Database = {
           features: Json
           id: string
           image: string
+          is_active: boolean
           is_featured: boolean
           is_new: boolean
           name: string
@@ -249,6 +255,7 @@ export type Database = {
         }
         Insert: {
           badge?: string | null
+          brand?: string
           category: string
           colors?: Json
           created_at?: string
@@ -257,6 +264,7 @@ export type Database = {
           features?: Json
           id: string
           image?: string
+          is_active?: boolean
           is_featured?: boolean
           is_new?: boolean
           name: string
@@ -267,6 +275,7 @@ export type Database = {
         }
         Update: {
           badge?: string | null
+          brand?: string
           category?: string
           colors?: Json
           created_at?: string
@@ -275,6 +284,7 @@ export type Database = {
           features?: Json
           id?: string
           image?: string
+          is_active?: boolean
           is_featured?: boolean
           is_new?: boolean
           name?: string
@@ -318,6 +328,7 @@ export type Database = {
       sedes: {
         Row: {
           area: string
+          created_at: string
           detail: string
           id: string
           name: string
@@ -326,6 +337,7 @@ export type Database = {
         }
         Insert: {
           area?: string
+          created_at?: string
           detail?: string
           id: string
           name: string
@@ -334,6 +346,7 @@ export type Database = {
         }
         Update: {
           area?: string
+          created_at?: string
           detail?: string
           id?: string
           name?: string
@@ -341,6 +354,54 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      seller_targets: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          period_month: number
+          period_year: number
+          seller_id: string
+          target_cop: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          period_month: number
+          period_year: number
+          seller_id: string
+          target_cop: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          period_month?: number
+          period_year?: number
+          seller_id?: string
+          target_cop?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seller_targets_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "seller_targets_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       site_config: {
         Row: {
@@ -363,10 +424,15 @@ export type Database = {
       variants: {
         Row: {
           color: string | null
+          commission_pct: number | null
+          compare_price: number | null
           condition: string
           created_at: string
           in_stock: boolean
+          is_active: boolean
+          label: string | null
           notes: string | null
+          price: number | null
           price_cop: number
           product_id: string
           ram: string | null
@@ -379,10 +445,15 @@ export type Database = {
         }
         Insert: {
           color?: string | null
+          commission_pct?: number | null
+          compare_price?: number | null
           condition: string
           created_at?: string
           in_stock?: boolean
+          is_active?: boolean
+          label?: string | null
           notes?: string | null
+          price?: number | null
           price_cop: number
           product_id: string
           ram?: string | null
@@ -395,10 +466,15 @@ export type Database = {
         }
         Update: {
           color?: string | null
+          commission_pct?: number | null
+          compare_price?: number | null
           condition?: string
           created_at?: string
           in_stock?: boolean
+          is_active?: boolean
+          label?: string | null
           notes?: string | null
+          price?: number | null
           price_cop?: number
           product_id?: string
           ram?: string | null
@@ -446,26 +522,28 @@ export type Database = {
       }
       create_order_with_items: {
         Args: {
-          p_customer_email: string | null
-          p_customer_name: string
-          p_customer_phone: string
-          p_items: Json
-          p_notes: string | null
-          p_payment_method: string | null
-          p_shipping_address: string | null
-          p_shipping_city: string | null
-          p_shipping_cop: number
-          p_shipping_department: string | null
-          p_subtotal_cop: number
-          p_total_cop: number
-          p_user_id: string | null
+          p_customer_email?: string | null
+          p_customer_name?: string | null
+          p_customer_phone?: string | null
+          p_items?: Json
+          p_notes?: string | null
+          p_payment_method?: string | null
+          p_shipping_address?: string | null
+          p_shipping_city?: string | null
+          p_shipping_cop?: number
+          p_shipping_department?: string | null
+          p_subtotal_cop?: number
+          p_total_cop?: number
+          p_user_id?: string | null
         }
         Returns: Json
       }
       is_current_user_admin: { Args: never; Returns: boolean }
+      is_current_user_inventory_manager: { Args: never; Returns: boolean }
+      is_current_user_staff: { Args: never; Returns: boolean }
       lookup_order: {
         Args: { p_order_number: string; p_phone: string }
-        Returns: Json | null
+        Returns: Json
       }
       register_local_sale: {
         Args: {
@@ -475,6 +553,16 @@ export type Database = {
           p_sku: string
         }
         Returns: string
+      }
+      register_local_sale_v2: {
+        Args: {
+          p_customer_name?: string
+          p_customer_phone?: string
+          p_items: Json
+          p_notes?: string
+          p_payment_method_type?: string
+        }
+        Returns: Json
       }
       set_variant_stock: {
         Args: { p_qty: number; p_sku: string }

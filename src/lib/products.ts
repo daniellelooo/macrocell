@@ -43,6 +43,11 @@ export type Variant = {
   notes?: string; // "Naranja", "Batería 100%", "Sim física", etc.
   inStock: boolean;
   stockQuantity?: number; // unidades disponibles; undefined = no rastreado, 0 = agotado
+  /**
+   * Porcentaje de comisión para el vendedor sobre el precio de venta de
+   * esta variante (0-100). Default 0 = sin comisión.
+   */
+  commissionPct?: number;
 };
 
 /**

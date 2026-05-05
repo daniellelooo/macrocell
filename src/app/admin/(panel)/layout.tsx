@@ -14,6 +14,7 @@ import {
   Sparkles,
   ShoppingBag,
   Store,
+  Target,
   TrendingUp,
   Users,
   UserCog,
@@ -34,6 +35,7 @@ const NAV_ADMIN: NavItem[] = [
   { href: "/admin/ordenes", label: "Pedidos", icon: ShoppingBag, badgeKey: "pending" },
   { href: "/admin/clientes", label: "Clientes", icon: Users },
   { href: "/admin/usuarios", label: "Equipo", icon: UserCog },
+  { href: "/admin/metas", label: "Metas", icon: Target },
   { href: "/admin/promociones", label: "Promociones", icon: Sparkles },
   { href: "/admin/configuracion", label: "Configuración", icon: Settings },
 ];
