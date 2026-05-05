@@ -261,7 +261,16 @@ export async function verifyWebhookSignature(
     .map((path) => extractPath(body.data, path))
     .join("");
   const computed = await sha256Hex(`${concatenated}${body.timestamp}${secret}`);
-  return computed === body.signature.checksum;
+  return timingSafeEqualHex(computed, body.signature.checksum);
+}
+
+function timingSafeEqualHex(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) {
+    diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return diff === 0;
 }
 
 function extractPath(obj: unknown, path: string): string {

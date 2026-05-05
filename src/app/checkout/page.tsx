@@ -32,21 +32,94 @@ type FormData = {
   notas: string;
 };
 
-const DEPARTAMENTOS = [
-  "Antioquia",
-  "Bogotá D.C.",
-  "Valle del Cauca",
-  "Cundinamarca",
-  "Atlántico",
-  "Bolívar",
-  "Santander",
-  "Nariño",
-  "Córdoba",
-  "Otro",
-];
+// Ciudades por departamento. La opción "Otra ciudad" deja escribir una libre
+// (con su propia validación de longitud mínima). Cobertura: capitales + ciudades
+// con flujo logístico recurrente para Macrocell.
+const CITIES_BY_DEPARTMENT: Record<string, string[]> = {
+  Antioquia: [
+    "Medellín",
+    "Itagüí",
+    "Envigado",
+    "Bello",
+    "Sabaneta",
+    "La Estrella",
+    "Caldas",
+    "Copacabana",
+    "Girardota",
+    "Rionegro",
+    "Apartadó",
+    "Turbo",
+  ],
+  "Bogotá D.C.": ["Bogotá"],
+  "Valle del Cauca": [
+    "Cali",
+    "Palmira",
+    "Buenaventura",
+    "Tuluá",
+    "Cartago",
+    "Buga",
+    "Yumbo",
+  ],
+  Cundinamarca: [
+    "Soacha",
+    "Chía",
+    "Zipaquirá",
+    "Facatativá",
+    "Mosquera",
+    "Madrid",
+    "Funza",
+    "Cajicá",
+    "Fusagasugá",
+    "Girardot",
+  ],
+  Atlántico: ["Barranquilla", "Soledad", "Malambo", "Sabanalarga", "Puerto Colombia"],
+  Bolívar: ["Cartagena", "Magangué", "Turbaco", "Arjona"],
+  Santander: ["Bucaramanga", "Floridablanca", "Girón", "Piedecuesta", "Barrancabermeja"],
+  Nariño: ["Pasto", "Tumaco", "Ipiales"],
+  Córdoba: ["Montería", "Lorica", "Cereté", "Sahagún", "Planeta Rica"],
+  "Norte de Santander": ["Cúcuta", "Villa del Rosario", "Los Patios", "Ocaña"],
+  Risaralda: ["Pereira", "Dosquebradas", "Santa Rosa de Cabal"],
+  Quindío: ["Armenia", "Calarcá", "La Tebaida"],
+  Caldas: ["Manizales", "La Dorada", "Villamaría"],
+  Tolima: ["Ibagué", "Espinal", "Honda"],
+  Huila: ["Neiva", "Pitalito", "Garzón"],
+  Cauca: ["Popayán", "Santander de Quilichao"],
+  Magdalena: ["Santa Marta", "Ciénaga"],
+  Meta: ["Villavicencio", "Acacías"],
+  Boyacá: ["Tunja", "Duitama", "Sogamoso"],
+  Otro: [],
+};
+
+const DEPARTAMENTOS = Object.keys(CITIES_BY_DEPARTMENT);
+const CUSTOM_CITY_VALUE = "__custom__";
 
 // Email RFC-lite (suficiente para checkout, no PII validation paranoica).
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+/**
+ * Valida una dirección de envío. Rechaza:
+ *   - Cadenas muy cortas (<10 chars)
+ *   - Cadenas sin ningún número (calle/carrera siempre lleva número)
+ *   - Cadenas que parecen "asdfasdf" — sin vocales o con un solo char repetido
+ *   - Cadenas con demasiados chars repetidos seguidos (>=4)
+ */
+function isPlausibleAddress(raw: string): boolean {
+  const a = raw.trim();
+  if (a.length < 10) return false;
+  if (!/\d/.test(a)) return false; // alguna calle/carrera lleva número
+  // No puede ser un solo char repetido
+  const uniqueChars = new Set(a.toLowerCase().replace(/\s/g, "")).size;
+  if (uniqueChars < 4) return false;
+  // No 4 chars iguales seguidos (asdfasdfsssss…)
+  if (/(.)\1{3,}/.test(a)) return false;
+  // No bigramas repetidos pegados (asdfasdf, abcabc) — patrón de teclado random
+  if (/([a-záéíóú]{3,})\1/i.test(a)) return false;
+  // Necesita vocales (filtra strings random tipo "kjhgfd 123")
+  if (!/[aeiouáéíóú]/i.test(a)) return false;
+  // No puede tener una corrida de 6+ consonantes seguidas (sin vocales)
+  if (/[bcdfghjklmnñpqrstvwxyz]{6,}/i.test(a)) return false;
+  return true;
+}
 
 /** Normaliza un teléfono colombiano: deja solo dígitos y quita el +57 inicial. */
 function normalizeCoPhone(raw: string): string {
@@ -167,12 +240,17 @@ export default function CheckoutPage() {
       e.email = "El correo no parece válido.";
     }
 
-    if (!form.ciudad.trim()) e.ciudad = "Ingresa tu ciudad.";
+    if (!form.ciudad.trim()) {
+      e.ciudad = "Selecciona tu ciudad.";
+    } else if (form.ciudad.trim().length < 3) {
+      e.ciudad = "Nombre de ciudad demasiado corto.";
+    }
 
     if (!form.direccion.trim()) {
-      e.direccion = "Ingresa tu dirección.";
-    } else if (form.direccion.trim().length < 8) {
-      e.direccion = "La dirección parece muy corta — incluye calle, número y barrio.";
+      e.direccion = "Ingresa tu dirección de entrega.";
+    } else if (!isPlausibleAddress(form.direccion)) {
+      e.direccion =
+        "Esa dirección no parece válida. Incluye calle/carrera, número y barrio (ej: Calle 10 # 43-20, Laureles).";
     }
 
     return e;
@@ -490,7 +568,16 @@ ${orderLines}
                         id="departamento"
                         name="departamento"
                         value={form.departamento}
-                        onChange={handleChange}
+                        onChange={(e) => {
+                          // Al cambiar departamento, resetear ciudad para evitar
+                          // que quede una ciudad de otro departamento.
+                          setForm((prev) => ({
+                            ...prev,
+                            departamento: e.target.value,
+                            ciudad: "",
+                          }));
+                          setErrors((prev) => ({ ...prev, ciudad: undefined }));
+                        }}
                         required
                         className="w-full px-4 py-3 rounded-xl border border-neutral-200 text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#3B9DD8] focus:border-transparent transition-all bg-white"
                       >
@@ -501,14 +588,14 @@ ${orderLines}
                         ))}
                       </select>
                     </div>
-                    <Field
-                      name="ciudad"
-                      label="Ciudad / Municipio *"
+                    <CitySelect
+                      department={form.departamento}
                       value={form.ciudad}
-                      onChange={handleChange}
-                      placeholder="Medellín"
+                      onChange={(val) => {
+                        setForm((prev) => ({ ...prev, ciudad: val }));
+                        setErrors((prev) => ({ ...prev, ciudad: undefined }));
+                      }}
                       error={errors.ciudad}
-                      required
                     />
                   </div>
 
@@ -827,6 +914,98 @@ function Field({
           {hint}
         </p>
       ) : null}
+    </div>
+  );
+}
+
+/**
+ * Selector de ciudad. Muestra un dropdown con las ciudades del departamento
+ * elegido + opción "Otra ciudad" que despliega un input libre. Para "Bogotá D.C."
+ * solo hay Bogotá, así que se autoselecciona y se oculta el dropdown.
+ */
+function CitySelect({
+  department,
+  value,
+  onChange,
+  error,
+}: {
+  department: string;
+  value: string;
+  onChange: (val: string) => void;
+  error?: string;
+}) {
+  const cities = CITIES_BY_DEPARTMENT[department] ?? [];
+  const isCustomDept = department === "Otro" || cities.length === 0;
+  const isInList = cities.includes(value);
+  // El select muestra: ciudad si está en la lista, "__custom__" si el usuario
+  // está escribiendo una libre, o "" si todavía no eligió.
+  const selectValue = isInList ? value : value || isCustomDept ? CUSTOM_CITY_VALUE : "";
+  const showCustomInput = isCustomDept || selectValue === CUSTOM_CITY_VALUE;
+  const id = "field-ciudad";
+  const errorId = error ? `${id}-error` : undefined;
+
+  return (
+    <div>
+      <label
+        htmlFor={id}
+        className="block text-sm font-medium text-neutral-700 mb-1.5"
+      >
+        Ciudad / Municipio *
+      </label>
+      {!isCustomDept && (
+        <select
+          id={id}
+          name="ciudad"
+          value={selectValue}
+          onChange={(e) => {
+            const v = e.target.value;
+            if (v === CUSTOM_CITY_VALUE) {
+              onChange(""); // limpiamos para que el input custom arranque vacío
+            } else {
+              onChange(v);
+            }
+          }}
+          aria-invalid={!!error}
+          aria-describedby={errorId}
+          className={`w-full px-4 py-3 rounded-xl border text-neutral-900 focus:outline-none focus:ring-2 focus:border-transparent transition-all bg-white ${
+            error
+              ? "border-red-300 focus:ring-red-400 bg-red-50/40"
+              : "border-neutral-200 focus:ring-[#3B9DD8]"
+          }`}
+        >
+          <option value="">Selecciona una ciudad…</option>
+          {cities.map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
+          <option value={CUSTOM_CITY_VALUE}>Otra ciudad…</option>
+        </select>
+      )}
+      {showCustomInput && (
+        <input
+          id={isCustomDept ? id : `${id}-custom`}
+          name={isCustomDept ? "ciudad" : "ciudad-custom"}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="Escribe el nombre de tu municipio"
+          autoFocus={!isCustomDept}
+          aria-invalid={!!error}
+          aria-describedby={errorId}
+          className={`w-full px-4 py-3 rounded-xl border text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all ${
+            !isCustomDept ? "mt-2" : ""
+          } ${
+            error
+              ? "border-red-300 focus:ring-red-400 bg-red-50/40"
+              : "border-neutral-200 focus:ring-[#3B9DD8]"
+          }`}
+        />
+      )}
+      {error && (
+        <p id={errorId} className="text-[11px] text-red-600 mt-1.5 leading-snug">
+          {error}
+        </p>
+      )}
     </div>
   );
 }

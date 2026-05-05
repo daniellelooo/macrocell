@@ -8,6 +8,8 @@ import PriceTicker from "@/components/PriceTicker";
 import BottomNav from "@/components/BottomNav";
 import { Suspense } from "react";
 import CatalogHydrator from "@/components/CatalogHydrator";
+import WishlistSync from "@/components/WishlistSync";
+import CompareBar from "@/components/CompareBar";
 import MarketingPixels from "@/components/MarketingPixels";
 import CookieBanner from "@/components/CookieBanner";
 
@@ -92,9 +94,12 @@ export default function RootLayout({
       >
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(orgJsonLd).replace(/</g, "\\u003c"),
+          }}
         />
         <CatalogHydrator />
+        <WishlistSync />
         <Suspense fallback={null}>
           <MarketingPixels />
         </Suspense>
@@ -104,6 +109,7 @@ export default function RootLayout({
         <main>{children}</main>
         <Footer />
         <BottomNav />
+        <CompareBar />
         <CookieBanner />
       </body>
     </html>

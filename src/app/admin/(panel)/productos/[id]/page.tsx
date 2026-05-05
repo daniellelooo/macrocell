@@ -924,6 +924,7 @@ export default function ProductEditorPage() {
                   <th className="px-2 py-2 font-semibold">Color</th>
                   <th className="px-2 py-2 font-semibold">Condición</th>
                   <th className="px-2 py-2 font-semibold text-right">Precio</th>
+                  <th className="px-2 py-2 font-semibold text-right" title="Precio antes (opcional). Si es mayor al precio se muestra tachado.">Antes</th>
                   <th className="px-2 py-2 font-semibold text-right">Stock</th>
                   <th className="px-2 py-2 font-semibold text-right">Com %</th>
                   <th className="px-2 py-2 font-semibold">Notas</th>
@@ -1006,6 +1007,22 @@ export default function ProductEditorPage() {
                           onChange={(n) => updateVariant(v.sku, { price: n })}
                           placeholder="0"
                           className="w-28 px-2 py-1.5 rounded border border-neutral-200 text-xs text-right font-semibold focus:outline-none focus:ring-1 focus:ring-[#3B9DD8] bg-white"
+                        />
+                      </td>
+                      <td className="px-1 py-1.5">
+                        <PriceInput
+                          value={v.comparePrice ?? 0}
+                          onChange={(n) =>
+                            updateVariant(v.sku, {
+                              comparePrice: n > 0 ? n : undefined,
+                            })
+                          }
+                          placeholder="—"
+                          className={`w-24 px-2 py-1.5 rounded border text-xs text-right focus:outline-none focus:ring-1 focus:ring-[#3B9DD8] bg-white ${
+                            v.comparePrice && v.comparePrice > v.price
+                              ? "border-amber-300 text-amber-700 line-through"
+                              : "border-neutral-200 text-neutral-500"
+                          }`}
                         />
                       </td>
                       <td className="px-1 py-1.5">
@@ -2216,6 +2233,7 @@ function VariantTable({
             {axes.ram && <th className="px-2 py-1.5 font-semibold">RAM</th>}
             <th className="px-2 py-1.5 font-semibold">Condición</th>
             <th className="px-2 py-1.5 font-semibold text-right">Precio (COP)</th>
+            <th className="px-2 py-1.5 font-semibold text-right" title="Precio antes del descuento (opcional)">Antes</th>
             <th className="px-2 py-1.5 font-semibold text-right">Stock</th>
             <th className="px-2 py-1.5 font-semibold text-right">Comisión %</th>
             {showUsedFields && (
@@ -2363,6 +2381,29 @@ function VariantRow({
             ↕ a todos los {v.storage}
           </button>
         )}
+      </td>
+      {/* Precio antes (promoción) */}
+      <td className="px-2 py-1.5">
+        <div className="flex items-center justify-end gap-0.5" title="Precio antes del descuento. Si es mayor al precio actual se muestra tachado en la tienda.">
+          <span className="text-neutral-400 text-[10px]">$</span>
+          <PriceInput
+            value={v.comparePrice ?? 0}
+            onChange={(n) =>
+              onUpdate({ comparePrice: n > 0 ? n : undefined })
+            }
+            placeholder="—"
+            className={`w-24 px-2 py-1.5 rounded border text-right focus:outline-none focus:ring-1 focus:ring-[#3B9DD8] bg-white ${
+              v.comparePrice && v.comparePrice > v.price
+                ? "border-amber-300 text-amber-700 line-through"
+                : "border-neutral-200 text-neutral-500"
+            }`}
+          />
+        </div>
+        {v.comparePrice && v.comparePrice > v.price ? (
+          <p className="text-[9px] text-amber-700 font-bold text-right mt-0.5">
+            -{Math.floor(((v.comparePrice - v.price) / v.comparePrice) * 100)}%
+          </p>
+        ) : null}
       </td>
       {/* Stock */}
       <td className="px-2 py-1.5">

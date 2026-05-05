@@ -8,8 +8,9 @@ import { getSupabaseBrowserClient } from "./supabase/client";
  * - El cliente `@supabase/ssr` persiste la sesión en cookies (no en
  *   localStorage), así que `isAuthed()` consulta `supabase.auth.getSession()`
  *   directamente. Es async — cualquier consumidor debe `await`.
- * - Cualquier usuario autenticado en el proyecto Supabase tiene permisos
- *   completos sobre las tablas (RLS abierto a `authenticated`).
+ * - Las RLS policies restringen las operaciones por rol del perfil
+ *   (admin / vendedor / gestor_inventario). Estar autenticado no implica
+ *   acceso a operaciones administrativas.
  */
 
 export type AdminCredentials = {

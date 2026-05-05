@@ -11,6 +11,7 @@ import {
   ArrowLeft,
   Check,
   Heart,
+  GitCompare,
   BatteryFull,
   BatteryMedium,
   BatteryLow,
@@ -20,6 +21,7 @@ import {
   formatPrice,
   conditionLabels,
   conditionWarranty,
+  getDiscountPct,
   getImageColor,
   getImageUrl,
   type ProductCondition,
@@ -27,6 +29,7 @@ import {
 import { useCatalogStore } from "@/lib/catalog-store";
 import { useCartStore } from "@/lib/store";
 import { useWishlistStore } from "@/lib/wishlist-store";
+import { useCompareStore } from "@/lib/compare-store";
 import ProductGallery from "@/components/ProductGallery";
 import RelatedProducts from "@/components/RelatedProducts";
 import FrequentlyBoughtTogether from "@/components/FrequentlyBoughtTogether";
@@ -143,6 +146,8 @@ export default function ProductPage() {
   const addItem = useCartStore((s) => s.addItem);
   const toggleWishlist = useWishlistStore((s) => s.toggle);
   const isWished = useWishlistStore((s) => s.has(product.slug));
+  const toggleCompare = useCompareStore((s) => s.toggle);
+  const inCompare = useCompareStore((s) => s.has(product.slug));
 
   const [stockMsg, setStockMsg] = useState<string | null>(null);
 
@@ -264,7 +269,23 @@ export default function ProductPage() {
             </div>
 
             <div>
-              <p className="text-3xl font-bold text-neutral-900">
+              {selectedVariant && getDiscountPct(selectedVariant) !== null && (
+                <div className="flex items-baseline gap-3 mb-1">
+                  <span className="text-base text-neutral-400 line-through font-medium">
+                    {formatPrice(selectedVariant.comparePrice!)}
+                  </span>
+                  <span className="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-red-600 text-white">
+                    -{getDiscountPct(selectedVariant)}%
+                  </span>
+                </div>
+              )}
+              <p
+                className={`text-3xl font-bold ${
+                  selectedVariant && getDiscountPct(selectedVariant) !== null
+                    ? "text-red-600"
+                    : "text-neutral-900"
+                }`}
+              >
                 {formatPrice(selectedVariant?.price ?? 0)}
               </p>
               {selectedVariant && (
@@ -550,6 +571,31 @@ export default function ProductPage() {
                       size={20}
                       className={isWished ? "fill-[#3B9DD8]" : ""}
                     />
+                  </button>
+                  <button
+                    onClick={() => {
+                      const ok = toggleCompare(product.slug);
+                      if (!ok && !inCompare) {
+                        alert("Solo puedes comparar hasta 4 productos a la vez.");
+                      }
+                    }}
+                    title={
+                      inCompare
+                        ? "Quitar del comparador"
+                        : "Agregar al comparador"
+                    }
+                    aria-label={
+                      inCompare
+                        ? "Quitar del comparador"
+                        : "Agregar al comparador"
+                    }
+                    className={`shrink-0 w-14 sm:order-last flex items-center justify-center rounded-2xl border-2 transition-all active:scale-95 ${
+                      inCompare
+                        ? "border-[#3B9DD8] bg-[#3B9DD8] text-white"
+                        : "border-neutral-200 text-neutral-400 hover:border-[#3B9DD8] hover:text-[#3B9DD8]"
+                    }`}
+                  >
+                    <GitCompare size={20} />
                   </button>
                 </div>
                 {/* WhatsApp: full-width abajo en mobile, en línea en desktop */}

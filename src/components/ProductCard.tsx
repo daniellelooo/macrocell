@@ -3,14 +3,17 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Heart, ShoppingBag } from "lucide-react";
+import { Heart, ShoppingBag, GitCompare } from "lucide-react";
 import { useCartStore } from "@/lib/store";
 import { useWishlistStore } from "@/lib/wishlist-store";
+import { useCompareStore } from "@/lib/compare-store";
 import {
   type Product,
   formatPrice,
   getMinPrice,
   hasMultipleVariants,
+  hasActivePromotion,
+  getBestDiscountPct,
 } from "@/lib/products";
 
 type Props = {
@@ -22,9 +25,19 @@ export default function ProductCard({ product, index = 0 }: Props) {
   const addItem = useCartStore((s) => s.addItem);
   const toggle = useWishlistStore((s) => s.toggle);
   const isWished = useWishlistStore((s) => s.has(product.slug));
+  const toggleCompare = useCompareStore((s) => s.toggle);
+  const inCompare = useCompareStore((s) => s.has(product.slug));
   const minPrice = getMinPrice(product);
   const showFromLabel = hasMultipleVariants(product);
   const allOutOfStock = product.variants.every((v) => !v.inStock);
+  const onSale = hasActivePromotion(product);
+  const bestDiscount = getBestDiscountPct(product);
+  // Para mostrar el "antes" tachado en la card usamos el comparePrice de la
+  // variante más barata (la que aporta el `Desde`).
+  const cheapestVariant = product.variants
+    .slice()
+    .sort((a, b) => a.price - b.price)[0];
+  const compareAtMin = cheapestVariant?.comparePrice;
 
   return (
     <motion.div
@@ -43,26 +56,56 @@ export default function ProductCard({ product, index = 0 }: Props) {
               </span>
             </div>
           )}
-          {product.badge && !allOutOfStock && (
+          {onSale && !allOutOfStock && (
+            <span className="absolute top-2.5 left-2.5 z-10 bg-red-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shadow-sm">
+              -{bestDiscount}%
+            </span>
+          )}
+          {product.badge && !allOutOfStock && !onSale && (
             <span className="absolute top-2.5 left-2.5 z-10 bg-white text-neutral-600 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider border border-neutral-200">
               {product.badge}
             </span>
           )}
-          {product.isNew && !product.badge && !allOutOfStock && (
+          {product.isNew && !product.badge && !allOutOfStock && !onSale && (
             <span className="absolute top-2.5 left-2.5 z-10 bg-neutral-900 text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
               Nuevo
             </span>
           )}
-          <button
-            onClick={(e) => { e.preventDefault(); toggle(product.slug); }}
-            aria-label={isWished ? "Quitar de favoritos" : "Agregar a favoritos"}
-            className="absolute top-2.5 right-2.5 z-10 p-1.5 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white transition-colors"
-          >
-            <Heart
-              size={14}
-              className={isWished ? "fill-[#3B9DD8] text-[#3B9DD8]" : "text-neutral-400"}
-            />
-          </button>
+          <div className="absolute top-2.5 right-2.5 z-10 flex flex-col gap-1.5">
+            <button
+              onClick={(e) => { e.preventDefault(); toggle(product.slug); }}
+              aria-label={isWished ? "Quitar de favoritos" : "Agregar a favoritos"}
+              title={isWished ? "Quitar de favoritos" : "Agregar a favoritos"}
+              className={`w-8 h-8 flex items-center justify-center rounded-full border shadow-sm transition-all hover:scale-110 ${
+                isWished
+                  ? "bg-red-50 border-[#3B9DD8] text-[#3B9DD8]"
+                  : "bg-white border-neutral-200 text-neutral-500 hover:border-[#3B9DD8] hover:text-[#3B9DD8]"
+              }`}
+            >
+              <Heart
+                size={14}
+                className={isWished ? "fill-[#3B9DD8]" : ""}
+              />
+            </button>
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                const ok = toggleCompare(product.slug);
+                if (!ok && !inCompare) {
+                  alert("Solo puedes comparar hasta 4 productos a la vez.");
+                }
+              }}
+              aria-label={inCompare ? "Quitar del comparador" : "Agregar al comparador"}
+              title={inCompare ? "En el comparador" : "Comparar este producto"}
+              className={`w-8 h-8 flex items-center justify-center rounded-full border shadow-sm transition-all hover:scale-110 ${
+                inCompare
+                  ? "bg-[#3B9DD8] border-[#3B9DD8] text-white"
+                  : "bg-white border-neutral-200 text-neutral-500 hover:border-[#3B9DD8] hover:text-[#3B9DD8]"
+              }`}
+            >
+              <GitCompare size={14} />
+            </button>
+          </div>
           <Image
             src={product.image}
             alt={product.name}
@@ -81,15 +124,22 @@ export default function ProductCard({ product, index = 0 }: Props) {
         </Link>
         <p className="text-[11px] text-neutral-400 mb-3 leading-snug">{product.shortDescription}</p>
 
-        <div className="flex items-center justify-between mt-auto">
-          <p className="text-sm font-bold text-neutral-900">
-            {showFromLabel && (
-              <span className="text-[10px] font-medium text-neutral-400 mr-1">
-                Desde
-              </span>
+        <div className="flex items-center justify-between mt-auto gap-2">
+          <div className="min-w-0">
+            {compareAtMin && compareAtMin > minPrice && (
+              <p className="text-[10px] text-neutral-400 line-through leading-none mb-0.5">
+                {formatPrice(compareAtMin)}
+              </p>
             )}
-            {formatPrice(minPrice)}
-          </p>
+            <p className={`text-sm font-bold ${onSale ? "text-red-600" : "text-neutral-900"}`}>
+              {showFromLabel && (
+                <span className="text-[10px] font-medium text-neutral-400 mr-1">
+                  Desde
+                </span>
+              )}
+              {formatPrice(minPrice)}
+            </p>
+          </div>
           {allOutOfStock ? (
             <span className="text-[10px] font-semibold text-neutral-400 px-3 py-1.5">
               Sin stock

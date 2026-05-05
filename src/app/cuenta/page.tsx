@@ -17,7 +17,11 @@ import {
   ChevronRight,
   Save,
   Check,
+  MapPin,
+  RefreshCcw,
 } from "lucide-react";
+import { useCartStore } from "@/lib/store";
+import AddressManager from "@/components/AddressManager";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import {
   getCurrentProfile,
@@ -34,7 +38,7 @@ import { formatPrice } from "@/lib/products";
 import { useCatalogStore } from "@/lib/catalog-store";
 import CustomerAuthForm from "@/components/CustomerAuthForm";
 
-type Tab = "pedidos" | "datos";
+type Tab = "pedidos" | "direcciones" | "datos";
 
 export default function CuentaPage() {
   const router = useRouter();
@@ -190,6 +194,13 @@ export default function CuentaPage() {
             )}
           </TabButton>
           <TabButton
+            active={tab === "direcciones"}
+            onClick={() => setTab("direcciones")}
+            icon={<MapPin size={14} aria-hidden />}
+          >
+            Direcciones
+          </TabButton>
+          <TabButton
             active={tab === "datos"}
             onClick={() => setTab("datos")}
             icon={<User size={14} aria-hidden />}
@@ -222,6 +233,18 @@ export default function CuentaPage() {
                   ))}
                 </div>
               )}
+            </motion.div>
+          )}
+
+          {tab === "direcciones" && (
+            <motion.div
+              key="direcciones"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2 }}
+            >
+              <AddressManager userId={profile.id} />
             </motion.div>
           )}
 
@@ -348,6 +371,59 @@ function Field({
 function OrderCard({ order }: { order: OrderRecord }) {
   const date = new Date(order.createdAt);
   const catalogProducts = useCatalogStore((s) => s.products);
+  const addItem = useCartStore((s) => s.addItem);
+  const [reordered, setReordered] = useState(false);
+
+  /**
+   * Repite la orden agregando todos los items al carrito. Para cada item
+   * se busca el producto+variante en el catálogo actual; si la variante
+   * ya no existe (SKU agotado/eliminado), se omite con aviso.
+   */
+  const handleReorder = () => {
+    const skipped: string[] = [];
+    let added = 0;
+    for (const item of order.items) {
+      const product = catalogProducts.find(
+        (p) => p.id === item.productId || p.name === item.productName
+      );
+      if (!product) {
+        skipped.push(item.productName);
+        continue;
+      }
+      const variant = item.variantSku
+        ? product.variants.find((v) => v.sku === item.variantSku)
+        : product.variants[0];
+      if (!variant || !variant.inStock) {
+        skipped.push(`${item.productName}${item.variantLabel ? ` (${item.variantLabel})` : ""}`);
+        continue;
+      }
+      let okThisItem = 0;
+      for (let i = 0; i < item.quantity; i++) {
+        const result = addItem(product, { variant });
+        if (result.ok) okThisItem += 1;
+        else break; // hit max stock — paramos para este SKU
+      }
+      if (okThisItem > 0) added += okThisItem;
+      if (okThisItem < item.quantity) {
+        skipped.push(
+          `${item.productName}${item.variantLabel ? ` (${item.variantLabel})` : ""}` +
+            (okThisItem > 0
+              ? ` — solo ${okThisItem}/${item.quantity}`
+              : "")
+        );
+      }
+    }
+    if (added > 0) {
+      setReordered(true);
+      setTimeout(() => setReordered(false), 2500);
+    }
+    if (skipped.length > 0) {
+      alert(
+        `${added} producto(s) agregado(s) al carrito. ` +
+          `No se pudieron agregar: ${skipped.join(", ")} (sin stock o ya no disponibles).`
+      );
+    }
+  };
 
   return (
     <motion.article
@@ -465,13 +541,33 @@ function OrderCard({ order }: { order: OrderRecord }) {
           );
         })}
       </ul>
-      {order.shippingAddress && (
-        <footer className="px-5 py-3 border-t border-neutral-100 flex items-center gap-2 text-[11px] text-neutral-500">
-          <Truck size={11} aria-hidden />
-          {order.shippingAddress}, {order.shippingCity},{" "}
-          {order.shippingDepartment}
-        </footer>
-      )}
+      <footer className="px-5 py-3 border-t border-neutral-100 flex flex-col md:flex-row md:items-center gap-2 md:justify-between">
+        {order.shippingAddress && (
+          <p className="flex items-center gap-2 text-[11px] text-neutral-500 min-w-0 truncate">
+            <Truck size={11} aria-hidden />
+            {order.shippingAddress}, {order.shippingCity},{" "}
+            {order.shippingDepartment}
+          </p>
+        )}
+        <button
+          onClick={handleReorder}
+          className={`inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1.5 rounded-full transition active:scale-95 ${
+            reordered
+              ? "bg-green-500 text-white"
+              : "bg-neutral-900 text-white hover:bg-neutral-700"
+          }`}
+        >
+          {reordered ? (
+            <>
+              <Check size={11} /> Agregado al carrito
+            </>
+          ) : (
+            <>
+              <RefreshCcw size={11} /> Repetir compra
+            </>
+          )}
+        </button>
+      </footer>
     </motion.article>
   );
 }

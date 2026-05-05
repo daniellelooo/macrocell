@@ -14,23 +14,17 @@ import type { Database } from "@/lib/database.types";
  * de Vercel se removió porque el plan Hobby solo permite 1×/día.
  *
  * Este endpoint queda disponible para invocaciones manuales (debug,
- * cancelación forzada). Auth: header `Authorization: Bearer ${CRON_SECRET}`
- * o `x-vercel-cron` si en algún momento se vuelve a usar el cron de Vercel.
+ * cancelación forzada). Auth: header `Authorization: Bearer ${CRON_SECRET}`.
  */
 export const runtime = "nodejs";
 
 const STALE_MINUTES = 30;
 
 export async function GET(request: Request) {
-  // Vercel agrega este header automáticamente para invocaciones de cron.
-  const isVercelCron = request.headers.get("x-vercel-cron") !== null;
-
-  if (!isVercelCron) {
-    const auth = request.headers.get("authorization");
-    const expected = `Bearer ${process.env.CRON_SECRET}`;
-    if (!process.env.CRON_SECRET || auth !== expected) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+  const auth = request.headers.get("authorization");
+  const expected = `Bearer ${process.env.CRON_SECRET}`;
+  if (!process.env.CRON_SECRET || auth !== expected) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const supabaseAdmin = createClient<Database>(

@@ -62,18 +62,33 @@ export async function POST(request: Request) {
     );
   }
 
+  // No permitir reactivar el flujo de pago de una orden que ya no está pendiente
+  // (evita que con el orderId se pueda sobrescribir una orden aprobada/cancelada).
+  if (order.status !== "pending") {
+    return NextResponse.json(
+      { error: `La orden no está pendiente (estado actual: ${order.status}).` },
+      { status: 409 }
+    );
+  }
+  if (
+    order.payment_status &&
+    !["pending", "failed", "declined", "voided"].includes(order.payment_status)
+  ) {
+    return NextResponse.json(
+      {
+        error: `El pago de la orden ya fue procesado (estado: ${order.payment_status}).`,
+      },
+      { status: 409 }
+    );
+  }
+
   // Verificación de dueño para órdenes con user_id.
-  // Permitimos en cualquiera de estos casos:
+  // Permitimos sólo:
   //  a) la sesión del caller coincide con order.user_id (dueño)
   //  b) el caller es staff (admin/vendedor/gestor) — pueden iniciar pagos a nombre del cliente
-  //  c) la orden es reciente (<15 min) — caso normal del flujo: el cliente la acaba de crear
-  //     y vamos a redirigirlo a Wompi de inmediato. Como el orderId es UUID v4 (no
-  //     enumerable), el riesgo es bajo y la ventana es corta.
-  // Sólo devolvemos 403 cuando hay sesión activa que NO matchea Y la orden es vieja.
+  // Las órdenes guest (sin user_id) no tienen dueño autenticado y dependen del UUID v4
+  // como secreto del flujo de checkout (caso estándar de guest checkout).
   if (order.user_id) {
-    const orderAgeMs = Date.now() - new Date(order.created_at).getTime();
-    const isRecent = orderAgeMs < 15 * 60 * 1000;
-
     const cookieStore = await cookies();
     const supabaseCaller = createServerClient<Database>(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -93,7 +108,6 @@ export async function POST(request: Request) {
         },
       }
     );
-    // getSession() lee del cookie sin pegarle a la red — evita lock contention.
     const { data: { session } } = await supabaseCaller.auth.getSession();
     const callerId = session?.user?.id ?? null;
     const isOwner = callerId === order.user_id;
@@ -110,11 +124,12 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!isOwner && !isStaff && !isRecent) {
-      console.warn(
-        "[wompi/checkout-url] denied",
-        { orderId: order.id, callerId, ownerHint: order.user_id?.slice(0, 8), orderAgeMs }
-      );
+    if (!isOwner && !isStaff) {
+      console.warn("[wompi/checkout-url] denied", {
+        orderId: order.id,
+        callerId,
+        ownerHint: order.user_id?.slice(0, 8),
+      });
       return NextResponse.json(
         { error: "No tienes permiso para iniciar el pago de esta orden." },
         { status: 403 }

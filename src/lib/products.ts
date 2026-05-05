@@ -40,6 +40,12 @@ export type Variant = {
   color?: string;
   condition: ProductCondition;
   price: number;
+  /**
+   * Precio "antes" / precio sin descuento. Si está presente y es > price,
+   * se renderiza tachado en cards y PDP, y se calcula `% off` automáticamente.
+   * Undefined = sin promoción activa.
+   */
+  comparePrice?: number;
   notes?: string; // "Naranja", "Batería 100%", "Sim física", etc.
   inStock: boolean;
   stockQuantity?: number; // unidades disponibles; undefined = no rastreado, 0 = agotado
@@ -1083,6 +1089,32 @@ export function getDefaultVariant(product: Product): Variant | undefined {
   const inStock = product.variants.filter((v) => v.inStock);
   const pool = inStock.length > 0 ? inStock : product.variants;
   return [...pool].sort((a, b) => a.price - b.price)[0];
+}
+
+/**
+ * % de descuento entre comparePrice y price. Devuelve null si no aplica.
+ * Redondea hacia abajo para evitar mostrar "100%" cuando es 99.7%.
+ */
+export function getDiscountPct(variant: Variant): number | null {
+  if (!variant.comparePrice || variant.comparePrice <= variant.price) return null;
+  return Math.floor(((variant.comparePrice - variant.price) / variant.comparePrice) * 100);
+}
+
+/** ¿El producto tiene al menos una variante en promoción (comparePrice > price)? */
+export function hasActivePromotion(product: Product): boolean {
+  return product.variants.some(
+    (v) => v.comparePrice !== undefined && v.comparePrice > v.price
+  );
+}
+
+/** Mejor descuento del catálogo (la promoción más fuerte). 0 si no hay. */
+export function getBestDiscountPct(product: Product): number {
+  let best = 0;
+  for (const v of product.variants) {
+    const d = getDiscountPct(v);
+    if (d && d > best) best = d;
+  }
+  return best;
 }
 
 export function formatPrice(price: number): string {
