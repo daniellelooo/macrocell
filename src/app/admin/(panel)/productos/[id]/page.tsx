@@ -1601,27 +1601,50 @@ function ColorGroupedVariants({
     }));
   };
 
-  /** Agrega un almacenamiento a un color (nueva variante). */
-  const addStorageToColor = (colorName: string, storage: string) => {
+  /** Agrega un almacenamiento a un color como nueva variante.
+   *  Para condición "nuevo" rechaza si ya existe la combinación
+   *  storage+color (rara vez quieres dos "nuevos" idénticos — usa duplicar).
+   *  Para "exhibicion" SIEMPRE permite duplicados: cada equipo físico es
+   *  una unidad distinta con su propia batería, detalles y precio. */
+  const addStorageToColor = (
+    colorName: string,
+    storage: string,
+    condition: ProductCondition = "nuevo"
+  ) => {
     const cleanStorage = storage.trim();
     if (!cleanStorage) return;
     const colorVariants = draft.variants.filter((v) => (v.color ?? "") === colorName);
-    if (colorVariants.some((v) => v.storage === cleanStorage)) {
-      alert(`${colorName} ya tiene ${cleanStorage}.`);
-      return;
+
+    if (condition === "nuevo") {
+      const dup = colorVariants.some(
+        (v) => v.storage === cleanStorage && v.condition === "nuevo"
+      );
+      if (dup) {
+        alert(`${colorName || "Sin color"} ya tiene un equipo NUEVO de ${cleanStorage}. Para agregar varios usa el botón de duplicar.`);
+        return;
+      }
     }
-    // Heredar precio de otra variante con mismo storage si existe
-    const otherWithSameStorage = draft.variants.find((v) => v.storage === cleanStorage);
+
+    // Heredar precio de otra variante con misma combinación storage+condition
+    const sibling = draft.variants.find(
+      (v) => v.storage === cleanStorage && v.condition === condition
+    );
     const skus = draft.variants.map((v) => v.sku);
     const newVariant: Variant = {
-      sku: autoSku(productId, { storage: cleanStorage, ram: undefined, condition: "nuevo", color: colorName || undefined }, skus),
+      sku: autoSku(
+        productId,
+        { storage: cleanStorage, ram: undefined, condition, color: colorName || undefined },
+        skus
+      ),
       color: colorName || undefined,
       storage: cleanStorage,
-      condition: "nuevo",
-      price: otherWithSameStorage?.price ?? 0,
-      commissionPct: otherWithSameStorage?.commissionPct ?? 0,
+      condition,
+      price: sibling?.price ?? 0,
+      commissionPct: sibling?.commissionPct ?? 0,
       inStock: true,
-      stockQuantity: 0,
+      stockQuantity: condition === "exhibicion" ? 1 : 0,
+      // Equipos de exhibición empiezan con 1 unidad porque son piezas físicas
+      // únicas (cada uno es UN equipo). El admin puede ajustar después.
     };
     setDraft((d) => ({ ...d, variants: [...d.variants, newVariant] }));
   };
@@ -1696,7 +1719,7 @@ function ColorGroupedVariants({
           hideColorChrome={hideColorUI}
           onRenameColor={(newName, newHex) => renameColor(g.colorName, newName, newHex)}
           onRemoveColor={() => removeColor(g.colorName)}
-          onAddStorage={(storage) => addStorageToColor(g.colorName, storage)}
+          onAddStorage={(storage, condition) => addStorageToColor(g.colorName, storage, condition)}
           onAddVariantNoStorage={() => {
             const skus = draft.variants.map((v) => v.sku);
             const colorName = g.colorName || undefined;
@@ -1777,7 +1800,7 @@ function ColorGroupCard({
   hideColorChrome: boolean;
   onRenameColor: (newName: string, newHex: string) => void;
   onRemoveColor: () => void;
-  onAddStorage: (storage: string) => void;
+  onAddStorage: (storage: string, condition?: ProductCondition) => void;
   onAddVariantNoStorage: () => void;
   onUpdateVariant: (sku: string, patch: Partial<Variant>) => void;
   onRemoveVariant: (sku: string) => void;
@@ -1787,7 +1810,8 @@ function ColorGroupCard({
 }) {
   const [collapsed, setCollapsed] = useState(false);
   const [draftName, setDraftName] = useState(group.colorName);
-  const [showAddStorage, setShowAddStorage] = useState(false);
+  /** "nuevo" o "exhibicion" cuando el input custom está abierto, null oculto. */
+  const [showAddStorage, setShowAddStorage] = useState<ProductCondition | null>(null);
   const [newStorage, setNewStorage] = useState("");
   const [dropHover, setDropHover] = useState(false);
 
@@ -1962,80 +1986,148 @@ function ColorGroupCard({
             </div>
           )}
           {axes.storage && (
-          <div className="pt-2 border-t border-neutral-100">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 mb-2">
-              Agregar almacenamiento
-            </p>
-            {showAddStorage ? (
-              <div className="flex items-center gap-2">
-                <input
-                  value={newStorage}
-                  onChange={(e) => setNewStorage(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && newStorage.trim()) {
-                      onAddStorage(newStorage.trim());
-                      setNewStorage("");
-                      setShowAddStorage(false);
-                    }
-                  }}
-                  placeholder="Almacenamiento (ej: 256 GB)"
-                  list="storage-options"
-                  autoFocus
-                  className="px-3 py-1.5 rounded-lg border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30 flex-1"
-                />
-                <datalist id="storage-options">
-                  {STORAGE_OPTIONS.map((s) => <option key={s} value={s} />)}
-                </datalist>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (newStorage.trim()) {
-                      onAddStorage(newStorage.trim());
-                      setNewStorage("");
-                      setShowAddStorage(false);
-                    }
-                  }}
-                  className="text-xs font-semibold text-[#3B9DD8] hover:bg-blue-50 px-3 py-1.5 rounded-lg transition"
-                >
-                  Agregar
-                </button>
-                <button
-                  type="button"
-                  onClick={() => { setShowAddStorage(false); setNewStorage(""); }}
-                  className="text-xs text-neutral-500 hover:text-neutral-900"
-                >
-                  Cancelar
-                </button>
-              </div>
-            ) : (
+          <div className="pt-2 border-t border-neutral-100 space-y-3">
+            {/* Agregar EQUIPO NUEVO */}
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-green-700 mb-1.5">
+                Agregar equipo nuevo
+              </p>
               <div className="flex flex-wrap gap-1.5">
                 {STORAGE_OPTIONS.filter(
                   (s) => !group.variants.some((v) => v.storage === s && v.condition === "nuevo")
                 )
-                  .slice(0, 4)
+                  .slice(0, 5)
                   .map((s) => (
                     <button
                       key={s}
                       type="button"
-                      onClick={() => onAddStorage(s)}
-                      className="text-[11px] font-semibold px-2.5 py-1 rounded-full border border-neutral-200 text-neutral-600 hover:border-[#3B9DD8] hover:text-[#3B9DD8] hover:bg-blue-50 transition"
+                      onClick={() => onAddStorage(s, "nuevo")}
+                      className="text-[11px] font-semibold px-2.5 py-1 rounded-full border border-green-200 bg-green-50/50 text-green-700 hover:border-green-500 hover:bg-green-100 transition"
                     >
                       + {s}
                     </button>
                   ))}
-                <button
-                  type="button"
-                  onClick={() => setShowAddStorage(true)}
-                  className="text-[11px] font-semibold text-neutral-500 hover:text-[#3B9DD8] px-2.5 py-1 transition"
-                >
-                  + Otro almacenamiento
-                </button>
+                {showAddStorage === "nuevo" ? (
+                  <CustomStorageInput
+                    value={newStorage}
+                    onChange={setNewStorage}
+                    onSubmit={() => {
+                      if (newStorage.trim()) {
+                        onAddStorage(newStorage.trim(), "nuevo");
+                        setNewStorage("");
+                        setShowAddStorage(null);
+                      }
+                    }}
+                    onCancel={() => { setShowAddStorage(null); setNewStorage(""); }}
+                  />
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setShowAddStorage("nuevo")}
+                    className="text-[11px] font-semibold text-neutral-500 hover:text-[#3B9DD8] px-2.5 py-1 transition"
+                  >
+                    + Otro
+                  </button>
+                )}
               </div>
-            )}
+            </div>
+
+            {/* Agregar EQUIPO DE EXHIBICIÓN — siempre permite duplicar storages
+                porque cada equipo físico es una unidad distinta con su propia
+                batería y detalles. */}
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-amber-700 mb-1.5">
+                Agregar equipo de exhibición
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {STORAGE_OPTIONS.slice(0, 5).map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => onAddStorage(s, "exhibicion")}
+                    className="text-[11px] font-semibold px-2.5 py-1 rounded-full border border-amber-200 bg-amber-50/50 text-amber-700 hover:border-amber-500 hover:bg-amber-100 transition"
+                    title="Cada click crea un equipo de exhibición distinto (puedes tener varios del mismo storage)"
+                  >
+                    + {s}
+                  </button>
+                ))}
+                {showAddStorage === "exhibicion" ? (
+                  <CustomStorageInput
+                    value={newStorage}
+                    onChange={setNewStorage}
+                    onSubmit={() => {
+                      if (newStorage.trim()) {
+                        onAddStorage(newStorage.trim(), "exhibicion");
+                        setNewStorage("");
+                        setShowAddStorage(null);
+                      }
+                    }}
+                    onCancel={() => { setShowAddStorage(null); setNewStorage(""); }}
+                  />
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setShowAddStorage("exhibicion")}
+                    className="text-[11px] font-semibold text-neutral-500 hover:text-[#3B9DD8] px-2.5 py-1 transition"
+                  >
+                    + Otro
+                  </button>
+                )}
+              </div>
+              <p className="text-[10px] text-neutral-400 mt-1.5">
+                Cada click crea un equipo distinto — puedes tener varios del mismo almacenamiento (cada uno con su propia batería y detalles).
+              </p>
+            </div>
           </div>
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+function CustomStorageInput({
+  value,
+  onChange,
+  onSubmit,
+  onCancel,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  onSubmit: () => void;
+  onCancel: () => void;
+}) {
+  return (
+    <div className="inline-flex items-center gap-1 bg-white border border-neutral-200 rounded-full px-1 py-0.5">
+      <input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") onSubmit();
+          if (e.key === "Escape") onCancel();
+        }}
+        placeholder="Otro (ej: 64 GB)"
+        list="storage-options"
+        autoFocus
+        className="text-[11px] px-2 py-0.5 focus:outline-none w-32 bg-transparent"
+      />
+      <datalist id="storage-options">
+        {STORAGE_OPTIONS.map((s) => <option key={s} value={s} />)}
+      </datalist>
+      <button
+        type="button"
+        onClick={onSubmit}
+        className="text-[11px] font-semibold text-[#3B9DD8] px-1.5"
+      >
+        ✓
+      </button>
+      <button
+        type="button"
+        onClick={onCancel}
+        className="text-[11px] text-neutral-400 px-1.5"
+      >
+        ✕
+      </button>
     </div>
   );
 }
