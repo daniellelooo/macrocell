@@ -10,17 +10,22 @@ export default function VendedorLayout({ children }: { children: React.ReactNode
 
   useEffect(() => {
     const supabase = getSupabaseBrowserClient();
-    supabase.auth.getUser().then(async ({ data: { user } }) => {
-      if (!user) { router.replace("/admin"); return; }
+    let cancelled = false;
+    (async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (cancelled) return;
+      if (!session?.user) { router.replace("/admin"); return; }
       const { data: profile } = await supabase
         .from("profiles")
         .select("role, is_admin")
-        .eq("id", user.id)
+        .eq("id", session.user.id)
         .single();
+      if (cancelled) return;
       const allowed = profile?.is_admin || ["admin", "vendedor", "gestor_inventario"].includes(profile?.role ?? "");
       if (!allowed) { router.replace("/admin"); return; }
       setChecked(true);
-    });
+    })();
+    return () => { cancelled = true; };
   }, [router]);
 
   if (!checked) {

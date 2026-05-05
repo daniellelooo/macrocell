@@ -5,11 +5,24 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingBag, Menu, X, Search, User, Heart } from "lucide-react";
+import { ShoppingBag, Menu, X, Search, User, Heart, LayoutDashboard, Store as StoreIcon } from "lucide-react";
 import { useCartStore } from "@/lib/store";
 import { useSiteConfigStore, getWhatsappUrl } from "@/lib/site-config-store";
 import { useWishlistStore } from "@/lib/wishlist-store";
 import SearchModal from "@/components/SearchModal";
+import { getSupabaseBrowserClient } from "@/lib/supabase/client";
+
+type StaffSession = {
+  role: "admin" | "vendedor" | "gestor_inventario";
+  panelHref: string;
+  panelLabel: string;
+} | null;
+
+const PANEL_FOR_ROLE: Record<string, { href: string; label: string }> = {
+  admin: { href: "/admin/dashboard", label: "Panel Admin" },
+  vendedor: { href: "/vendedor", label: "Panel Vendedor" },
+  gestor_inventario: { href: "/admin/productos", label: "Panel Gestor" },
+};
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -29,6 +42,43 @@ export default function Navbar() {
   }, []);
   const itemCount = mounted ? itemCountRaw : 0;
   const wishlistCount = mounted ? wishlistCountRaw : 0;
+  const [staff, setStaff] = useState<StaffSession>(null);
+
+  useEffect(() => {
+    const supabase = getSupabaseBrowserClient();
+    let cancelled = false;
+    const loadFromUserId = async (userId: string) => {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", userId)
+        .single();
+      if (cancelled) return;
+      const role = profile?.role;
+      if (role && PANEL_FOR_ROLE[role]) {
+        setStaff({
+          role: role as "admin" | "vendedor" | "gestor_inventario",
+          panelHref: PANEL_FOR_ROLE[role].href,
+          panelLabel: PANEL_FOR_ROLE[role].label,
+        });
+      } else {
+        setStaff(null);
+      }
+    };
+    // getSession() lee de localStorage sin lock — no compite con otros consumidores.
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (cancelled) return;
+      if (session?.user) loadFromUserId(session.user.id);
+      else setStaff(null);
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (cancelled) return;
+      if (event === "SIGNED_OUT") setStaff(null);
+      else if (event === "SIGNED_IN" && session?.user) loadFromUserId(session.user.id);
+      // TOKEN_REFRESHED y otros: no recargar; el rol no cambia entre refreshes.
+    });
+    return () => { cancelled = true; sub.subscription.unsubscribe(); };
+  }, []);
   const whatsappNumber = useSiteConfigStore((s) => s.whatsappNumber);
   const whatsappMsg = useSiteConfigStore((s) => s.whatsappDefaultMessage);
   const waUrl = getWhatsappUrl(whatsappNumber, whatsappMsg);
@@ -176,6 +226,18 @@ export default function Navbar() {
               </AnimatePresence>
             </button>
 
+            {/* Botón al panel del rol (solo si hay sesión staff) */}
+            {staff && (
+              <Link
+                href={staff.panelHref}
+                className="hidden md:flex items-center gap-1.5 bg-neutral-900 text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-neutral-800 active:scale-95 transition-all duration-200"
+                title={`Ir al ${staff.panelLabel.toLowerCase()}`}
+              >
+                {staff.role === "vendedor" ? <StoreIcon size={14} /> : <LayoutDashboard size={14} />}
+                {staff.panelLabel}
+              </Link>
+            )}
+
             {/* Desktop: botón WhatsApp */}
             <a
               href={waUrl}
@@ -222,11 +284,21 @@ export default function Navbar() {
                   {link.label}
                 </Link>
               ))}
+              {staff && (
+                <Link
+                  href={staff.panelHref}
+                  onClick={() => setMobileOpen(false)}
+                  className="mt-3 bg-neutral-900 text-white px-5 py-3 rounded-full text-sm font-semibold text-center inline-flex items-center justify-center gap-1.5"
+                >
+                  {staff.role === "vendedor" ? <StoreIcon size={14} /> : <LayoutDashboard size={14} />}
+                  {staff.panelLabel}
+                </Link>
+              )}
               <a
                 href={waUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-3 bg-[#3B9DD8] text-white px-5 py-3 rounded-full text-sm font-medium text-center"
+                className={`${staff ? "mt-2" : "mt-3"} bg-[#3B9DD8] text-white px-5 py-3 rounded-full text-sm font-medium text-center`}
               >
                 Contactar por WhatsApp
               </a>

@@ -64,9 +64,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: createErr.message }, { status: 400 });
   }
 
-  // 4. Upsert perfil con nombre y rol
+  // 4. Upsert perfil con nombre y rol (el trigger handle_new_user ya leyó initial_role
+  //    desde user_metadata, pero hacemos upsert defensivo por si fallara).
   if (created?.user?.id) {
-    await supabaseAdmin
+    const { error: upsertErr } = await supabaseAdmin
       .from("profiles")
       .upsert({
         id: created.user.id,
@@ -74,6 +75,12 @@ export async function POST(req: NextRequest) {
         role,
         is_admin: role === "admin",
       });
+    if (upsertErr) {
+      return NextResponse.json(
+        { error: `Usuario creado pero rol no asignado: ${upsertErr.message}` },
+        { status: 500 }
+      );
+    }
   }
 
   return NextResponse.json({ ok: true });

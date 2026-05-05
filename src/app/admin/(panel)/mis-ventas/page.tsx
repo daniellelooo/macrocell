@@ -12,6 +12,7 @@ type SaleRow = {
   createdAt: string;
   status: string;
   totalCop: number;
+  paymentMethod: string | null;
   items: { productName: string; variantLabel: string | null; quantity: number; unitPriceCop: number }[];
 };
 
@@ -31,7 +32,7 @@ export default function MisVentasPage() {
       const [ordersRes, itemsRes] = await Promise.all([
         supabase
           .from("orders")
-          .select("id, order_number, created_at, status, total_cop")
+          .select("id, order_number, created_at, status, total_cop, payment_method_type")
           .eq("seller_id", user.id)
           .eq("payment_provider", "local")
           .order("created_at", { ascending: false }),
@@ -54,6 +55,7 @@ export default function MisVentasPage() {
           createdAt: o.created_at,
           status: o.status,
           totalCop: o.total_cop,
+          paymentMethod: o.payment_method_type,
           items: myItems
             .filter((it) => it.order_id === o.id)
             .map((it) => ({
@@ -191,6 +193,7 @@ export default function MisVentasPage() {
                         {date.toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" })}
                         {" · "}
                         {s.items.length} ítem{s.items.length !== 1 ? "s" : ""}
+                        {s.paymentMethod && ` · ${s.paymentMethod}`}
                       </p>
                     </div>
                     <div className="text-right shrink-0">

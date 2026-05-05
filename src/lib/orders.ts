@@ -186,9 +186,18 @@ export async function markOrderWhatsappSent(orderId: string): Promise<void> {
 
 export async function listMyOrders(): Promise<OrderRecord[]> {
   const supabase = getSupabaseBrowserClient();
+  // Filtramos explícitamente por user_id del caller. La RLS permite a staff
+  // (admin/vendedor/gestor) leer TODAS las órdenes para los paneles internos,
+  // así que sin este filtro /cuenta mostraría todo el universo de pedidos
+  // cuando un staff entra como cliente.
+  const { data: { session } } = await supabase.auth.getSession();
+  const myId = session?.user?.id;
+  if (!myId) return [];
+
   const { data: ordersData, error: oErr } = await supabase
     .from("orders")
     .select("*")
+    .eq("user_id", myId)
     .order("created_at", { ascending: false });
   if (oErr || !ordersData) return [];
 

@@ -62,8 +62,18 @@ export async function POST(request: Request) {
     );
   }
 
-  // Verificación de dueño para órdenes con user_id, usando la sesión del caller.
+  // Verificación de dueño para órdenes con user_id.
+  // Permitimos en cualquiera de estos casos:
+  //  a) la sesión del caller coincide con order.user_id (dueño)
+  //  b) el caller es staff (admin/vendedor/gestor) — pueden iniciar pagos a nombre del cliente
+  //  c) la orden es reciente (<15 min) — caso normal del flujo: el cliente la acaba de crear
+  //     y vamos a redirigirlo a Wompi de inmediato. Como el orderId es UUID v4 (no
+  //     enumerable), el riesgo es bajo y la ventana es corta.
+  // Sólo devolvemos 403 cuando hay sesión activa que NO matchea Y la orden es vieja.
   if (order.user_id) {
+    const orderAgeMs = Date.now() - new Date(order.created_at).getTime();
+    const isRecent = orderAgeMs < 15 * 60 * 1000;
+
     const cookieStore = await cookies();
     const supabaseCaller = createServerClient<Database>(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -83,8 +93,28 @@ export async function POST(request: Request) {
         },
       }
     );
-    const { data: userData } = await supabaseCaller.auth.getUser();
-    if (!userData.user || userData.user.id !== order.user_id) {
+    // getSession() lee del cookie sin pegarle a la red — evita lock contention.
+    const { data: { session } } = await supabaseCaller.auth.getSession();
+    const callerId = session?.user?.id ?? null;
+    const isOwner = callerId === order.user_id;
+
+    let isStaff = false;
+    if (callerId && !isOwner) {
+      const { data: callerProfile } = await supabaseAdmin
+        .from("profiles")
+        .select("role")
+        .eq("id", callerId)
+        .maybeSingle();
+      isStaff = ["admin", "vendedor", "gestor_inventario"].includes(
+        callerProfile?.role ?? ""
+      );
+    }
+
+    if (!isOwner && !isStaff && !isRecent) {
+      console.warn(
+        "[wompi/checkout-url] denied",
+        { orderId: order.id, callerId, ownerHint: order.user_id?.slice(0, 8), orderAgeMs }
+      );
       return NextResponse.json(
         { error: "No tienes permiso para iniciar el pago de esta orden." },
         { status: 403 }

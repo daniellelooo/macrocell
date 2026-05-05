@@ -76,6 +76,22 @@ async function sha256Hex(input: string): Promise<string> {
 // Web Checkout
 // ─────────────────────────────────────────────────────────────────────────
 
+/**
+ * Wompi y su WAF de CloudFront esperan teléfonos en formato E.164
+ * (`+57XXXXXXXXXX` para Colombia). Si recibimos solo dígitos los
+ * convertimos; si ya viene con + lo dejamos. Si no podemos formatear,
+ * devolvemos undefined para no enviar un valor que el WAF rechace.
+ */
+function toE164Co(raw: string | undefined): string | undefined {
+  if (!raw) return undefined;
+  const trimmed = raw.trim();
+  if (trimmed.startsWith("+")) return trimmed;
+  const digits = trimmed.replace(/\D/g, "");
+  if (digits.length === 10 && digits.startsWith("3")) return `+57${digits}`;
+  if (digits.length === 12 && digits.startsWith("57")) return `+${digits}`;
+  return undefined;
+}
+
 export type WompiCheckoutInput = {
   /** Order number / referencia única. */
   reference: string;
@@ -120,21 +136,43 @@ export async function buildCheckoutUrl(input: WompiCheckoutInput): Promise<strin
   params.set("amount-in-cents", String(amountInCents));
   params.set("reference", input.reference);
   params.set("signature:integrity", signature);
-  params.set("redirect-url", input.redirectUrl);
+  // El WAF de CloudFront que protege checkout.wompi.co bloquea con 403 cualquier
+  // redirect-url que apunte a localhost / 127.0.0.1 (anti-SSRF). En desarrollo
+  // omitimos el parámetro: Wompi redirigirá a su página default y el estado de
+  // la orden se sincroniza igual vía webhook + /api/wompi/transaction/[id].
+  const isLocalRedirect = /^https?:\/\/(localhost|127\.0\.0\.1)(:|\/|$)/i.test(
+    input.redirectUrl
+  );
+  if (isLocalRedirect) {
+    console.warn(
+      "[wompi] redirect-url omitida porque apunta a localhost — el WAF de Wompi la rechaza con 403. En producción usa una URL pública con HTTPS."
+    );
+  } else {
+    params.set("redirect-url", input.redirectUrl);
+  }
   if (input.customerEmail)
     params.set("customer-data:email", input.customerEmail);
   if (input.customerFullName)
     params.set("customer-data:full-name", input.customerFullName);
-  if (input.customerPhoneNumber)
-    params.set("customer-data:phone-number", input.customerPhoneNumber);
+  const customerPhoneE164 = toE164Co(input.customerPhoneNumber);
+  if (customerPhoneE164)
+    params.set("customer-data:phone-number", customerPhoneE164);
   if (input.shippingAddress) {
     const a = input.shippingAddress;
-    params.set("shipping-address:address-line-1", a.addressLine1);
-    params.set("shipping-address:city", a.city);
-    params.set("shipping-address:region", a.region);
-    params.set("shipping-address:country", a.country ?? "CO");
-    if (a.phoneNumber)
-      params.set("shipping-address:phone-number", a.phoneNumber);
+    // Sólo mandamos dirección si tiene mínimos razonables — direcciones de
+    // 1-3 caracteres ("ASD") activan reglas de WAF anti-junk en CloudFront
+    // y disparan 403 antes de llegar al checkout de Wompi.
+    const addrOk =
+      a.addressLine1.trim().length >= 5 && a.city.trim().length >= 3;
+    if (addrOk) {
+      params.set("shipping-address:address-line-1", a.addressLine1.trim());
+      params.set("shipping-address:city", a.city.trim());
+      params.set("shipping-address:region", a.region.trim());
+      params.set("shipping-address:country", a.country ?? "CO");
+      const shipPhoneE164 = toE164Co(a.phoneNumber);
+      if (shipPhoneE164)
+        params.set("shipping-address:phone-number", shipPhoneE164);
+    }
   }
 
   return `${getCheckoutBase()}?${params.toString()}`;

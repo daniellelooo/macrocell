@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Minus, Plus, Trash2, ShoppingBag, ArrowLeft } from "lucide-react";
+import { Minus, Plus, Trash2, ShoppingBag, ArrowLeft, Lock, ShieldCheck, Truck } from "lucide-react";
 import { useCartStore } from "@/lib/store";
 import { formatPrice } from "@/lib/products";
 
@@ -217,15 +217,18 @@ export default function CartPage() {
                 </div>
               </motion.div>
 
-              <div className="bg-white rounded-3xl p-5 shadow-sm text-sm text-neutral-500 space-y-2">
-                <div className="flex items-center gap-2">
-                  <span>🔒</span> Transacción 100% segura
+              <div className="bg-white rounded-3xl p-5 shadow-sm text-sm text-neutral-500 space-y-2.5">
+                <div className="flex items-center gap-2.5">
+                  <Lock size={15} className="text-neutral-400 shrink-0" />
+                  Transacción 100% segura
                 </div>
-                <div className="flex items-center gap-2">
-                  <span>✅</span> Garantía oficial Apple 1 año
+                <div className="flex items-center gap-2.5">
+                  <ShieldCheck size={15} className="text-neutral-400 shrink-0" />
+                  Garantía oficial Apple 1 año
                 </div>
-                <div className="flex items-center gap-2">
-                  <span>🚚</span> Envíos a todo Colombia
+                <div className="flex items-center gap-2.5">
+                  <Truck size={15} className="text-neutral-400 shrink-0" />
+                  Envíos a todo Colombia
                 </div>
               </div>
             </div>

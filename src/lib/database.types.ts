@@ -468,7 +468,12 @@ export type Database = {
         Returns: Json | null
       }
       register_local_sale: {
-        Args: { p_notes?: string; p_qty: number; p_sku: string }
+        Args: {
+          p_notes?: string
+          p_payment_method_type?: string
+          p_qty: number
+          p_sku: string
+        }
         Returns: string
       }
       set_variant_stock: {

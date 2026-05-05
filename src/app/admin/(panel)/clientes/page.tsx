@@ -80,6 +80,9 @@ export default function AdminClientesPage() {
 
   useEffect(() => {
     if (!detailUserId) return;
+    // Limpiar pedidos del cliente anterior mientras carga el nuevo,
+    // evitar que se vean los de otro perfil por unos ms.
+    setDetailOrders(null);
     let cancelled = false;
     (async () => {
       const supabase = getSupabaseBrowserClient();
@@ -106,7 +109,7 @@ export default function AdminClientesPage() {
   }, [detailUserId]);
 
   const closeDetail = () => {
-    closeDetail();
+    setDetailUserId(null);
     setDetailOrders(null);
   };
 
