@@ -1001,12 +1001,11 @@ export default function ProductEditorPage() {
                         </select>
                       </td>
                       <td className="px-1 py-1.5">
-                        <CellInput
-                          type="number"
-                          value={String(v.price)}
-                          onChange={(val) => updateVariant(v.sku, { price: Number(val) || 0 })}
+                        <PriceInput
+                          value={v.price}
+                          onChange={(n) => updateVariant(v.sku, { price: n })}
                           placeholder="0"
-                          className="w-24 text-right"
+                          className="w-28 px-2 py-1.5 rounded border border-neutral-200 text-xs text-right font-semibold focus:outline-none focus:ring-1 focus:ring-[#3B9DD8] bg-white"
                         />
                       </td>
                       <td className="px-1 py-1.5">
@@ -2086,6 +2085,39 @@ function ColorGroupCard({
   );
 }
 
+/**
+ * Input de precio con formato es-CO (separador de miles con punto).
+ * El usuario escribe sólo dígitos; los puntos se añaden automáticamente.
+ *   "5400000" → muestra "5.400.000"
+ *   value en el callback siempre es number sin formato.
+ */
+function PriceInput({
+  value,
+  onChange,
+  placeholder = "0",
+  className = "",
+}: {
+  value: number;
+  onChange: (n: number) => void;
+  placeholder?: string;
+  className?: string;
+}) {
+  const display = value > 0 ? value.toLocaleString("es-CO") : "";
+  return (
+    <input
+      type="text"
+      inputMode="numeric"
+      value={display}
+      onChange={(e) => {
+        const digits = e.target.value.replace(/\D/g, "");
+        onChange(digits ? Number(digits) : 0);
+      }}
+      placeholder={placeholder}
+      className={className}
+    />
+  );
+}
+
 function CustomStorageInput({
   value,
   onChange,
@@ -2314,12 +2346,11 @@ function VariantRow({
       <td className="px-2 py-1.5 relative">
         <div className="flex items-center justify-end gap-0.5">
           <span className="text-neutral-400 text-[10px]">$</span>
-          <input
-            type="number"
-            value={String(v.price)}
-            onChange={(e) => onUpdate({ price: Number(e.target.value) || 0 })}
+          <PriceInput
+            value={v.price}
+            onChange={(n) => onUpdate({ price: n })}
             placeholder="0"
-            className="w-24 px-2 py-1.5 rounded border border-neutral-200 text-right font-semibold focus:outline-none focus:ring-1 focus:ring-[#3B9DD8] bg-white"
+            className="w-28 px-2 py-1.5 rounded border border-neutral-200 text-right font-semibold focus:outline-none focus:ring-1 focus:ring-[#3B9DD8] bg-white"
           />
         </div>
         {onApplyPriceToStorage && v.price > 0 && (
