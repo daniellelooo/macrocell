@@ -31,13 +31,33 @@ import {
   conditionLabels,
 } from "@/lib/products";
 
-const CONDITIONS: ProductCondition[] = [
-  "nuevo",
-  "exhibicion",
-  "open-box",
-  "as-is",
-  "preventa",
-];
+/**
+ * Condiciones expuestas al usuario en el dropdown. "open-box" y "as-is"
+ * fueron eliminados del UI por confusión: en la tienda solo se manejan
+ * "nuevo / exhibición / preventa". Si una variante legacy tiene una de
+ * las condiciones removidas, el select agrega la opción dinámicamente
+ * para no perder el dato (ver `effectiveConditions` en VariantRow).
+ */
+const CONDITIONS: ProductCondition[] = ["nuevo", "exhibicion", "preventa"];
+
+/**
+ * Qué ejes de variación aplican a cada categoría. Al crear o editar un
+ * producto, sólo se muestran los inputs/columnas relevantes para que el
+ * admin no tenga que pelear con campos que no aplican (ej: AirPods no
+ * tiene almacenamiento ni RAM).
+ */
+type Axes = { storage: boolean; color: boolean; ram: boolean; size: boolean };
+
+const CATEGORY_AXES: Record<ProductCategory, Axes> = {
+  iphone:      { storage: true,  color: true,  ram: false, size: false },
+  ipad:        { storage: true,  color: true,  ram: false, size: false },
+  watch:       { storage: false, color: true,  ram: false, size: true  },
+  macbook:     { storage: true,  color: true,  ram: true,  size: true  },
+  // Accesorios: por defecto sólo precio y stock. Si el accesorio sí
+  // tiene colores (AirPods, fundas, etc), el usuario puede agregar
+  // colores manualmente — el form los aceptará.
+  accesorios:  { storage: false, color: true,  ram: false, size: false },
+};
 
 const CATEGORY_OPTIONS = categories.filter((c) => c.id !== "todos");
 
@@ -856,6 +876,7 @@ export default function ProductEditorPage() {
           <ColorGroupedVariants
             draft={draft}
             setDraft={setDraft}
+            axes={CATEGORY_AXES[draft.category]}
             updateVariant={updateVariant}
             removeVariant={removeVariant}
             duplicateVariant={duplicateVariant}
@@ -1478,6 +1499,7 @@ const STORAGE_OPTIONS = ["64 GB", "128 GB", "256 GB", "512 GB", "1 TB", "2 TB"];
 function ColorGroupedVariants({
   draft,
   setDraft,
+  axes,
   updateVariant,
   removeVariant,
   duplicateVariant,
@@ -1486,6 +1508,7 @@ function ColorGroupedVariants({
 }: {
   draft: Product;
   setDraft: React.Dispatch<React.SetStateAction<Product>>;
+  axes: Axes;
   updateVariant: (sku: string, patch: Partial<Variant>) => void;
   removeVariant: (sku: string) => void;
   duplicateVariant: (sku: string) => void;
@@ -1625,15 +1648,36 @@ function ColorGroupedVariants({
     }));
   };
 
+  // Si la categoría no usa color y todas las variantes están "sin color",
+  // mostramos un solo bloque sin opción de "agregar color". Si el admin
+  // quiere agregarlo, puede usar el botón explícito.
+  const hideColorUI = !axes.color && !groups.some((g) => g.colorName !== "");
+
   return (
     <div className="space-y-3">
       {groups.map((g) => (
         <ColorGroupCard
           key={g.colorName || "__none__"}
           group={g}
+          axes={axes}
+          hideColorChrome={hideColorUI}
           onRenameColor={(newName, newHex) => renameColor(g.colorName, newName, newHex)}
           onRemoveColor={() => removeColor(g.colorName)}
           onAddStorage={(storage) => addStorageToColor(g.colorName, storage)}
+          onAddVariantNoStorage={() => {
+            const skus = draft.variants.map((v) => v.sku);
+            const colorName = g.colorName || undefined;
+            const newV: Variant = {
+              sku: autoSku(productId, { condition: "nuevo", color: colorName }, skus),
+              color: colorName,
+              condition: "nuevo",
+              price: 0,
+              inStock: true,
+              stockQuantity: 0,
+              commissionPct: 0,
+            };
+            setDraft((d) => ({ ...d, variants: [...d.variants, newV] }));
+          }}
           onUpdateVariant={updateVariant}
           onRemoveVariant={removeVariant}
           onDuplicateVariant={duplicateVariant}
@@ -1643,7 +1687,7 @@ function ColorGroupedVariants({
       ))}
 
       <div className="flex flex-wrap gap-2 pt-2">
-        <AddColorButton onAdd={addColor} />
+        {axes.color && <AddColorButton onAdd={addColor} />}
         {/* Si no hay sección "Sin color" todavía, ofrecer agregar variante sin color */}
         {!groups.some((g) => g.colorName === "") && (
           <button
@@ -1663,27 +1707,32 @@ function ColorGroupedVariants({
             }}
             className="inline-flex items-center gap-1.5 text-sm font-semibold text-neutral-600 bg-white border border-neutral-200 px-3 py-2 rounded-lg hover:border-neutral-400 transition"
           >
-            <Plus size={14} /> Variante sin color
+            <Plus size={14} /> {axes.color ? "Variante sin color" : "Agregar variante"}
           </button>
         )}
       </div>
 
-      <p className="text-[11px] text-neutral-400 mt-3 leading-relaxed">
-        💡 <strong>Tip</strong>: arrastra una variante por su <span className="text-neutral-600">⋮⋮</span> izquierdo para moverla a otro color.
-        Las variantes <strong>nuevas</strong> y las <strong>de exhibición/open-box</strong> aparecen en secciones separadas dentro de cada color.
-      </p>
+      {axes.color && (
+        <p className="text-[11px] text-neutral-400 mt-3 leading-relaxed">
+          💡 <strong>Tip</strong>: arrastra una variante por su <span className="text-neutral-600">⋮⋮</span> izquierdo para moverla a otro color.
+          Las variantes <strong>nuevas</strong> y las de <strong>exhibición</strong> aparecen en secciones separadas dentro de cada color.
+        </p>
+      )}
     </div>
   );
 }
 
-/** Condiciones consideradas "usado" — muestran campos extras de batería y detalles. */
-const USED_CONDITIONS: ProductCondition[] = ["exhibicion", "open-box", "as-is"];
+/** Condiciones que muestran campos extras de batería y detalles del estado. */
+const USED_CONDITIONS: ProductCondition[] = ["exhibicion"];
 
 function ColorGroupCard({
   group,
+  axes,
+  hideColorChrome,
   onRenameColor,
   onRemoveColor,
   onAddStorage,
+  onAddVariantNoStorage,
   onUpdateVariant,
   onRemoveVariant,
   onDuplicateVariant,
@@ -1691,9 +1740,12 @@ function ColorGroupCard({
   onDropVariant,
 }: {
   group: ColorGroup;
+  axes: Axes;
+  hideColorChrome: boolean;
   onRenameColor: (newName: string, newHex: string) => void;
   onRemoveColor: () => void;
   onAddStorage: (storage: string) => void;
+  onAddVariantNoStorage: () => void;
   onUpdateVariant: (sku: string, patch: Partial<Variant>) => void;
   onRemoveVariant: (sku: string) => void;
   onDuplicateVariant: (sku: string) => void;
@@ -1743,7 +1795,8 @@ function ColorGroupCard({
         if (sku) onDropVariant(sku);
       }}
     >
-      {/* Header de color */}
+      {/* Header de color (oculto si la categoría no usa color y no hay color asignado) */}
+      {!hideColorChrome && (
       <div className="px-4 py-3 bg-neutral-50/70 border-b border-neutral-200 flex items-center gap-3 flex-wrap">
         <button
           type="button"
@@ -1829,12 +1882,13 @@ function ColorGroupCard({
           </button>
         )}
       </div>
+      )}
 
       {!collapsed && (
         <div className="px-4 py-4 space-y-5">
           {group.variants.length === 0 ? (
             <p className="text-xs text-neutral-400 italic py-2">
-              Sin variantes para este color. Agrega un almacenamiento abajo.
+              Sin variantes. Agrega una abajo.
             </p>
           ) : (
             <>
@@ -1844,6 +1898,7 @@ function ColorGroupCard({
                   <SectionHeader label="Equipos nuevos / preventa" count={newVariants.length} variant="new" />
                   <VariantTable
                     variants={newVariants}
+                    axes={axes}
                     onUpdate={onUpdateVariant}
                     onRemove={onRemoveVariant}
                     onDuplicate={onDuplicateVariant}
@@ -1852,12 +1907,13 @@ function ColorGroupCard({
                 </div>
               )}
 
-              {/* Sección: Equipos USADOS (exhibición / open-box / AS-IS) */}
+              {/* Sección: Equipos de exhibición (con batería y detalles) */}
               {usedVariants.length > 0 && (
                 <div>
-                  <SectionHeader label="Equipos usados (exhibición · open-box · AS-IS)" count={usedVariants.length} variant="used" />
+                  <SectionHeader label="Equipos de exhibición" count={usedVariants.length} variant="used" />
                   <VariantTable
                     variants={usedVariants}
+                    axes={axes}
                     onUpdate={onUpdateVariant}
                     onRemove={onRemoveVariant}
                     onDuplicate={onDuplicateVariant}
@@ -1869,7 +1925,21 @@ function ColorGroupCard({
             </>
           )}
 
-          {/* Acciones para agregar almacenamiento */}
+          {/* Acciones para agregar variante. Si la categoría usa storage,
+              ofrecemos chips quick-add por almacenamiento; si no, simple
+              "Agregar variante". */}
+          {!axes.storage && (
+            <div className="pt-2 border-t border-neutral-100">
+              <button
+                type="button"
+                onClick={onAddVariantNoStorage}
+                className="text-xs font-semibold text-[#3B9DD8] bg-white border border-[#3B9DD8] hover:bg-blue-50 px-3 py-1.5 rounded-lg transition inline-flex items-center gap-1.5"
+              >
+                <Plus size={12} /> Agregar variante
+              </button>
+            </div>
+          )}
+          {axes.storage && (
           <div className="pt-2 border-t border-neutral-100">
             <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 mb-2">
               Agregar almacenamiento
@@ -1941,6 +2011,7 @@ function ColorGroupCard({
               </div>
             )}
           </div>
+          )}
         </div>
       )}
     </div>
@@ -1974,6 +2045,7 @@ function SectionHeader({
 
 function VariantTable({
   variants,
+  axes,
   onUpdate,
   onRemove,
   onDuplicate,
@@ -1981,6 +2053,7 @@ function VariantTable({
   showUsedFields = false,
 }: {
   variants: Variant[];
+  axes: Axes;
   onUpdate: (sku: string, patch: Partial<Variant>) => void;
   onRemove: (sku: string) => void;
   onDuplicate: (sku: string) => void;
@@ -1993,7 +2066,8 @@ function VariantTable({
         <thead>
           <tr className="text-left text-[10px] uppercase tracking-wider text-neutral-500">
             <th className="px-1 py-1.5 w-6"></th>
-            <th className="px-2 py-1.5 font-semibold">Almacen.</th>
+            {axes.storage && <th className="px-2 py-1.5 font-semibold">Almacen.</th>}
+            {axes.ram && <th className="px-2 py-1.5 font-semibold">RAM</th>}
             <th className="px-2 py-1.5 font-semibold">Condición</th>
             <th className="px-2 py-1.5 font-semibold text-right">Precio (COP)</th>
             <th className="px-2 py-1.5 font-semibold text-right">Stock</th>
@@ -2015,6 +2089,7 @@ function VariantTable({
             <VariantRow
               key={v.sku}
               variant={v}
+              axes={axes}
               showUsedFields={showUsedFields}
               onUpdate={(patch) => onUpdate(v.sku, patch)}
               onRemove={() => onRemove(v.sku)}
@@ -2034,6 +2109,7 @@ function VariantTable({
 
 function VariantRow({
   variant: v,
+  axes,
   showUsedFields,
   onUpdate,
   onRemove,
@@ -2041,6 +2117,7 @@ function VariantRow({
   onApplyPriceToStorage,
 }: {
   variant: Variant;
+  axes: Axes;
   showUsedFields: boolean;
   onUpdate: (patch: Partial<Variant>) => void;
   onRemove: () => void;
@@ -2071,15 +2148,28 @@ function VariantRow({
         ⋮⋮
       </td>
       {/* Storage */}
-      <td className="px-2 py-1.5">
-        <input
-          value={v.storage ?? ""}
-          onChange={(e) => onUpdate({ storage: e.target.value || undefined })}
-          placeholder="—"
-          list="storage-options"
-          className="w-24 px-2 py-1.5 rounded border border-neutral-200 font-semibold focus:outline-none focus:ring-1 focus:ring-[#3B9DD8] bg-white"
-        />
-      </td>
+      {axes.storage && (
+        <td className="px-2 py-1.5">
+          <input
+            value={v.storage ?? ""}
+            onChange={(e) => onUpdate({ storage: e.target.value || undefined })}
+            placeholder="—"
+            list="storage-options"
+            className="w-24 px-2 py-1.5 rounded border border-neutral-200 font-semibold focus:outline-none focus:ring-1 focus:ring-[#3B9DD8] bg-white"
+          />
+        </td>
+      )}
+      {/* RAM */}
+      {axes.ram && (
+        <td className="px-2 py-1.5">
+          <input
+            value={v.ram ?? ""}
+            onChange={(e) => onUpdate({ ram: e.target.value || undefined })}
+            placeholder="—"
+            className="w-20 px-2 py-1.5 rounded border border-neutral-200 focus:outline-none focus:ring-1 focus:ring-[#3B9DD8] bg-white"
+          />
+        </td>
+      )}
       {/* Condición */}
       <td className="px-2 py-1.5">
         <select
@@ -2096,6 +2186,11 @@ function VariantRow({
           }}
           className="w-32 px-2 py-1.5 rounded border border-neutral-200 bg-white focus:outline-none focus:ring-1 focus:ring-[#3B9DD8]"
         >
+          {/* Si el valor actual es legacy (open-box / as-is) lo incluimos
+              para no perder el dato hasta que el usuario elija otro. */}
+          {!CONDITIONS.includes(v.condition) && (
+            <option value={v.condition}>{conditionLabels[v.condition] ?? v.condition}</option>
+          )}
           {CONDITIONS.map((c) => (
             <option key={c} value={c}>{conditionLabels[c]}</option>
           ))}

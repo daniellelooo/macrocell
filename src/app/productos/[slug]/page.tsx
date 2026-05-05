@@ -47,28 +47,62 @@ export default function ProductPage() {
     conditions[0] ?? "nuevo"
   );
 
-  const variantsForCondition = useMemo(
-    () => product.variants.filter((v) => v.condition === selectedCondition),
-    [product, selectedCondition]
+  /** Colores que tienen al menos UNA variante para la condición seleccionada. */
+  const colorsForCondition = useMemo(() => {
+    const set = new Set<string>();
+    for (const v of product.variants) {
+      if (v.condition !== selectedCondition) continue;
+      if (v.color) set.add(v.color);
+    }
+    return product.colors.filter((c) => set.has(c.name));
+  }, [product, selectedCondition]);
+
+  /** Color seleccionado. Vacío "" representa "sin color" (ej: cargadores). */
+  const [selectedColor, setSelectedColor] = useState(
+    colorsForCondition[0]?.name ?? product.colors[0]?.name ?? ""
   );
 
+  /** Variantes filtradas por (condición, color). */
+  const variantsForSelection = useMemo(() => {
+    return product.variants.filter((v) => {
+      if (v.condition !== selectedCondition) return false;
+      // Si el color seleccionado existe, exigir match exacto.
+      // Si no hay colores en el producto, no filtrar por color.
+      if (selectedColor) return v.color === selectedColor;
+      return !v.color;
+    });
+  }, [product, selectedCondition, selectedColor]);
+
   const [selectedSku, setSelectedSku] = useState<string>(
-    variantsForCondition[0]?.sku ?? ""
+    variantsForSelection[0]?.sku ?? ""
   );
+
+  // Si cambia condition o color y la variante actual ya no aplica, escoger la
+  // primera disponible para la nueva selección. Se calcula sincrónicamente
+  // (no en useEffect) para evitar el lint react-hooks/set-state-in-effect.
+  const effectiveSelectedSku = useMemo(() => {
+    if (variantsForSelection.some((v) => v.sku === selectedSku)) return selectedSku;
+    return variantsForSelection[0]?.sku ?? selectedSku;
+  }, [variantsForSelection, selectedSku]);
+  // Mantener selectedSku coherente sin causar setState en render: lo usamos
+  // sólo para el dispatch de eventos (clicks); para lectura usamos effectiveSelectedSku.
+
   const selectedVariant =
-    product.variants.find((v) => v.sku === selectedSku) ??
-    variantsForCondition[0] ??
+    product.variants.find((v) => v.sku === effectiveSelectedSku) ??
+    variantsForSelection[0] ??
     product.variants[0];
 
   const handleConditionChange = (c: ProductCondition) => {
     setSelectedCondition(c);
-    const first = product.variants.find((v) => v.condition === c);
-    if (first) setSelectedSku(first.sku);
+    // Si el color seleccionado no tiene variantes para la nueva condición,
+    // pasar al primer color que sí tenga.
+    const colorsAvailable = product.colors.filter((col) =>
+      product.variants.some((v) => v.condition === c && v.color === col.name)
+    );
+    if (colorsAvailable.length > 0 && !colorsAvailable.some((c) => c.name === selectedColor)) {
+      setSelectedColor(colorsAvailable[0].name);
+    }
   };
-
-  const [selectedColor, setSelectedColor] = useState(
-    product.colors[0]?.name ?? ""
-  );
 
   // Imágenes filtradas por color: si hay imágenes asociadas al color
   // seleccionado, sólo muestra esas; si no, muestra las genéricas (sin
@@ -216,7 +250,13 @@ export default function ProductPage() {
               </p>
               {selectedVariant && (
                 <div className="flex flex-wrap items-center gap-2 mt-2">
-                  <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-neutral-100 text-neutral-700">
+                  <span className={`inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${
+                    selectedVariant.condition === "exhibicion"
+                      ? "bg-amber-100 text-amber-800"
+                      : selectedVariant.condition === "preventa"
+                        ? "bg-purple-100 text-purple-800"
+                        : "bg-green-100 text-green-700"
+                  }`}>
                     {conditionLabels[selectedVariant.condition]}
                   </span>
                   {(selectedVariant.size ||
@@ -232,6 +272,18 @@ export default function ProductPage() {
                         .join(" · ")}
                     </span>
                   )}
+                  {/* Batería % para equipos de exhibición */}
+                  {selectedVariant.condition === "exhibicion" && selectedVariant.batteryHealth !== undefined && (
+                    <span className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full ${
+                      selectedVariant.batteryHealth >= 90
+                        ? "bg-green-100 text-green-800"
+                        : selectedVariant.batteryHealth >= 80
+                          ? "bg-amber-100 text-amber-800"
+                          : "bg-red-100 text-red-800"
+                    }`}>
+                      🔋 Batería {selectedVariant.batteryHealth}%
+                    </span>
+                  )}
                   {selectedVariant.notes && (
                     <span className="inline-flex items-center text-[11px] text-neutral-500 italic">
                       {selectedVariant.notes}
@@ -243,6 +295,17 @@ export default function ProductPage() {
                 <p className="text-xs text-neutral-500 mt-2">
                   {conditionWarranty[selectedVariant.condition]}
                 </p>
+              )}
+              {/* Detalles del estado para equipos de exhibición */}
+              {selectedVariant?.condition === "exhibicion" && selectedVariant.conditionDetails && (
+                <div className="mt-3 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2.5">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-amber-800 mb-1">
+                    Detalles del estado
+                  </p>
+                  <p className="text-xs text-amber-900 leading-relaxed">
+                    {selectedVariant.conditionDetails}
+                  </p>
+                </div>
               )}
             </div>
 
@@ -273,38 +336,41 @@ export default function ProductPage() {
               </div>
             )}
 
-            {/* Variantes (almacenamiento / RAM / tamaño) — siempre visibles si hay
-                al menos una variante con storage/ram/size, aunque sea única,
-                para que se vea qué configuración exacta tiene la variante. */}
-            {variantsForCondition.length > 0 &&
-              variantsForCondition.some((v) => v.storage || v.ram || v.size) && (
+            {/* Variantes (almacenamiento / RAM / tamaño) filtradas por la combinación
+                condición + color seleccionado. Las agotadas se ven deshabilitadas. */}
+            {variantsForSelection.length > 0 &&
+              variantsForSelection.some((v) => v.storage || v.ram || v.size) && (
                 <div>
                   <p className="text-sm font-semibold text-neutral-700 mb-3">
-                    {variantsForCondition.length > 1
+                    {variantsForSelection.length > 1
                       ? "Configuración"
                       : "Configuración disponible"}
                   </p>
                   <div className="flex gap-2 flex-wrap">
-                    {variantsForCondition.map((v) => {
+                    {variantsForSelection.map((v) => {
                       const label = [v.size, v.ram, v.storage]
                         .filter(Boolean)
                         .join(" / ");
-                      const isOnly = variantsForCondition.length === 1;
+                      const isOnly = variantsForSelection.length === 1;
+                      const stock = v.stockQuantity ?? 0;
+                      const outOfStock = !v.inStock || stock === 0;
                       return (
                         <button
                           key={v.sku}
-                          onClick={() => setSelectedSku(v.sku)}
-                          disabled={isOnly}
+                          onClick={() => !outOfStock && setSelectedSku(v.sku)}
+                          disabled={isOnly || outOfStock}
                           className={`flex flex-col items-start px-4 py-2 rounded-xl text-sm font-medium border transition-all ${
-                            selectedSku === v.sku
+                            effectiveSelectedSku === v.sku
                               ? "border-[#0071E3] bg-blue-50 text-[#0071E3]"
-                              : "border-neutral-200 text-neutral-700 hover:border-neutral-400"
-                          } ${isOnly ? "cursor-default" : ""}`}
+                              : outOfStock
+                                ? "border-neutral-200 bg-neutral-50 text-neutral-400 cursor-not-allowed line-through decoration-neutral-300"
+                                : "border-neutral-200 text-neutral-700 hover:border-neutral-400"
+                          } ${isOnly && !outOfStock ? "cursor-default" : ""}`}
                         >
                           <span>{label || "Estándar"}</span>
-                          <span className="text-[11px] opacity-70">
-                            {formatPrice(v.price)}
-                            {v.notes ? ` · ${v.notes}` : ""}
+                          <span className={`text-[11px] ${outOfStock ? "no-underline" : "opacity-70"}`}>
+                            {outOfStock ? "Agotado" : formatPrice(v.price)}
+                            {!outOfStock && v.notes ? ` · ${v.notes}` : ""}
                           </span>
                         </button>
                       );
@@ -313,30 +379,63 @@ export default function ProductPage() {
                 </div>
               )}
 
-            {/* Colors */}
+            {/* Colors — sólo colores que tienen variantes para la condición seleccionada. */}
             {product.colors.length > 0 && (
               <div>
                 <p className="text-sm font-semibold text-neutral-700 mb-3">
                   Color:{" "}
                   <span className="text-neutral-900 font-bold">
-                    {selectedColor}
+                    {selectedColor || "—"}
                   </span>
                 </p>
-                <div className="flex gap-3 flex-wrap">
-                  {product.colors.map((color) => (
-                    <button
-                      key={color.name}
-                      onClick={() => setSelectedColor(color.name)}
-                      title={color.name}
-                      className={`w-8 h-8 rounded-full border-2 transition-all ${
-                        selectedColor === color.name
-                          ? "border-[#0071E3] scale-110 shadow-md"
-                          : "border-transparent hover:scale-105"
-                      }`}
-                      style={{ backgroundColor: color.hex }}
-                    />
-                  ))}
+                <div className="flex gap-3 flex-wrap items-center">
+                  {product.colors.map((color) => {
+                    const hasVariantInCondition = product.variants.some(
+                      (v) => v.condition === selectedCondition && v.color === color.name
+                    );
+                    const hasStock = product.variants.some(
+                      (v) =>
+                        v.condition === selectedCondition &&
+                        v.color === color.name &&
+                        (v.stockQuantity ?? 0) > 0
+                    );
+                    const disabled = !hasVariantInCondition;
+                    const outOfStock = hasVariantInCondition && !hasStock;
+                    return (
+                      <button
+                        key={color.name}
+                        onClick={() => !disabled && setSelectedColor(color.name)}
+                        disabled={disabled}
+                        title={
+                          disabled
+                            ? `${color.name} — no disponible en ${conditionLabels[selectedCondition]}`
+                            : outOfStock
+                              ? `${color.name} — agotado`
+                              : color.name
+                        }
+                        className={`relative w-9 h-9 rounded-full border-2 transition-all ${
+                          selectedColor === color.name
+                            ? "border-[#0071E3] scale-110 shadow-md"
+                            : disabled
+                              ? "border-transparent opacity-30 cursor-not-allowed"
+                              : "border-transparent hover:scale-105"
+                        }`}
+                        style={{ backgroundColor: color.hex }}
+                      >
+                        {(disabled || outOfStock) && (
+                          <span className="absolute inset-0 flex items-center justify-center">
+                            <span className="absolute w-full h-0.5 bg-neutral-500/70 rotate-45 rounded-full" />
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
+                {colorsForCondition.length === 0 && product.colors.length > 0 && (
+                  <p className="text-[11px] text-neutral-500 mt-2">
+                    No hay colores disponibles en {conditionLabels[selectedCondition]}.
+                  </p>
+                )}
               </div>
             )}
 
