@@ -1547,15 +1547,48 @@ function ColorGroupedVariants({
     }));
   };
 
-  /** Renombra un color (actualiza colors[] y todas las variantes). */
+  /** Renombra un color (actualiza colors[] y todas las variantes).
+   *  Si el nuevo nombre coincide con otro color existente (case-insensitive),
+   *  fusiona: las variantes pasan al color que ya existía y removemos la
+   *  entrada duplicada de colors[]. */
   const renameColor = (oldName: string, newName: string, newHex: string) => {
     const cleanNew = newName.trim();
-    if (!cleanNew) return;
-    setDraft((d) => ({
-      ...d,
-      colors: d.colors.map((c) => (c.name === oldName ? { name: cleanNew, hex: newHex } : c)),
-      variants: d.variants.map((v) => (v.color === oldName ? { ...v, color: cleanNew } : v)),
-    }));
+    if (!cleanNew || cleanNew === oldName) {
+      // Sólo cambió el hex
+      if (newHex !== draft.colors.find((c) => c.name === oldName)?.hex) {
+        setDraft((d) => ({
+          ...d,
+          colors: d.colors.map((c) => (c.name === oldName ? { ...c, hex: newHex } : c)),
+        }));
+      }
+      return;
+    }
+
+    const conflict = draft.colors.find(
+      (c) => c.name !== oldName && c.name.toLowerCase() === cleanNew.toLowerCase()
+    );
+
+    setDraft((d) => {
+      if (conflict) {
+        // Merge: variantes del oldName pasan al nombre del conflict, eliminamos oldName.
+        return {
+          ...d,
+          colors: d.colors.filter((c) => c.name !== oldName),
+          variants: d.variants.map((v) =>
+            v.color === oldName ? { ...v, color: conflict.name } : v
+          ),
+        };
+      }
+      return {
+        ...d,
+        colors: d.colors.map((c) =>
+          c.name === oldName ? { name: cleanNew, hex: newHex } : c
+        ),
+        variants: d.variants.map((v) =>
+          v.color === oldName ? { ...v, color: cleanNew } : v
+        ),
+      };
+    });
   };
 
   /** Elimina un color y TODAS sus variantes. */
@@ -1753,27 +1786,37 @@ function ColorGroupCard({
   onDropVariant: (sku: string) => void;
 }) {
   const [collapsed, setCollapsed] = useState(false);
-  const [editingColor, setEditingColor] = useState(false);
   const [draftName, setDraftName] = useState(group.colorName);
-  const [draftHex, setDraftHex] = useState(group.hex);
   const [showAddStorage, setShowAddStorage] = useState(false);
   const [newStorage, setNewStorage] = useState("");
   const [dropHover, setDropHover] = useState(false);
 
+  // No necesitamos sync extra: el padre usa `key={g.colorName}` así que React
+  // remonta este componente al cambiar el nombre del color desde fuera.
+
   const totalStock = group.variants.reduce((s, v) => s + (v.stockQuantity ?? 0), 0);
   const isNoColor = group.colorName === "";
 
-  // Separar variantes nuevas vs usadas (exhibición/open-box/as-is)
+  // Separar variantes nuevas vs de exhibición
   const newVariants = group.variants.filter((v) => v.condition === "nuevo" || v.condition === "preventa");
   const usedVariants = group.variants.filter((v) => USED_CONDITIONS.includes(v.condition));
 
-  const submitRename = () => {
-    if (draftName.trim() && draftName.trim() !== group.colorName) {
-      onRenameColor(draftName.trim(), draftHex);
-    } else if (draftHex !== group.hex) {
-      onRenameColor(group.colorName, draftHex);
+  /** Autoguardar el rename onBlur o al presionar Enter. Si el campo queda
+   *  vacío revierte al nombre original. */
+  const commitName = () => {
+    const trimmed = draftName.trim();
+    if (!trimmed) {
+      setDraftName(group.colorName);
+      return;
     }
-    setEditingColor(false);
+    if (trimmed === group.colorName) return;
+    onRenameColor(trimmed, group.hex);
+  };
+
+  const handleHexChange = (hex: string) => {
+    if (hex !== group.hex) {
+      onRenameColor(group.colorName, hex);
+    }
   };
 
   return (
@@ -1814,64 +1857,43 @@ function ColorGroupCard({
           </svg>
         </button>
 
-        {editingColor && !isNoColor ? (
+        {!isNoColor ? (
           <>
+            {/* Color picker — guarda automáticamente al cambiar */}
             <input
               type="color"
-              value={draftHex}
-              onChange={(e) => setDraftHex(e.target.value)}
-              className="w-8 h-8 rounded border border-neutral-200 cursor-pointer"
+              value={group.hex}
+              onChange={(e) => handleHexChange(e.target.value)}
+              className="w-7 h-7 rounded border border-neutral-200 cursor-pointer shrink-0"
+              title="Cambiar tono"
             />
+            {/* Nombre editable inline — onBlur o Enter guarda */}
             <input
               value={draftName}
               onChange={(e) => setDraftName(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter") submitRename(); }}
-              autoFocus
-              className="px-2 py-1 rounded border border-neutral-200 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
+              onBlur={commitName}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.currentTarget.blur();
+                } else if (e.key === "Escape") {
+                  setDraftName(group.colorName);
+                  e.currentTarget.blur();
+                }
+              }}
+              className="bg-transparent text-sm font-bold text-neutral-900 px-2 py-1 rounded hover:bg-white focus:bg-white focus:ring-2 focus:ring-[#3B9DD8]/30 focus:outline-none transition w-32"
             />
-            <button
-              type="button"
-              onClick={submitRename}
-              className="text-xs font-semibold text-[#3B9DD8] hover:underline"
-            >
-              Guardar
-            </button>
-            <button
-              type="button"
-              onClick={() => { setEditingColor(false); setDraftName(group.colorName); setDraftHex(group.hex); }}
-              className="text-xs text-neutral-400 hover:text-neutral-700"
-            >
-              Cancelar
-            </button>
           </>
         ) : (
-          <>
-            {!isNoColor && (
-              <span
-                className="w-5 h-5 rounded-full border border-neutral-200 shrink-0"
-                style={{ backgroundColor: group.hex }}
-              />
-            )}
-            <span className="text-sm font-bold text-neutral-900">
-              {isNoColor ? "Sin color" : group.colorName}
-            </span>
-            {!isNoColor && (
-              <button
-                type="button"
-                onClick={() => setEditingColor(true)}
-                className="text-[10px] text-neutral-400 hover:text-neutral-700"
-              >
-                editar
-              </button>
-            )}
-          </>
+          <span className="text-sm font-bold text-neutral-900">
+            Sin color
+          </span>
         )}
 
         <span className="text-[11px] text-neutral-500 ml-auto">
           {group.variants.length} variante{group.variants.length === 1 ? "" : "s"} · stock total {totalStock}
         </span>
 
-        {!isNoColor && !editingColor && (
+        {!isNoColor && (
           <button
             type="button"
             onClick={onRemoveColor}

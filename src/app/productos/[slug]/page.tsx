@@ -11,6 +11,10 @@ import {
   ArrowLeft,
   Check,
   Heart,
+  BatteryFull,
+  BatteryMedium,
+  BatteryLow,
+  Info,
 } from "lucide-react";
 import {
   formatPrice,
@@ -272,23 +276,28 @@ export default function ProductPage() {
                         .join(" · ")}
                     </span>
                   )}
-                  {/* Batería % para equipos de exhibición */}
-                  {selectedVariant.condition === "exhibicion" && selectedVariant.batteryHealth !== undefined && (
-                    <span className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full ${
-                      selectedVariant.batteryHealth >= 90
-                        ? "bg-green-100 text-green-800"
-                        : selectedVariant.batteryHealth >= 80
-                          ? "bg-amber-100 text-amber-800"
-                          : "bg-red-100 text-red-800"
-                    }`}>
-                      🔋 Batería {selectedVariant.batteryHealth}%
-                    </span>
-                  )}
-                  {selectedVariant.notes && (
+                  {/* Notas (sim física, batería 100%, etc.) — si la variante es nueva */}
+                  {selectedVariant.notes && selectedVariant.condition !== "exhibicion" && (
                     <span className="inline-flex items-center text-[11px] text-neutral-500 italic">
                       {selectedVariant.notes}
                     </span>
                   )}
+                  {/* Batería % para equipos de exhibición */}
+                  {selectedVariant.condition === "exhibicion" && selectedVariant.batteryHealth !== undefined && (() => {
+                    const bh = selectedVariant.batteryHealth;
+                    const colorCls = bh >= 90
+                      ? "bg-green-100 text-green-800"
+                      : bh >= 80
+                        ? "bg-amber-100 text-amber-800"
+                        : "bg-red-100 text-red-800";
+                    const Icon = bh >= 90 ? BatteryFull : bh >= 60 ? BatteryMedium : BatteryLow;
+                    return (
+                      <span className={`inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full ${colorCls}`}>
+                        <Icon size={13} />
+                        Batería {bh}%
+                      </span>
+                    );
+                  })()}
                 </div>
               )}
               {selectedVariant && (
@@ -296,17 +305,41 @@ export default function ProductPage() {
                   {conditionWarranty[selectedVariant.condition]}
                 </p>
               )}
-              {/* Detalles del estado para equipos de exhibición */}
-              {selectedVariant?.condition === "exhibicion" && selectedVariant.conditionDetails && (
-                <div className="mt-3 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2.5">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-amber-800 mb-1">
-                    Detalles del estado
-                  </p>
-                  <p className="text-xs text-amber-900 leading-relaxed">
-                    {selectedVariant.conditionDetails}
-                  </p>
-                </div>
-              )}
+              {/* Caja informativa para equipos de exhibición:
+                  detalles del estado + notas del vendedor + batería.
+                  Es información crítica para el cliente antes de comprar. */}
+              {selectedVariant?.condition === "exhibicion" &&
+                (selectedVariant.conditionDetails || selectedVariant.notes || selectedVariant.batteryHealth !== undefined) && (
+                  <div className="mt-4 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3.5 space-y-2.5">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-amber-900 flex items-center gap-1.5">
+                      <Info size={12} /> Información del equipo de exhibición
+                    </p>
+                    {selectedVariant.batteryHealth !== undefined && (
+                      <div className="flex items-start gap-2">
+                        <span className="text-[10px] font-bold uppercase text-amber-800 w-20 shrink-0 mt-0.5">Batería</span>
+                        <span className="text-xs text-amber-900 font-semibold">
+                          {selectedVariant.batteryHealth}% de salud
+                        </span>
+                      </div>
+                    )}
+                    {selectedVariant.conditionDetails && (
+                      <div className="flex items-start gap-2">
+                        <span className="text-[10px] font-bold uppercase text-amber-800 w-20 shrink-0 mt-0.5">Estado</span>
+                        <span className="text-xs text-amber-900 leading-relaxed">
+                          {selectedVariant.conditionDetails}
+                        </span>
+                      </div>
+                    )}
+                    {selectedVariant.notes && (
+                      <div className="flex items-start gap-2">
+                        <span className="text-[10px] font-bold uppercase text-amber-800 w-20 shrink-0 mt-0.5">Notas</span>
+                        <span className="text-xs text-amber-900 leading-relaxed">
+                          {selectedVariant.notes}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
             </div>
 
             {/* Condición */}
