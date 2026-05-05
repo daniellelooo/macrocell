@@ -423,10 +423,12 @@ export type Database = {
       }
       variants: {
         Row: {
+          battery_health: number | null
           color: string | null
           commission_pct: number | null
           compare_price: number | null
           condition: string
+          condition_details: string | null
           created_at: string
           in_stock: boolean
           is_active: boolean
@@ -444,10 +446,12 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          battery_health?: number | null
           color?: string | null
           commission_pct?: number | null
           compare_price?: number | null
           condition: string
+          condition_details?: string | null
           created_at?: string
           in_stock?: boolean
           is_active?: boolean
@@ -465,10 +469,12 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          battery_health?: number | null
           color?: string | null
           commission_pct?: number | null
           compare_price?: number | null
           condition?: string
+          condition_details?: string | null
           created_at?: string
           in_stock?: boolean
           is_active?: boolean

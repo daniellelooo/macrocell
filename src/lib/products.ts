@@ -48,6 +48,16 @@ export type Variant = {
    * esta variante (0-100). Default 0 = sin comisión.
    */
   commissionPct?: number;
+  /**
+   * Salud de batería (0-100%). Sólo aplica para condiciones distintas a
+   * "nuevo" (exhibición / open-box / as-is). Undefined para nuevos.
+   */
+  batteryHealth?: number;
+  /**
+   * Detalles del estado físico del equipo: rayones, accesorios incluidos,
+   * observaciones del vendedor. Sólo aplica para equipos no-nuevos.
+   */
+  conditionDetails?: string;
 };
 
 /**

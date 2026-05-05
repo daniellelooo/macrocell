@@ -28,6 +28,8 @@ export function rowToVariant(v: VariantRow): Variant {
     inStock: v.in_stock,
     stockQuantity: v.stock_quantity ?? (v.in_stock ? 1 : 0),
     commissionPct: v.commission_pct ?? 0,
+    batteryHealth: v.battery_health ?? undefined,
+    conditionDetails: v.condition_details ?? undefined,
   };
 }
 
@@ -151,6 +153,8 @@ export function productToRows(p: Product): {
       stock_quantity: v.stockQuantity ?? 1,
       notes: v.notes ?? null,
       commission_pct: v.commissionPct ?? 0,
+      battery_health: v.batteryHealth ?? null,
+      condition_details: v.conditionDetails ?? null,
       sort_order: i,
     })),
     images: p.images.map((img, i) => {

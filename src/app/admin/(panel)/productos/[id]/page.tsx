@@ -1527,13 +1527,22 @@ function ColorGroupedVariants({
     );
   }
 
+  /** Mueve una variante de un color a otro (drag-and-drop). */
+  const moveVariantToColor = (sku: string, targetColor: string) => {
+    setDraft((d) => ({
+      ...d,
+      variants: d.variants.map((v) =>
+        v.sku === sku ? { ...v, color: targetColor || undefined } : v
+      ),
+    }));
+  };
+
   return (
     <div className="space-y-3">
       {groups.map((g) => (
         <ColorGroupCard
           key={g.colorName || "__none__"}
           group={g}
-          allStorages={Array.from(new Set(draft.variants.map((v) => v.storage).filter((s): s is string => !!s)))}
           onRenameColor={(newName, newHex) => renameColor(g.colorName, newName, newHex)}
           onRemoveColor={() => removeColor(g.colorName)}
           onAddStorage={(storage) => addStorageToColor(g.colorName, storage)}
@@ -1541,19 +1550,49 @@ function ColorGroupedVariants({
           onRemoveVariant={removeVariant}
           onDuplicateVariant={duplicateVariant}
           onApplyPriceToStorage={applyPriceToStorage}
+          onDropVariant={(sku) => moveVariantToColor(sku, g.colorName)}
         />
       ))}
 
       <div className="flex flex-wrap gap-2 pt-2">
         <AddColorButton onAdd={addColor} />
+        {/* Si no hay sección "Sin color" todavía, ofrecer agregar variante sin color */}
+        {!groups.some((g) => g.colorName === "") && (
+          <button
+            type="button"
+            onClick={() => {
+              const skus = draft.variants.map((v) => v.sku);
+              const newV: Variant = {
+                sku: autoSku(productId, { condition: "nuevo" }, skus),
+                color: undefined,
+                condition: "nuevo",
+                price: 0,
+                inStock: true,
+                stockQuantity: 0,
+                commissionPct: 0,
+              };
+              setDraft((d) => ({ ...d, variants: [...d.variants, newV] }));
+            }}
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-neutral-600 bg-white border border-neutral-200 px-3 py-2 rounded-lg hover:border-neutral-400 transition"
+          >
+            <Plus size={14} /> Variante sin color
+          </button>
+        )}
       </div>
+
+      <p className="text-[11px] text-neutral-400 mt-3 leading-relaxed">
+        💡 <strong>Tip</strong>: arrastra una variante por su <span className="text-neutral-600">⋮⋮</span> izquierdo para moverla a otro color.
+        Las variantes <strong>nuevas</strong> y las <strong>de exhibición/open-box</strong> aparecen en secciones separadas dentro de cada color.
+      </p>
     </div>
   );
 }
 
+/** Condiciones consideradas "usado" — muestran campos extras de batería y detalles. */
+const USED_CONDITIONS: ProductCondition[] = ["exhibicion", "open-box", "as-is"];
+
 function ColorGroupCard({
   group,
-  allStorages,
   onRenameColor,
   onRemoveColor,
   onAddStorage,
@@ -1561,9 +1600,9 @@ function ColorGroupCard({
   onRemoveVariant,
   onDuplicateVariant,
   onApplyPriceToStorage,
+  onDropVariant,
 }: {
   group: ColorGroup;
-  allStorages: string[];
   onRenameColor: (newName: string, newHex: string) => void;
   onRemoveColor: () => void;
   onAddStorage: (storage: string) => void;
@@ -1571,6 +1610,7 @@ function ColorGroupCard({
   onRemoveVariant: (sku: string) => void;
   onDuplicateVariant: (sku: string) => void;
   onApplyPriceToStorage: (storage: string, price: number) => void;
+  onDropVariant: (sku: string) => void;
 }) {
   const [collapsed, setCollapsed] = useState(false);
   const [editingColor, setEditingColor] = useState(false);
@@ -1578,9 +1618,14 @@ function ColorGroupCard({
   const [draftHex, setDraftHex] = useState(group.hex);
   const [showAddStorage, setShowAddStorage] = useState(false);
   const [newStorage, setNewStorage] = useState("");
+  const [dropHover, setDropHover] = useState(false);
 
   const totalStock = group.variants.reduce((s, v) => s + (v.stockQuantity ?? 0), 0);
   const isNoColor = group.colorName === "";
+
+  // Separar variantes nuevas vs usadas (exhibición/open-box/as-is)
+  const newVariants = group.variants.filter((v) => v.condition === "nuevo" || v.condition === "preventa");
+  const usedVariants = group.variants.filter((v) => USED_CONDITIONS.includes(v.condition));
 
   const submitRename = () => {
     if (draftName.trim() && draftName.trim() !== group.colorName) {
@@ -1592,7 +1637,24 @@ function ColorGroupCard({
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-neutral-200 overflow-hidden">
+    <div
+      className={`bg-white rounded-2xl border overflow-hidden transition ${
+        dropHover ? "border-[#3B9DD8] ring-2 ring-[#3B9DD8]/30" : "border-neutral-200"
+      }`}
+      onDragOver={(e) => {
+        if (e.dataTransfer.types.includes("application/x-variant-sku")) {
+          e.preventDefault();
+          setDropHover(true);
+        }
+      }}
+      onDragLeave={() => setDropHover(false)}
+      onDrop={(e) => {
+        e.preventDefault();
+        setDropHover(false);
+        const sku = e.dataTransfer.getData("application/x-variant-sku");
+        if (sku) onDropVariant(sku);
+      }}
+    >
       {/* Header de color */}
       <div className="px-4 py-3 bg-neutral-50/70 border-b border-neutral-200 flex items-center gap-3 flex-wrap">
         <button
@@ -1681,114 +1743,217 @@ function ColorGroupCard({
       </div>
 
       {!collapsed && (
-        <div className="px-4 py-3 space-y-2">
+        <div className="px-4 py-4 space-y-5">
           {group.variants.length === 0 ? (
             <p className="text-xs text-neutral-400 italic py-2">
               Sin variantes para este color. Agrega un almacenamiento abajo.
             </p>
           ) : (
-            <div className="space-y-2">
-              {group.variants.map((v) => (
-                <VariantRow
-                  key={v.sku}
-                  variant={v}
-                  onUpdate={(patch) => onUpdateVariant(v.sku, patch)}
-                  onRemove={() => onRemoveVariant(v.sku)}
-                  onDuplicate={() => onDuplicateVariant(v.sku)}
-                  onApplyPriceToStorage={
-                    v.storage
-                      ? (price) => onApplyPriceToStorage(v.storage!, price)
-                      : undefined
-                  }
-                />
-              ))}
-            </div>
+            <>
+              {/* Sección: Equipos NUEVOS */}
+              {newVariants.length > 0 && (
+                <div>
+                  <SectionHeader label="Equipos nuevos / preventa" count={newVariants.length} variant="new" />
+                  <VariantTable
+                    variants={newVariants}
+                    onUpdate={onUpdateVariant}
+                    onRemove={onRemoveVariant}
+                    onDuplicate={onDuplicateVariant}
+                    onApplyPriceToStorage={onApplyPriceToStorage}
+                  />
+                </div>
+              )}
+
+              {/* Sección: Equipos USADOS (exhibición / open-box / AS-IS) */}
+              {usedVariants.length > 0 && (
+                <div>
+                  <SectionHeader label="Equipos usados (exhibición · open-box · AS-IS)" count={usedVariants.length} variant="used" />
+                  <VariantTable
+                    variants={usedVariants}
+                    onUpdate={onUpdateVariant}
+                    onRemove={onRemoveVariant}
+                    onDuplicate={onDuplicateVariant}
+                    onApplyPriceToStorage={onApplyPriceToStorage}
+                    showUsedFields
+                  />
+                </div>
+              )}
+            </>
           )}
 
-          {/* Agregar almacenamiento */}
-          {showAddStorage ? (
-            <div className="flex items-center gap-2 mt-2 pt-2 border-t border-neutral-100">
-              <input
-                value={newStorage}
-                onChange={(e) => setNewStorage(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && newStorage.trim()) {
-                    onAddStorage(newStorage.trim());
-                    setNewStorage("");
-                    setShowAddStorage(false);
-                  }
-                }}
-                placeholder="Almacenamiento (ej: 256 GB)"
-                list="storage-options"
-                autoFocus
-                className="px-3 py-1.5 rounded-lg border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30 flex-1"
-              />
-              <datalist id="storage-options">
-                {STORAGE_OPTIONS.map((s) => <option key={s} value={s} />)}
-              </datalist>
-              <button
-                type="button"
-                onClick={() => {
-                  if (newStorage.trim()) {
-                    onAddStorage(newStorage.trim());
-                    setNewStorage("");
-                    setShowAddStorage(false);
-                  }
-                }}
-                className="text-xs font-semibold text-[#3B9DD8] hover:bg-blue-50 px-3 py-1.5 rounded-lg transition"
-              >
-                Agregar
-              </button>
-              <button
-                type="button"
-                onClick={() => { setShowAddStorage(false); setNewStorage(""); }}
-                className="text-xs text-neutral-500 hover:text-neutral-900"
-              >
-                Cancelar
-              </button>
-            </div>
-          ) : (
-            <div className="flex flex-wrap gap-1 pt-2">
-              {/* Quick add: storage chips comunes */}
-              {STORAGE_OPTIONS.filter(
-                (s) => !group.variants.some((v) => v.storage === s)
-              )
-                .slice(0, 4)
-                .map((s) => (
-                  <button
-                    key={s}
-                    type="button"
-                    onClick={() => onAddStorage(s)}
-                    className="text-[11px] font-semibold px-2.5 py-1 rounded-full border border-neutral-200 text-neutral-600 hover:border-[#3B9DD8] hover:text-[#3B9DD8] hover:bg-blue-50 transition"
-                  >
-                    + {s}
-                  </button>
-                ))}
-              <button
-                type="button"
-                onClick={() => setShowAddStorage(true)}
-                className="text-[11px] font-semibold text-neutral-500 hover:text-[#3B9DD8] px-2.5 py-1 transition"
-              >
-                + Otro
-              </button>
-            </div>
-          )}
+          {/* Acciones para agregar almacenamiento */}
+          <div className="pt-2 border-t border-neutral-100">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 mb-2">
+              Agregar almacenamiento
+            </p>
+            {showAddStorage ? (
+              <div className="flex items-center gap-2">
+                <input
+                  value={newStorage}
+                  onChange={(e) => setNewStorage(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && newStorage.trim()) {
+                      onAddStorage(newStorage.trim());
+                      setNewStorage("");
+                      setShowAddStorage(false);
+                    }
+                  }}
+                  placeholder="Almacenamiento (ej: 256 GB)"
+                  list="storage-options"
+                  autoFocus
+                  className="px-3 py-1.5 rounded-lg border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30 flex-1"
+                />
+                <datalist id="storage-options">
+                  {STORAGE_OPTIONS.map((s) => <option key={s} value={s} />)}
+                </datalist>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (newStorage.trim()) {
+                      onAddStorage(newStorage.trim());
+                      setNewStorage("");
+                      setShowAddStorage(false);
+                    }
+                  }}
+                  className="text-xs font-semibold text-[#3B9DD8] hover:bg-blue-50 px-3 py-1.5 rounded-lg transition"
+                >
+                  Agregar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setShowAddStorage(false); setNewStorage(""); }}
+                  className="text-xs text-neutral-500 hover:text-neutral-900"
+                >
+                  Cancelar
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-wrap gap-1.5">
+                {STORAGE_OPTIONS.filter(
+                  (s) => !group.variants.some((v) => v.storage === s && v.condition === "nuevo")
+                )
+                  .slice(0, 4)
+                  .map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => onAddStorage(s)}
+                      className="text-[11px] font-semibold px-2.5 py-1 rounded-full border border-neutral-200 text-neutral-600 hover:border-[#3B9DD8] hover:text-[#3B9DD8] hover:bg-blue-50 transition"
+                    >
+                      + {s}
+                    </button>
+                  ))}
+                <button
+                  type="button"
+                  onClick={() => setShowAddStorage(true)}
+                  className="text-[11px] font-semibold text-neutral-500 hover:text-[#3B9DD8] px-2.5 py-1 transition"
+                >
+                  + Otro almacenamiento
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       )}
-      {/* Resumen no usado pero útil para debug */}
-      {void allStorages}
+    </div>
+  );
+}
+
+function SectionHeader({
+  label,
+  count,
+  variant,
+}: {
+  label: string;
+  count: number;
+  variant: "new" | "used";
+}) {
+  return (
+    <div className="flex items-center gap-2 mb-2">
+      <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
+        variant === "new"
+          ? "bg-green-100 text-green-700"
+          : "bg-amber-100 text-amber-700"
+      }`}>
+        {label}
+      </span>
+      <span className="text-[10px] text-neutral-400">
+        {count} variante{count === 1 ? "" : "s"}
+      </span>
+    </div>
+  );
+}
+
+function VariantTable({
+  variants,
+  onUpdate,
+  onRemove,
+  onDuplicate,
+  onApplyPriceToStorage,
+  showUsedFields = false,
+}: {
+  variants: Variant[];
+  onUpdate: (sku: string, patch: Partial<Variant>) => void;
+  onRemove: (sku: string) => void;
+  onDuplicate: (sku: string) => void;
+  onApplyPriceToStorage: (storage: string, price: number) => void;
+  showUsedFields?: boolean;
+}) {
+  return (
+    <div className="overflow-x-auto -mx-1">
+      <table className="w-full text-xs">
+        <thead>
+          <tr className="text-left text-[10px] uppercase tracking-wider text-neutral-500">
+            <th className="px-1 py-1.5 w-6"></th>
+            <th className="px-2 py-1.5 font-semibold">Almacen.</th>
+            <th className="px-2 py-1.5 font-semibold">Condición</th>
+            <th className="px-2 py-1.5 font-semibold text-right">Precio (COP)</th>
+            <th className="px-2 py-1.5 font-semibold text-right">Stock</th>
+            <th className="px-2 py-1.5 font-semibold text-right">Comisión %</th>
+            {showUsedFields && (
+              <>
+                <th className="px-2 py-1.5 font-semibold text-right">Batería %</th>
+                <th className="px-2 py-1.5 font-semibold">Detalles del estado</th>
+              </>
+            )}
+            {!showUsedFields && (
+              <th className="px-2 py-1.5 font-semibold">Notas</th>
+            )}
+            <th className="w-16"></th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-neutral-50">
+          {variants.map((v) => (
+            <VariantRow
+              key={v.sku}
+              variant={v}
+              showUsedFields={showUsedFields}
+              onUpdate={(patch) => onUpdate(v.sku, patch)}
+              onRemove={() => onRemove(v.sku)}
+              onDuplicate={() => onDuplicate(v.sku)}
+              onApplyPriceToStorage={
+                v.storage
+                  ? (price) => onApplyPriceToStorage(v.storage!, price)
+                  : undefined
+              }
+            />
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
 
 function VariantRow({
   variant: v,
+  showUsedFields,
   onUpdate,
   onRemove,
   onDuplicate,
   onApplyPriceToStorage,
 }: {
   variant: Variant;
+  showUsedFields: boolean;
   onUpdate: (patch: Partial<Variant>) => void;
   onRemove: () => void;
   onDuplicate: () => void;
@@ -1796,101 +1961,179 @@ function VariantRow({
 }) {
   const stock = v.stockQuantity ?? 0;
   const stockColor = stock === 0 ? "text-red-600" : stock <= 2 ? "text-amber-600" : "text-green-600";
+  const battery = v.batteryHealth;
+  const batteryColor =
+    battery === undefined || battery >= 90
+      ? "text-green-600"
+      : battery >= 80
+        ? "text-amber-600"
+        : "text-red-600";
 
   return (
-    <div className="grid grid-cols-12 gap-2 items-center px-2 py-2 rounded-lg hover:bg-neutral-50 group">
+    <tr
+      draggable
+      onDragStart={(e) => {
+        e.dataTransfer.setData("application/x-variant-sku", v.sku);
+        e.dataTransfer.effectAllowed = "move";
+      }}
+      className="group hover:bg-neutral-50"
+    >
+      {/* Drag handle */}
+      <td className="px-1 py-1.5 cursor-move text-center text-neutral-300 group-hover:text-neutral-500 select-none" title="Arrastra para mover a otro color">
+        ⋮⋮
+      </td>
       {/* Storage */}
-      <div className="col-span-2">
+      <td className="px-2 py-1.5">
         <input
           value={v.storage ?? ""}
           onChange={(e) => onUpdate({ storage: e.target.value || undefined })}
-          placeholder="Storage"
+          placeholder="—"
           list="storage-options"
-          className="w-full px-2 py-1.5 rounded border border-neutral-200 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-[#3B9DD8] bg-white"
+          className="w-24 px-2 py-1.5 rounded border border-neutral-200 font-semibold focus:outline-none focus:ring-1 focus:ring-[#3B9DD8] bg-white"
         />
-      </div>
+      </td>
       {/* Condición */}
-      <div className="col-span-2">
+      <td className="px-2 py-1.5">
         <select
           value={v.condition}
-          onChange={(e) => onUpdate({ condition: e.target.value as ProductCondition })}
-          className="w-full px-2 py-1.5 rounded border border-neutral-200 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-[#3B9DD8]"
+          onChange={(e) => {
+            const newCond = e.target.value as ProductCondition;
+            const becameNew = newCond === "nuevo" || newCond === "preventa";
+            onUpdate({
+              condition: newCond,
+              // Limpiar campos de usado si pasa a nuevo
+              batteryHealth: becameNew ? undefined : v.batteryHealth,
+              conditionDetails: becameNew ? undefined : v.conditionDetails,
+            });
+          }}
+          className="w-32 px-2 py-1.5 rounded border border-neutral-200 bg-white focus:outline-none focus:ring-1 focus:ring-[#3B9DD8]"
         >
           {CONDITIONS.map((c) => (
             <option key={c} value={c}>{conditionLabels[c]}</option>
           ))}
         </select>
-      </div>
+      </td>
       {/* Precio */}
-      <div className="col-span-2 relative">
-        <input
-          type="number"
-          value={String(v.price)}
-          onChange={(e) => onUpdate({ price: Number(e.target.value) || 0 })}
-          placeholder="Precio"
-          className="w-full px-2 py-1.5 rounded border border-neutral-200 text-xs text-right font-semibold focus:outline-none focus:ring-1 focus:ring-[#3B9DD8] bg-white"
-        />
+      <td className="px-2 py-1.5 relative">
+        <div className="flex items-center justify-end gap-0.5">
+          <span className="text-neutral-400 text-[10px]">$</span>
+          <input
+            type="number"
+            value={String(v.price)}
+            onChange={(e) => onUpdate({ price: Number(e.target.value) || 0 })}
+            placeholder="0"
+            className="w-24 px-2 py-1.5 rounded border border-neutral-200 text-right font-semibold focus:outline-none focus:ring-1 focus:ring-[#3B9DD8] bg-white"
+          />
+        </div>
         {onApplyPriceToStorage && v.price > 0 && (
           <button
             type="button"
             onClick={() => onApplyPriceToStorage(v.price)}
-            className="absolute -bottom-4 left-0 right-0 text-[8px] text-[#3B9DD8] hover:underline opacity-0 group-hover:opacity-100 transition whitespace-nowrap text-center"
-            title={`Aplicar este precio a todas las variantes con ${v.storage}`}
+            className="absolute -bottom-3 right-0 text-[8px] text-[#3B9DD8] hover:underline opacity-0 group-hover:opacity-100 transition whitespace-nowrap"
+            title={`Copiar este precio a todas las variantes de ${v.storage}`}
           >
-            ↕ aplicar a {v.storage}
+            ↕ a todos los {v.storage}
           </button>
         )}
-      </div>
+      </td>
       {/* Stock */}
-      <div className="col-span-1">
-        <input
-          type="number"
-          value={String(stock)}
-          onChange={(e) => onUpdate({ stockQuantity: Math.max(0, Number(e.target.value) || 0) })}
-          placeholder="Stock"
-          className={`w-full px-2 py-1.5 rounded border border-neutral-200 text-xs text-right font-bold focus:outline-none focus:ring-1 focus:ring-[#3B9DD8] bg-white ${stockColor}`}
-        />
-      </div>
-      {/* Comisión */}
-      <div className="col-span-1">
-        <input
-          type="number"
-          value={String(v.commissionPct ?? 0)}
-          onChange={(e) => onUpdate({ commissionPct: Math.max(0, Math.min(100, Number(e.target.value) || 0)) })}
-          placeholder="0"
-          title="Comisión %"
-          className="w-full px-2 py-1.5 rounded border border-neutral-200 text-xs text-right focus:outline-none focus:ring-1 focus:ring-[#3B9DD8] bg-white"
-        />
-      </div>
-      {/* Notas */}
-      <div className="col-span-3">
-        <input
-          value={v.notes ?? ""}
-          onChange={(e) => onUpdate({ notes: e.target.value || undefined })}
-          placeholder="Notas (sim física, batería 100%, …)"
-          className="w-full px-2 py-1.5 rounded border border-neutral-200 text-xs focus:outline-none focus:ring-1 focus:ring-[#3B9DD8] bg-white"
-        />
-      </div>
+      <td className="px-2 py-1.5">
+        <div className="flex items-center justify-end gap-0.5">
+          <input
+            type="number"
+            value={String(stock)}
+            onChange={(e) => onUpdate({ stockQuantity: Math.max(0, Number(e.target.value) || 0) })}
+            placeholder="0"
+            className={`w-14 px-2 py-1.5 rounded border border-neutral-200 text-right font-bold focus:outline-none focus:ring-1 focus:ring-[#3B9DD8] bg-white ${stockColor}`}
+          />
+          <span className="text-neutral-400 text-[10px]">u.</span>
+        </div>
+      </td>
+      {/* Comisión % */}
+      <td className="px-2 py-1.5">
+        <div className="flex items-center justify-end gap-0.5">
+          <input
+            type="number"
+            value={String(v.commissionPct ?? 0)}
+            onChange={(e) => onUpdate({ commissionPct: Math.max(0, Math.min(100, Number(e.target.value) || 0)) })}
+            placeholder="0"
+            min={0}
+            max={100}
+            className="w-12 px-2 py-1.5 rounded border border-neutral-200 text-right focus:outline-none focus:ring-1 focus:ring-[#3B9DD8] bg-white"
+          />
+          <span className="text-neutral-400 text-[10px]">%</span>
+        </div>
+      </td>
+
+      {showUsedFields ? (
+        <>
+          {/* Batería % */}
+          <td className="px-2 py-1.5">
+            <div className="flex items-center justify-end gap-0.5">
+              <input
+                type="number"
+                value={battery !== undefined ? String(battery) : ""}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === "") {
+                    onUpdate({ batteryHealth: undefined });
+                  } else {
+                    const n = Math.max(0, Math.min(100, Number(val) || 0));
+                    onUpdate({ batteryHealth: n });
+                  }
+                }}
+                placeholder="—"
+                min={0}
+                max={100}
+                className={`w-12 px-2 py-1.5 rounded border border-neutral-200 text-right font-bold focus:outline-none focus:ring-1 focus:ring-[#3B9DD8] bg-white ${batteryColor}`}
+              />
+              <span className="text-neutral-400 text-[10px]">%</span>
+            </div>
+          </td>
+          {/* Detalles del estado */}
+          <td className="px-2 py-1.5">
+            <input
+              value={v.conditionDetails ?? ""}
+              onChange={(e) => onUpdate({ conditionDetails: e.target.value || undefined })}
+              placeholder="Pequeño rayón en marco, incluye caja original…"
+              className="w-full min-w-[200px] px-2 py-1.5 rounded border border-neutral-200 focus:outline-none focus:ring-1 focus:ring-[#3B9DD8] bg-white"
+            />
+          </td>
+        </>
+      ) : (
+        /* Notas (sólo para variantes nuevas) */
+        <td className="px-2 py-1.5">
+          <input
+            value={v.notes ?? ""}
+            onChange={(e) => onUpdate({ notes: e.target.value || undefined })}
+            placeholder="Sim física, opcional…"
+            className="w-full min-w-[160px] px-2 py-1.5 rounded border border-neutral-200 focus:outline-none focus:ring-1 focus:ring-[#3B9DD8] bg-white"
+          />
+        </td>
+      )}
+
       {/* Acciones */}
-      <div className="col-span-1 flex items-center justify-end gap-0.5 opacity-0 group-hover:opacity-100 transition">
-        <button
-          type="button"
-          onClick={onDuplicate}
-          className="p-1 rounded text-neutral-400 hover:text-neutral-900 hover:bg-white transition"
-          title="Duplicar"
-        >
-          <Copy size={11} />
-        </button>
-        <button
-          type="button"
-          onClick={onRemove}
-          className="p-1 rounded text-neutral-400 hover:text-red-600 hover:bg-red-50 transition"
-          title="Eliminar"
-        >
-          <Trash2 size={11} />
-        </button>
-      </div>
-    </div>
+      <td className="px-1 py-1.5">
+        <div className="flex items-center justify-end gap-0.5 opacity-0 group-hover:opacity-100 transition">
+          <button
+            type="button"
+            onClick={onDuplicate}
+            className="p-1 rounded text-neutral-400 hover:text-neutral-900 hover:bg-white transition"
+            title="Duplicar"
+          >
+            <Copy size={11} />
+          </button>
+          <button
+            type="button"
+            onClick={onRemove}
+            className="p-1 rounded text-neutral-400 hover:text-red-600 hover:bg-red-50 transition"
+            title="Eliminar"
+          >
+            <Trash2 size={11} />
+          </button>
+        </div>
+      </td>
+    </tr>
   );
 }
 
