@@ -232,6 +232,7 @@ export default function ProductEditorPage() {
   const [draft, setDraft] = useState<Product>(initial ?? emptyProduct());
   const [saved, setSaved] = useState(false);
   const [showTemplates, setShowTemplates] = useState(isCreating);
+  const [advancedVariantMode, setAdvancedVariantMode] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
 
@@ -824,11 +825,35 @@ export default function ProductEditorPage() {
         </div>
       </Section>
 
-      {/* Variantes — grilla editable */}
+      {/* Variantes — vista agrupada por color (default) o grilla avanzada */}
       <Section
         title={`Variantes (${draft.variants.length})`}
-        desc="Cada SKU es una variante con precio y stock propios. Al cambiar Storage/RAM/Color/Condición el SKU se regenera automáticamente."
+        desc='Agrega un color, luego sus combinaciones de almacenamiento. Para condiciones especiales ("AS-IS", "exhibición"), agrégalas como variante extra.'
       >
+        {!advancedVariantMode ? (
+          <ColorGroupedVariants
+            draft={draft}
+            setDraft={setDraft}
+            updateVariant={updateVariant}
+            removeVariant={removeVariant}
+            duplicateVariant={duplicateVariant}
+            autoSku={autoSku}
+            slugify={slugify}
+          />
+        ) : null}
+
+        <div className="mt-4 flex justify-between items-center">
+          <button
+            type="button"
+            onClick={() => setAdvancedVariantMode((v) => !v)}
+            className="text-[11px] text-neutral-500 hover:text-neutral-900 underline"
+          >
+            {advancedVariantMode ? "← Volver a vista simple" : "Vista avanzada (grilla SKU por SKU)"}
+          </button>
+        </div>
+
+        {advancedVariantMode ? (
+        <>
         {draft.variants.length === 0 ? (
           <div className="text-center py-8 border-2 border-dashed border-neutral-200 rounded-xl">
             <p className="text-sm font-semibold text-neutral-700 mb-1">
@@ -1013,6 +1038,7 @@ export default function ProductEditorPage() {
             </div>
           </div>
         )}
+        </>) : null}
       </Section>
 
       {/* Colores */}
@@ -1282,5 +1308,657 @@ function Toggle({
         </span>
       </div>
     </button>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Vista de variantes agrupadas por color
+//
+// Modelo mental natural: "iPhone 17 Pro Max naranja: 256GB stock 8,
+// 1TB stock 1; azul: 256GB stock 5". Es decir COLOR es el nivel padre,
+// y dentro de cada color las combinaciones de almacenamiento.
+//
+// Las variantes sin color quedan en una sección "Sin color" para
+// productos que no tienen variación cromática (cargadores, cables, etc).
+// ─────────────────────────────────────────────────────────────────────
+
+const COMMON_COLOR_HEX: Record<string, string> = {
+  negro: "#1c1c1e",
+  blanco: "#f5f5f7",
+  azul: "#3B9DD8",
+  rojo: "#E03131",
+  verde: "#2A9D8F",
+  amarillo: "#FFD43B",
+  naranja: "#FF7A1A",
+  rosa: "#FFC2D7",
+  morado: "#9775FA",
+  dorado: "#F4D58D",
+  plata: "#D4D4D8",
+  gris: "#71717A",
+  titanio: "#8B8C8E",
+  "titanio negro": "#1c1c1e",
+  "titanio natural": "#A89F91",
+  "titanio blanco": "#F5F5F7",
+  "titanio azul": "#3B5C7E",
+};
+
+function guessHex(name: string): string {
+  const k = name.toLowerCase().trim();
+  if (COMMON_COLOR_HEX[k]) return COMMON_COLOR_HEX[k];
+  for (const [key, hex] of Object.entries(COMMON_COLOR_HEX)) {
+    if (k.includes(key)) return hex;
+  }
+  return "#888888";
+}
+
+type ColorGroup = {
+  colorName: string; // "" = sin color
+  hex: string;
+  variants: Variant[];
+};
+
+function groupVariantsByColor(variants: Variant[], productColors: { name: string; hex: string }[]): ColorGroup[] {
+  const map = new Map<string, ColorGroup>();
+  for (const v of variants) {
+    const colorKey = v.color ?? "";
+    if (!map.has(colorKey)) {
+      const knownHex = productColors.find((c) => c.name === colorKey)?.hex;
+      map.set(colorKey, {
+        colorName: colorKey,
+        hex: knownHex ?? guessHex(colorKey),
+        variants: [],
+      });
+    }
+    map.get(colorKey)!.variants.push(v);
+  }
+  // Asegurar que aparezcan colores definidos en el producto aunque no tengan variantes aún
+  for (const c of productColors) {
+    if (!map.has(c.name)) {
+      map.set(c.name, { colorName: c.name, hex: c.hex, variants: [] });
+    }
+  }
+  return Array.from(map.values()).sort((a, b) => {
+    // Sin color al final
+    if (a.colorName === "" && b.colorName !== "") return 1;
+    if (b.colorName === "" && a.colorName !== "") return -1;
+    return a.colorName.localeCompare(b.colorName);
+  });
+}
+
+const STORAGE_OPTIONS = ["64 GB", "128 GB", "256 GB", "512 GB", "1 TB", "2 TB"];
+
+function ColorGroupedVariants({
+  draft,
+  setDraft,
+  updateVariant,
+  removeVariant,
+  duplicateVariant,
+  autoSku,
+  slugify,
+}: {
+  draft: Product;
+  setDraft: React.Dispatch<React.SetStateAction<Product>>;
+  updateVariant: (sku: string, patch: Partial<Variant>) => void;
+  removeVariant: (sku: string) => void;
+  duplicateVariant: (sku: string) => void;
+  autoSku: (productId: string, v: Pick<Variant, "storage" | "ram" | "condition" | "color">, existing: string[]) => string;
+  slugify: (s: string) => string;
+}) {
+  const groups = useMemo(
+    () => groupVariantsByColor(draft.variants, draft.colors),
+    [draft.variants, draft.colors]
+  );
+
+  const productId = draft.id || slugify(draft.name) || "sku";
+
+  /** Crea un nuevo color group con una variante inicial. */
+  const addColor = (name: string, hex: string) => {
+    const cleanName = name.trim();
+    if (!cleanName) return;
+    if (draft.colors.some((c) => c.name.toLowerCase() === cleanName.toLowerCase())) {
+      alert(`El color "${cleanName}" ya existe.`);
+      return;
+    }
+    const skus = draft.variants.map((v) => v.sku);
+    const newVariant: Variant = {
+      sku: autoSku(productId, { storage: undefined, ram: undefined, condition: "nuevo", color: cleanName }, skus),
+      color: cleanName,
+      condition: "nuevo",
+      price: 0,
+      inStock: true,
+      stockQuantity: 0,
+      commissionPct: 0,
+    };
+    setDraft((d) => ({
+      ...d,
+      colors: [...d.colors, { name: cleanName, hex }],
+      variants: [...d.variants, newVariant],
+    }));
+  };
+
+  /** Renombra un color (actualiza colors[] y todas las variantes). */
+  const renameColor = (oldName: string, newName: string, newHex: string) => {
+    const cleanNew = newName.trim();
+    if (!cleanNew) return;
+    setDraft((d) => ({
+      ...d,
+      colors: d.colors.map((c) => (c.name === oldName ? { name: cleanNew, hex: newHex } : c)),
+      variants: d.variants.map((v) => (v.color === oldName ? { ...v, color: cleanNew } : v)),
+    }));
+  };
+
+  /** Elimina un color y TODAS sus variantes. */
+  const removeColor = (colorName: string) => {
+    if (!confirm(`Eliminar el color "${colorName}" y todas sus variantes?`)) return;
+    setDraft((d) => ({
+      ...d,
+      colors: d.colors.filter((c) => c.name !== colorName),
+      variants: d.variants.filter((v) => (v.color ?? "") !== colorName),
+    }));
+  };
+
+  /** Agrega un almacenamiento a un color (nueva variante). */
+  const addStorageToColor = (colorName: string, storage: string) => {
+    const cleanStorage = storage.trim();
+    if (!cleanStorage) return;
+    const colorVariants = draft.variants.filter((v) => (v.color ?? "") === colorName);
+    if (colorVariants.some((v) => v.storage === cleanStorage)) {
+      alert(`${colorName} ya tiene ${cleanStorage}.`);
+      return;
+    }
+    // Heredar precio de otra variante con mismo storage si existe
+    const otherWithSameStorage = draft.variants.find((v) => v.storage === cleanStorage);
+    const skus = draft.variants.map((v) => v.sku);
+    const newVariant: Variant = {
+      sku: autoSku(productId, { storage: cleanStorage, ram: undefined, condition: "nuevo", color: colorName || undefined }, skus),
+      color: colorName || undefined,
+      storage: cleanStorage,
+      condition: "nuevo",
+      price: otherWithSameStorage?.price ?? 0,
+      commissionPct: otherWithSameStorage?.commissionPct ?? 0,
+      inStock: true,
+      stockQuantity: 0,
+    };
+    setDraft((d) => ({ ...d, variants: [...d.variants, newVariant] }));
+  };
+
+  /** Aplica un mismo precio a todas las variantes con el mismo storage (across colors). */
+  const applyPriceToStorage = (storage: string, price: number) => {
+    setDraft((d) => ({
+      ...d,
+      variants: d.variants.map((v) =>
+        v.storage === storage ? { ...v, price } : v
+      ),
+    }));
+  };
+
+  if (groups.length === 0) {
+    return (
+      <div className="text-center py-10 border-2 border-dashed border-neutral-200 rounded-xl">
+        <p className="text-sm font-semibold text-neutral-700 mb-1">
+          Aún no hay variantes
+        </p>
+        <p className="text-xs text-neutral-400 mb-4">
+          Empieza agregando un color (o una variante sin color para productos como cargadores).
+        </p>
+        <div className="flex justify-center gap-2 flex-wrap">
+          <AddColorButton onAdd={addColor} />
+          <button
+            type="button"
+            onClick={() => {
+              const skus = draft.variants.map((v) => v.sku);
+              const newV: Variant = {
+                sku: autoSku(productId, { condition: "nuevo" }, skus),
+                color: undefined,
+                condition: "nuevo",
+                price: 0,
+                inStock: true,
+                stockQuantity: 0,
+                commissionPct: 0,
+              };
+              setDraft((d) => ({ ...d, variants: [...d.variants, newV] }));
+            }}
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-neutral-700 bg-white border border-neutral-200 px-3 py-2 rounded-lg hover:border-neutral-400 transition"
+          >
+            <Plus size={14} /> Variante única (sin color)
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      {groups.map((g) => (
+        <ColorGroupCard
+          key={g.colorName || "__none__"}
+          group={g}
+          allStorages={Array.from(new Set(draft.variants.map((v) => v.storage).filter((s): s is string => !!s)))}
+          onRenameColor={(newName, newHex) => renameColor(g.colorName, newName, newHex)}
+          onRemoveColor={() => removeColor(g.colorName)}
+          onAddStorage={(storage) => addStorageToColor(g.colorName, storage)}
+          onUpdateVariant={updateVariant}
+          onRemoveVariant={removeVariant}
+          onDuplicateVariant={duplicateVariant}
+          onApplyPriceToStorage={applyPriceToStorage}
+        />
+      ))}
+
+      <div className="flex flex-wrap gap-2 pt-2">
+        <AddColorButton onAdd={addColor} />
+      </div>
+    </div>
+  );
+}
+
+function ColorGroupCard({
+  group,
+  allStorages,
+  onRenameColor,
+  onRemoveColor,
+  onAddStorage,
+  onUpdateVariant,
+  onRemoveVariant,
+  onDuplicateVariant,
+  onApplyPriceToStorage,
+}: {
+  group: ColorGroup;
+  allStorages: string[];
+  onRenameColor: (newName: string, newHex: string) => void;
+  onRemoveColor: () => void;
+  onAddStorage: (storage: string) => void;
+  onUpdateVariant: (sku: string, patch: Partial<Variant>) => void;
+  onRemoveVariant: (sku: string) => void;
+  onDuplicateVariant: (sku: string) => void;
+  onApplyPriceToStorage: (storage: string, price: number) => void;
+}) {
+  const [collapsed, setCollapsed] = useState(false);
+  const [editingColor, setEditingColor] = useState(false);
+  const [draftName, setDraftName] = useState(group.colorName);
+  const [draftHex, setDraftHex] = useState(group.hex);
+  const [showAddStorage, setShowAddStorage] = useState(false);
+  const [newStorage, setNewStorage] = useState("");
+
+  const totalStock = group.variants.reduce((s, v) => s + (v.stockQuantity ?? 0), 0);
+  const isNoColor = group.colorName === "";
+
+  const submitRename = () => {
+    if (draftName.trim() && draftName.trim() !== group.colorName) {
+      onRenameColor(draftName.trim(), draftHex);
+    } else if (draftHex !== group.hex) {
+      onRenameColor(group.colorName, draftHex);
+    }
+    setEditingColor(false);
+  };
+
+  return (
+    <div className="bg-white rounded-2xl border border-neutral-200 overflow-hidden">
+      {/* Header de color */}
+      <div className="px-4 py-3 bg-neutral-50/70 border-b border-neutral-200 flex items-center gap-3 flex-wrap">
+        <button
+          type="button"
+          onClick={() => setCollapsed((c) => !c)}
+          className="text-neutral-400 hover:text-neutral-700 transition"
+          aria-label={collapsed ? "Expandir" : "Colapsar"}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="14" height="14" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+            className={`transition-transform ${collapsed ? "" : "rotate-90"}`}
+          >
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+
+        {editingColor && !isNoColor ? (
+          <>
+            <input
+              type="color"
+              value={draftHex}
+              onChange={(e) => setDraftHex(e.target.value)}
+              className="w-8 h-8 rounded border border-neutral-200 cursor-pointer"
+            />
+            <input
+              value={draftName}
+              onChange={(e) => setDraftName(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") submitRename(); }}
+              autoFocus
+              className="px-2 py-1 rounded border border-neutral-200 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
+            />
+            <button
+              type="button"
+              onClick={submitRename}
+              className="text-xs font-semibold text-[#3B9DD8] hover:underline"
+            >
+              Guardar
+            </button>
+            <button
+              type="button"
+              onClick={() => { setEditingColor(false); setDraftName(group.colorName); setDraftHex(group.hex); }}
+              className="text-xs text-neutral-400 hover:text-neutral-700"
+            >
+              Cancelar
+            </button>
+          </>
+        ) : (
+          <>
+            {!isNoColor && (
+              <span
+                className="w-5 h-5 rounded-full border border-neutral-200 shrink-0"
+                style={{ backgroundColor: group.hex }}
+              />
+            )}
+            <span className="text-sm font-bold text-neutral-900">
+              {isNoColor ? "Sin color" : group.colorName}
+            </span>
+            {!isNoColor && (
+              <button
+                type="button"
+                onClick={() => setEditingColor(true)}
+                className="text-[10px] text-neutral-400 hover:text-neutral-700"
+              >
+                editar
+              </button>
+            )}
+          </>
+        )}
+
+        <span className="text-[11px] text-neutral-500 ml-auto">
+          {group.variants.length} variante{group.variants.length === 1 ? "" : "s"} · stock total {totalStock}
+        </span>
+
+        {!isNoColor && !editingColor && (
+          <button
+            type="button"
+            onClick={onRemoveColor}
+            className="p-1.5 rounded-lg text-neutral-400 hover:text-red-600 hover:bg-red-50 transition"
+            title="Eliminar color y sus variantes"
+          >
+            <Trash2 size={13} />
+          </button>
+        )}
+      </div>
+
+      {!collapsed && (
+        <div className="px-4 py-3 space-y-2">
+          {group.variants.length === 0 ? (
+            <p className="text-xs text-neutral-400 italic py-2">
+              Sin variantes para este color. Agrega un almacenamiento abajo.
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {group.variants.map((v) => (
+                <VariantRow
+                  key={v.sku}
+                  variant={v}
+                  onUpdate={(patch) => onUpdateVariant(v.sku, patch)}
+                  onRemove={() => onRemoveVariant(v.sku)}
+                  onDuplicate={() => onDuplicateVariant(v.sku)}
+                  onApplyPriceToStorage={
+                    v.storage
+                      ? (price) => onApplyPriceToStorage(v.storage!, price)
+                      : undefined
+                  }
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Agregar almacenamiento */}
+          {showAddStorage ? (
+            <div className="flex items-center gap-2 mt-2 pt-2 border-t border-neutral-100">
+              <input
+                value={newStorage}
+                onChange={(e) => setNewStorage(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && newStorage.trim()) {
+                    onAddStorage(newStorage.trim());
+                    setNewStorage("");
+                    setShowAddStorage(false);
+                  }
+                }}
+                placeholder="Almacenamiento (ej: 256 GB)"
+                list="storage-options"
+                autoFocus
+                className="px-3 py-1.5 rounded-lg border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30 flex-1"
+              />
+              <datalist id="storage-options">
+                {STORAGE_OPTIONS.map((s) => <option key={s} value={s} />)}
+              </datalist>
+              <button
+                type="button"
+                onClick={() => {
+                  if (newStorage.trim()) {
+                    onAddStorage(newStorage.trim());
+                    setNewStorage("");
+                    setShowAddStorage(false);
+                  }
+                }}
+                className="text-xs font-semibold text-[#3B9DD8] hover:bg-blue-50 px-3 py-1.5 rounded-lg transition"
+              >
+                Agregar
+              </button>
+              <button
+                type="button"
+                onClick={() => { setShowAddStorage(false); setNewStorage(""); }}
+                className="text-xs text-neutral-500 hover:text-neutral-900"
+              >
+                Cancelar
+              </button>
+            </div>
+          ) : (
+            <div className="flex flex-wrap gap-1 pt-2">
+              {/* Quick add: storage chips comunes */}
+              {STORAGE_OPTIONS.filter(
+                (s) => !group.variants.some((v) => v.storage === s)
+              )
+                .slice(0, 4)
+                .map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => onAddStorage(s)}
+                    className="text-[11px] font-semibold px-2.5 py-1 rounded-full border border-neutral-200 text-neutral-600 hover:border-[#3B9DD8] hover:text-[#3B9DD8] hover:bg-blue-50 transition"
+                  >
+                    + {s}
+                  </button>
+                ))}
+              <button
+                type="button"
+                onClick={() => setShowAddStorage(true)}
+                className="text-[11px] font-semibold text-neutral-500 hover:text-[#3B9DD8] px-2.5 py-1 transition"
+              >
+                + Otro
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+      {/* Resumen no usado pero útil para debug */}
+      {void allStorages}
+    </div>
+  );
+}
+
+function VariantRow({
+  variant: v,
+  onUpdate,
+  onRemove,
+  onDuplicate,
+  onApplyPriceToStorage,
+}: {
+  variant: Variant;
+  onUpdate: (patch: Partial<Variant>) => void;
+  onRemove: () => void;
+  onDuplicate: () => void;
+  onApplyPriceToStorage?: (price: number) => void;
+}) {
+  const stock = v.stockQuantity ?? 0;
+  const stockColor = stock === 0 ? "text-red-600" : stock <= 2 ? "text-amber-600" : "text-green-600";
+
+  return (
+    <div className="grid grid-cols-12 gap-2 items-center px-2 py-2 rounded-lg hover:bg-neutral-50 group">
+      {/* Storage */}
+      <div className="col-span-2">
+        <input
+          value={v.storage ?? ""}
+          onChange={(e) => onUpdate({ storage: e.target.value || undefined })}
+          placeholder="Storage"
+          list="storage-options"
+          className="w-full px-2 py-1.5 rounded border border-neutral-200 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-[#3B9DD8] bg-white"
+        />
+      </div>
+      {/* Condición */}
+      <div className="col-span-2">
+        <select
+          value={v.condition}
+          onChange={(e) => onUpdate({ condition: e.target.value as ProductCondition })}
+          className="w-full px-2 py-1.5 rounded border border-neutral-200 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-[#3B9DD8]"
+        >
+          {CONDITIONS.map((c) => (
+            <option key={c} value={c}>{conditionLabels[c]}</option>
+          ))}
+        </select>
+      </div>
+      {/* Precio */}
+      <div className="col-span-2 relative">
+        <input
+          type="number"
+          value={String(v.price)}
+          onChange={(e) => onUpdate({ price: Number(e.target.value) || 0 })}
+          placeholder="Precio"
+          className="w-full px-2 py-1.5 rounded border border-neutral-200 text-xs text-right font-semibold focus:outline-none focus:ring-1 focus:ring-[#3B9DD8] bg-white"
+        />
+        {onApplyPriceToStorage && v.price > 0 && (
+          <button
+            type="button"
+            onClick={() => onApplyPriceToStorage(v.price)}
+            className="absolute -bottom-4 left-0 right-0 text-[8px] text-[#3B9DD8] hover:underline opacity-0 group-hover:opacity-100 transition whitespace-nowrap text-center"
+            title={`Aplicar este precio a todas las variantes con ${v.storage}`}
+          >
+            ↕ aplicar a {v.storage}
+          </button>
+        )}
+      </div>
+      {/* Stock */}
+      <div className="col-span-1">
+        <input
+          type="number"
+          value={String(stock)}
+          onChange={(e) => onUpdate({ stockQuantity: Math.max(0, Number(e.target.value) || 0) })}
+          placeholder="Stock"
+          className={`w-full px-2 py-1.5 rounded border border-neutral-200 text-xs text-right font-bold focus:outline-none focus:ring-1 focus:ring-[#3B9DD8] bg-white ${stockColor}`}
+        />
+      </div>
+      {/* Comisión */}
+      <div className="col-span-1">
+        <input
+          type="number"
+          value={String(v.commissionPct ?? 0)}
+          onChange={(e) => onUpdate({ commissionPct: Math.max(0, Math.min(100, Number(e.target.value) || 0)) })}
+          placeholder="0"
+          title="Comisión %"
+          className="w-full px-2 py-1.5 rounded border border-neutral-200 text-xs text-right focus:outline-none focus:ring-1 focus:ring-[#3B9DD8] bg-white"
+        />
+      </div>
+      {/* Notas */}
+      <div className="col-span-3">
+        <input
+          value={v.notes ?? ""}
+          onChange={(e) => onUpdate({ notes: e.target.value || undefined })}
+          placeholder="Notas (sim física, batería 100%, …)"
+          className="w-full px-2 py-1.5 rounded border border-neutral-200 text-xs focus:outline-none focus:ring-1 focus:ring-[#3B9DD8] bg-white"
+        />
+      </div>
+      {/* Acciones */}
+      <div className="col-span-1 flex items-center justify-end gap-0.5 opacity-0 group-hover:opacity-100 transition">
+        <button
+          type="button"
+          onClick={onDuplicate}
+          className="p-1 rounded text-neutral-400 hover:text-neutral-900 hover:bg-white transition"
+          title="Duplicar"
+        >
+          <Copy size={11} />
+        </button>
+        <button
+          type="button"
+          onClick={onRemove}
+          className="p-1 rounded text-neutral-400 hover:text-red-600 hover:bg-red-50 transition"
+          title="Eliminar"
+        >
+          <Trash2 size={11} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function AddColorButton({
+  onAdd,
+}: {
+  onAdd: (name: string, hex: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState("");
+  const [hex, setHex] = useState("#888888");
+
+  const submit = () => {
+    if (!name.trim()) return;
+    onAdd(name.trim(), hex);
+    setName("");
+    setHex("#888888");
+    setOpen(false);
+  };
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#3B9DD8] bg-white border border-[#3B9DD8] hover:bg-blue-50 px-3 py-2 rounded-lg transition"
+      >
+        <Plus size={14} /> Agregar color
+      </button>
+    );
+  }
+
+  return (
+    <div className="inline-flex items-center gap-2 bg-white border border-neutral-200 px-2 py-1.5 rounded-lg">
+      <input
+        type="color"
+        value={hex}
+        onChange={(e) => setHex(e.target.value)}
+        className="w-7 h-7 rounded border border-neutral-200 cursor-pointer"
+      />
+      <input
+        value={name}
+        onChange={(e) => {
+          setName(e.target.value);
+          // Auto-actualizar hex cuando coincide con color común
+          const guess = guessHex(e.target.value);
+          if (guess !== "#888888") setHex(guess);
+        }}
+        onKeyDown={(e) => { if (e.key === "Enter") submit(); }}
+        autoFocus
+        placeholder="Nombre del color"
+        className="px-2 py-1 text-sm focus:outline-none w-36"
+      />
+      <button
+        type="button"
+        onClick={submit}
+        disabled={!name.trim()}
+        className="text-xs font-semibold text-[#3B9DD8] hover:bg-blue-50 px-2 py-1 rounded transition disabled:opacity-40 disabled:cursor-not-allowed"
+      >
+        Agregar
+      </button>
+      <button
+        type="button"
+        onClick={() => { setOpen(false); setName(""); }}
+        className="text-xs text-neutral-400 hover:text-neutral-700"
+      >
+        Cancelar
+      </button>
+    </div>
   );
 }
