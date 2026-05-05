@@ -37,11 +37,18 @@ type ProductMeta = {
 
 type ChannelKey = "all" | "web" | "local";
 
+const MONTH_NAMES = [
+  "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+  "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre",
+];
+
 export default function AdminReportesPage() {
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [items, setItems] = useState<ItemRow[]>([]);
   const [productMeta, setProductMeta] = useState<Map<string, ProductMeta>>(new Map());
   const [year, setYear] = useState<number>(new Date().getFullYear());
+  /** Mes seleccionado: 0-11, o null = año completo (12 meses). */
+  const [month, setMonth] = useState<number | null>(null);
   const [channel, setChannel] = useState<ChannelKey>("all");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -90,9 +97,11 @@ export default function AdminReportesPage() {
       if (channel === "web" && o.payment_provider === "local") return false;
       if (channel === "local" && o.payment_provider !== "local") return false;
       const d = new Date(o.created_at.replace(" ", "T"));
-      return d.getFullYear() === year;
+      if (d.getFullYear() !== year) return false;
+      if (month !== null && d.getMonth() !== month) return false;
+      return true;
     });
-  }, [orders, channel, year]);
+  }, [orders, channel, year, month]);
 
   const filteredOrderIds = useMemo(
     () => new Set(filteredOrders.map((o) => o.id)),
@@ -191,7 +200,10 @@ export default function AdminReportesPage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `reporte-${year}-${channel}.csv`;
+    const periodSlug = month !== null
+      ? `${year}-${String(month + 1).padStart(2, "0")}`
+      : `${year}`;
+    a.download = `reporte-${periodSlug}-${channel}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -236,16 +248,22 @@ export default function AdminReportesPage() {
 
     // Hoja 4: Metadata
     const channelLabel = channel === "all" ? "Web + Local" : channel === "web" ? "Solo web" : "Solo local";
+    const periodLabel = month !== null
+      ? `${MONTH_NAMES[month]} ${year}`
+      : `Año ${year}`;
     const meta = [
       ["Reporte Macrocell"],
-      ["Año", year],
+      ["Período", periodLabel],
       ["Canal", channelLabel],
       ["Generado", new Date().toLocaleString("es-CO")],
     ];
     const wsMeta = XLSX.utils.aoa_to_sheet(meta);
     XLSX.utils.book_append_sheet(wb, wsMeta, "Info");
 
-    XLSX.writeFile(wb, `reporte-macrocell-${year}-${channel}.xlsx`);
+    const periodSlug = month !== null
+      ? `${year}-${String(month + 1).padStart(2, "0")}`
+      : `${year}`;
+    XLSX.writeFile(wb, `reporte-macrocell-${periodSlug}-${channel}.xlsx`);
   };
 
   const exportPdf = async () => {
@@ -261,7 +279,10 @@ export default function AdminReportesPage() {
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(100);
-    doc.text(`Año ${year} · Canal: ${channelLabel}`, 40, 68);
+    const pdfPeriodLabel = month !== null
+      ? `${MONTH_NAMES[month]} ${year}`
+      : `Año ${year}`;
+    doc.text(`${pdfPeriodLabel} · Canal: ${channelLabel}`, 40, 68);
     doc.text(`Generado: ${new Date().toLocaleString("es-CO")}`, 40, 82);
 
     // KPIs
@@ -333,7 +354,10 @@ export default function AdminReportesPage() {
       headStyles: { fillColor: [59, 157, 216] },
     });
 
-    doc.save(`reporte-macrocell-${year}-${channel}.pdf`);
+    const periodSlug = month !== null
+      ? `${year}-${String(month + 1).padStart(2, "0")}`
+      : `${year}`;
+    doc.save(`reporte-macrocell-${periodSlug}-${channel}.pdf`);
   };
 
   if (error) {
@@ -373,7 +397,9 @@ export default function AdminReportesPage() {
             <FileBarChart size={22} className="text-[#3B9DD8]" /> Reportes
           </h1>
           <p className="text-sm text-neutral-500 mt-1">
-            Vista anual con desglose mensual, por categoría y top productos.
+            {month !== null
+              ? `Detalle de ${MONTH_NAMES[month]} ${year}.`
+              : `Año ${year} con desglose mensual, por categoría y top productos.`}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -388,6 +414,19 @@ export default function AdminReportesPage() {
                 <option key={y} value={y}>
                   {y}
                 </option>
+              ))}
+            </select>
+            <span className="text-neutral-300">·</span>
+            <select
+              value={month === null ? "all" : String(month)}
+              onChange={(e) =>
+                setMonth(e.target.value === "all" ? null : Number(e.target.value))
+              }
+              className="text-sm font-medium text-neutral-800 bg-transparent focus:outline-none cursor-pointer"
+            >
+              <option value="all">Año completo</option>
+              {MONTH_NAMES.map((name, i) => (
+                <option key={i} value={i}>{name}</option>
               ))}
             </select>
           </div>
@@ -440,7 +479,7 @@ export default function AdminReportesPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <Kpi
-          label={`Ingresos ${year}`}
+          label={`Ingresos ${month !== null ? `${MONTH_NAMES[month]} ${year}` : year}`}
           value={formatPrice(yearTotals.revenue)}
           icon={<TrendingUp size={15} className="text-green-300" />}
           highlight

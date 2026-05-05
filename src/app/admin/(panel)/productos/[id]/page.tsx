@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import {
   ArrowLeft,
@@ -235,6 +235,28 @@ export default function ProductEditorPage() {
   const [advancedVariantMode, setAdvancedVariantMode] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
+
+  /** ¿El draft difiere del producto guardado? Permite mostrar el sticky de
+   *  guardar y advertir antes de salir si hay cambios pendientes. */
+  const isDirty = useMemo(() => {
+    if (isCreating) {
+      // En creación, dirty si hay nombre o variantes
+      return draft.name.trim().length > 0 || draft.variants.length > 0;
+    }
+    if (!initial) return false;
+    return JSON.stringify(draft) !== JSON.stringify(initial);
+  }, [draft, initial, isCreating]);
+
+  /** Advertir antes de cerrar la pestaña si hay cambios sin guardar. */
+  useEffect(() => {
+    if (!isDirty) return;
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [isDirty]);
 
   /** Aplica una plantilla: precarga categoría, descripciones y variantes típicas. */
   const applyTemplate = (tpl: Template) => {
@@ -1140,7 +1162,7 @@ export default function ProductEditorPage() {
       </Section>
 
       {/* Footer actions */}
-      <div className="flex justify-end gap-2 pt-4">
+      <div className="flex justify-end gap-2 pt-4 pb-24">
         <Link
           href="/admin/productos"
           className="px-4 py-2.5 rounded-xl text-sm font-semibold text-neutral-700 bg-white border border-neutral-200 hover:border-neutral-400 transition"
@@ -1164,6 +1186,72 @@ export default function ProductEditorPage() {
           )}
         </button>
       </div>
+
+      {/* Sticky save bar — aparece al hacer cambios para que no haga falta
+          bajar al final de la página para guardar. */}
+      {(isDirty || saved) && (
+        <motion.div
+          initial={{ y: 80, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: 80, opacity: 0 }}
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-neutral-200 shadow-lg backdrop-blur"
+        >
+          <div className="max-w-5xl mx-auto px-5 md:px-10 py-3 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 min-w-0">
+              {saved ? (
+                <>
+                  <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                  <p className="text-sm font-semibold text-green-700 truncate">
+                    Guardado correctamente
+                  </p>
+                </>
+              ) : (
+                <>
+                  <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                  <p className="text-sm font-semibold text-neutral-900 truncate">
+                    Tienes cambios sin guardar
+                  </p>
+                  <span className="hidden md:inline text-xs text-neutral-400">
+                    · {draft.variants.length} variante{draft.variants.length === 1 ? "" : "s"}
+                  </span>
+                </>
+              )}
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              {isDirty && !isCreating && initial && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (confirm("¿Descartar todos los cambios?")) {
+                      setDraft(initial);
+                    }
+                  }}
+                  className="hidden md:inline-flex px-3 py-2 rounded-xl text-xs font-semibold text-neutral-700 bg-white border border-neutral-200 hover:border-neutral-400 transition"
+                >
+                  Descartar
+                </button>
+              )}
+              <button
+                onClick={handleSave}
+                className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold text-white transition active:scale-95 shadow-md ${
+                  saved ? "bg-green-500" : "bg-[#3B9DD8] hover:bg-[#2A84BE]"
+                }`}
+              >
+                {saved ? (
+                  <>
+                    <Check size={14} /> Guardado
+                  </>
+                ) : (
+                  <>
+                    <Save size={14} /> {isCreating ? "Crear producto" : "Guardar cambios"}
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      )}
     </div>
   );
 }
