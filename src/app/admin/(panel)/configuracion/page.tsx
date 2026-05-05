@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import {
@@ -18,6 +17,7 @@ import {
   Package,
   Plus,
 } from "lucide-react";
+import Image from "next/image";
 import { useSiteConfigStore } from "@/lib/site-config-store";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
@@ -31,8 +31,6 @@ export default function AdminConfiguracionPage() {
   const [draftTT, setDraftTT] = useState(cfg.tiktokUrl);
   const [draftFB, setDraftFB] = useState(cfg.facebookUrl);
 
-  const [draftHeroTitle, setDraftHeroTitle] = useState(cfg.heroTitle);
-  const [draftHeroSub, setDraftHeroSub] = useState(cfg.heroSubtitle);
   const [draftHoursWeek, setDraftHoursWeek] = useState(cfg.hoursWeek);
   const [draftHoursWeekend, setDraftHoursWeekend] = useState(cfg.hoursWeekend);
   const [draftFooter, setDraftFooter] = useState(cfg.footerTagline);
@@ -84,67 +82,6 @@ export default function AdminConfiguracionPage() {
           {errorMsg}
         </div>
       )}
-
-      {/* Hero / Header del home */}
-      <Section
-        icon={<ImageIcon size={16} className="text-[#3B9DD8]" />}
-        title="Header del home"
-        desc="Carruseles e imagenes destacadas que ven los clientes al entrar."
-        onSave={() =>
-          trySave("hero", () =>
-            update({
-              heroTitle: draftHeroTitle.trim(),
-              heroSubtitle: draftHeroSub.trim(),
-            })
-          )
-        }
-        saved={savedKey === "hero"}
-      >
-        <div className="space-y-5">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div>
-              <Label>Título del hero (opcional)</Label>
-              <input
-                value={draftHeroTitle}
-                onChange={(e) => setDraftHeroTitle(e.target.value)}
-                placeholder="iPhone 17 Pro disponible"
-                className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
-              />
-            </div>
-            <div>
-              <Label>Subtítulo del hero (opcional)</Label>
-              <input
-                value={draftHeroSub}
-                onChange={(e) => setDraftHeroSub(e.target.value)}
-                placeholder="Garantía oficial · Envío gratis"
-                className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#3B9DD8]/30"
-              />
-            </div>
-          </div>
-
-          <ImageGallery
-            label="Carrusel desktop (imágenes verticales 4:5)"
-            images={cfg.heroImagesDesktop}
-            onChange={(imgs) =>
-              trySave("hero-desktop", () =>
-                update({ heroImagesDesktop: imgs })
-              )
-            }
-            saved={savedKey === "hero-desktop"}
-          />
-
-          <ImageGallery
-            label="Carrusel mobile (imágenes horizontales 16:9)"
-            images={cfg.heroImagesMobile}
-            onChange={(imgs) =>
-              trySave("hero-mobile", () =>
-                update({ heroImagesMobile: imgs })
-              )
-            }
-            saved={savedKey === "hero-mobile"}
-          />
-        </div>
-      </Section>
 
       {/* WhatsApp */}
       <Section

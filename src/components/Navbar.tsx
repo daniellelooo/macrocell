@@ -108,7 +108,8 @@ export default function Navbar() {
             ))}
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 md:gap-3">
+            {/* Desktop: search pill */}
             <button
               onClick={() => setSearchOpen(true)}
               className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-neutral-100/80 hover:bg-neutral-200/70 transition-colors text-neutral-500 text-xs"
@@ -121,17 +122,10 @@ export default function Navbar() {
               </kbd>
             </button>
 
-            <button
-              onClick={() => setSearchOpen(true)}
-              className="md:hidden p-2 rounded-full hover:bg-neutral-100 transition-colors"
-              aria-label="Buscar"
-            >
-              <Search size={20} className="text-neutral-700" />
-            </button>
-
+            {/* Desktop only: cuenta y favoritos */}
             <Link
               href="/cuenta"
-              className="p-2 rounded-full hover:bg-neutral-100 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3B9DD8]"
+              className="hidden md:flex p-2 rounded-full hover:bg-neutral-100 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3B9DD8]"
               aria-label="Mi cuenta"
               title="Mi cuenta"
             >
@@ -140,7 +134,7 @@ export default function Navbar() {
 
             <Link
               href="/wishlist"
-              className="relative p-2 rounded-full hover:bg-neutral-100 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3B9DD8]"
+              className="hidden md:flex relative p-2 rounded-full hover:bg-neutral-100 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3B9DD8]"
               aria-label="Favoritos"
               title="Favoritos"
             >
@@ -160,6 +154,7 @@ export default function Navbar() {
               </AnimatePresence>
             </Link>
 
+            {/* Carrito — visible en todos los tamaños */}
             <button
               onClick={toggleCart}
               className="relative p-2 rounded-full hover:bg-neutral-100 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3B9DD8]"
@@ -181,6 +176,7 @@ export default function Navbar() {
               </AnimatePresence>
             </button>
 
+            {/* Desktop: botón WhatsApp */}
             <a
               href={waUrl}
               target="_blank"
@@ -190,6 +186,7 @@ export default function Navbar() {
               WhatsApp
             </a>
 
+            {/* Mobile: hamburger */}
             <button
               className="md:hidden p-2 rounded-full hover:bg-neutral-100 transition-colors"
               onClick={() => setMobileOpen((v) => !v)}

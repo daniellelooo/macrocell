@@ -85,8 +85,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="es" className={outfit.variable}>
-      <body className="min-h-screen bg-[#f9f9f9] text-neutral-900 antialiased pb-[68px] md:pb-0">
+    <html lang="es" className={outfit.variable} suppressHydrationWarning>
+      <body
+        className="min-h-screen bg-[#f9f9f9] text-neutral-900 antialiased pb-[68px] md:pb-0"
+        suppressHydrationWarning
+      >
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}

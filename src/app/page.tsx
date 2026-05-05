@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import {
   ShieldCheck,
@@ -11,7 +11,6 @@ import {
   MapPin,
   ArrowRight,
   Star,
-  CreditCard,
   Gift,
   BadgeCheck,
 } from "lucide-react";
@@ -22,116 +21,6 @@ import { formatPrice } from "@/lib/products";
 import { useCatalogStore } from "@/lib/catalog-store";
 import { useSiteConfigStore, getWhatsappUrl } from "@/lib/site-config-store";
 
-// Las imágenes del carrusel ahora vienen de site-config (admin → Configuración).
-
-function MobileCarousel({ images }: { images: string[] }) {
-  const [current, setCurrent] = useState(0);
-  const list = images.length > 0 ? images : [""];
-
-  useEffect(() => {
-    if (list.length <= 1) return;
-    const timer = setInterval(() => {
-      setCurrent((prev) => (prev + 1) % list.length);
-    }, 5000);
-    return () => clearInterval(timer);
-  }, [list.length]);
-
-  return (
-    <div className="w-full">
-      <div className="relative w-full aspect-[16/9] overflow-hidden bg-[#F5F5F7]">
-        <AnimatePresence initial={false}>
-          <motion.div
-            key={current}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 1, ease: "easeInOut" }}
-            className="absolute inset-0"
-          >
-            {list[current] && (
-              <Image
-                src={list[current]}
-                alt={`Macrocell ${current + 1}`}
-                fill
-                className="object-contain"
-                priority={current === 0}
-                unoptimized
-              />
-            )}
-          </motion.div>
-        </AnimatePresence>
-      </div>
-
-      <div className="flex gap-1.5 justify-center pt-2.5">
-        {list.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => setCurrent(i)}
-            className={`rounded-full transition-all duration-500 ${
-              i === current ? "w-5 h-1.5 bg-[#3B9DD8]" : "w-1.5 h-1.5 bg-neutral-300"
-            }`}
-            aria-label={`Imagen ${i + 1}`}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function HeroCarousel({ images }: { images: string[] }) {
-  const [current, setCurrent] = useState(0);
-  const list = images.length > 0 ? images : [""];
-
-  useEffect(() => {
-    if (list.length <= 1) return;
-    const timer = setInterval(() => {
-      setCurrent((prev) => (prev + 1) % list.length);
-    }, 5000);
-    return () => clearInterval(timer);
-  }, [list.length]);
-
-  return (
-    <div className="relative w-full overflow-hidden rounded-2xl lg:rounded-3xl aspect-[4/5] max-w-[360px] lg:max-w-[420px] xl:max-w-[460px] mx-auto bg-[#F5F5F7]">
-      <AnimatePresence initial={false}>
-        <motion.div
-          key={current}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 1.2, ease: "easeInOut" }}
-          className="absolute inset-0"
-        >
-          {list[current] && (
-            <Image
-              src={list[current]}
-              alt={`Macrocell ${current + 1}`}
-              fill
-              className="object-contain"
-              priority={current === 0}
-              unoptimized
-            />
-          )}
-        </motion.div>
-      </AnimatePresence>
-
-      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
-        {list.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => setCurrent(i)}
-            className={`rounded-full transition-all duration-500 ${
-              i === current
-                ? "w-5 h-1.5 bg-white"
-                : "w-1.5 h-1.5 bg-white/40"
-            }`}
-            aria-label={`Imagen ${i + 1}`}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
 export default function HomePage() {
   const products = useCatalogStore((s) => s.products);
   const featuredProducts = products.filter((p) => p.isFeatured).slice(0, 4);
@@ -141,110 +30,128 @@ export default function HomePage() {
   const whatsappNumber = useSiteConfigStore((s) => s.whatsappNumber);
   const whatsappMsg = useSiteConfigStore((s) => s.whatsappDefaultMessage);
   const instagramUrl = useSiteConfigStore((s) => s.instagramUrl);
-  const heroImagesDesktop = useSiteConfigStore((s) => s.heroImagesDesktop);
-  const heroImagesMobile = useSiteConfigStore((s) => s.heroImagesMobile);
   const WA_URL = getWhatsappUrl(whatsappNumber, whatsappMsg);
+
+  const heroStats = [
+    { value: "154K", label: "Seguidores" },
+    { value: "4", label: "Sedes" },
+    { value: "1 año", label: "Garantía" },
+    { value: "Gratis", label: "Envío" },
+  ];
+
+  const words = ["El", "mejor", "precio"];
 
   return (
     <>
       {/* ── HERO ─────────────────────────────────────────────────── */}
-      <section className="bg-white flex items-center pt-24 pb-10 md:pt-28 md:pb-16 lg:pt-32 lg:pb-20 min-h-screen md:min-h-[calc(100svh-2rem)]">
-        <div className="max-w-7xl mx-auto w-full">
-          {/* Mobile: image on top, text below. Desktop: side by side */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 lg:gap-12 xl:gap-16 items-center">
+      <section className="relative min-h-[100svh] flex flex-col justify-center bg-white overflow-hidden">
 
-            {/* Mobile: carrusel horizontal */}
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
+        {/* Background ambient glow */}
+        <div className="absolute inset-0 pointer-events-none" aria-hidden>
+          <div className="absolute -top-40 -right-40 w-[700px] h-[700px] rounded-full bg-[#3B9DD8]/[0.07] blur-[130px]" />
+          <div className="absolute bottom-0 -left-20 w-[500px] h-[500px] rounded-full bg-[#3B9DD8]/[0.05] blur-[100px]" />
+        </div>
+
+        {/* Subtle dot grid */}
+        <div
+          className="absolute inset-0 pointer-events-none opacity-[0.35]"
+          aria-hidden
+          style={{
+            backgroundImage: "radial-gradient(circle, #d4d4d4 1px, transparent 1px)",
+            backgroundSize: "28px 28px",
+          }}
+        />
+
+        <div className="relative max-w-7xl mx-auto w-full px-6 md:px-12 pt-32 pb-20 md:pt-40 md:pb-28">
+
+
+          {/* Main headline — word-by-word stagger */}
+          <h1 className="mb-3 leading-[0.88] tracking-tight font-black text-neutral-900"
+            style={{ fontSize: "clamp(3.6rem, 11vw, 9.5rem)" }}>
+            {words.map((word, i) => (
+              <motion.span
+                key={word}
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.65, delay: 0.1 + i * 0.12, ease: [0.16, 1, 0.3, 1] }}
+                className="inline-block mr-[0.22em]"
+              >
+                {word}
+              </motion.span>
+            ))}
+            <br />
+            <motion.span
+              initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-              className="order-1 lg:hidden"
+              transition={{ duration: 0.65, delay: 0.46, ease: [0.16, 1, 0.3, 1] }}
+              className="inline-block text-[#3B9DD8]"
             >
-              <MobileCarousel images={heroImagesMobile} />
-            </motion.div>
+              en iPhone.
+            </motion.span>
+          </h1>
 
-            {/* Desktop: carrusel */}
+          {/* Animated underline accent */}
+          <motion.div
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: 1 }}
+            transition={{ duration: 0.8, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            style={{ originX: 0 }}
+            className="h-[3px] w-40 md:w-64 bg-[#3B9DD8] rounded-full mb-8 mt-5"
+          />
+
+          {/* Description + CTAs row */}
+          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 lg:gap-16">
+
             <motion.div
-              initial={{ opacity: 0, y: 12 }}
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-              className="order-1 lg:order-2 hidden lg:block lg:pr-12"
+              transition={{ duration: 0.55, delay: 0.55, ease: [0.16, 1, 0.3, 1] }}
+              className="max-w-md"
             >
-              <HeroCarousel images={heroImagesDesktop} />
-            </motion.div>
-
-            {/* Text — order-2 on mobile (bottom), order-1 on desktop (left) */}
-            <div className="order-2 lg:order-1 px-5 md:px-12 pt-7 pb-4 lg:py-0">
-              <motion.h1
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.55, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
-                className="text-[2.6rem] leading-[1.08] md:text-6xl lg:text-7xl font-bold tracking-tight text-neutral-900 mb-4"
-              >
-                Los precios
-                <br />
-                más bajos
-                <br />
-                <span className="text-[#3B9DD8]">en iPhone.</span>
-              </motion.h1>
-
-              <motion.p
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.18, ease: [0.16, 1, 0.3, 1] }}
-                className="text-sm md:text-lg text-neutral-500 mb-6 max-w-md leading-relaxed"
-              >
-                Sin intermediarios. Garantía oficial Apple. Crédito con Banco de Bogotá.
-                Desde{" "}
-                <strong className="text-neutral-800 font-semibold">
-                  {formatPrice(1420000)}
-                </strong>
-                .
-              </motion.p>
-
-              <motion.div
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.45, delay: 0.26, ease: [0.16, 1, 0.3, 1] }}
-                className="flex flex-col sm:flex-row gap-3 mb-8"
-              >
+              <p className="text-neutral-500 text-base md:text-lg leading-relaxed mb-7">
+                Sin intermediarios. Garantía oficial Apple. Envío gratis a toda Colombia. Desde{" "}
+                <strong className="text-neutral-800 font-semibold">{formatPrice(1420000)}</strong>.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3">
                 <Link
                   href="/catalogo"
-                  className="bg-[#3B9DD8] text-white px-7 py-4 rounded-full font-semibold text-sm hover:bg-[#2A84BE] transition-colors active:scale-95 text-center"
+                  className="inline-flex items-center justify-center gap-2 bg-[#3B9DD8] text-white px-7 py-4 rounded-full font-bold text-sm hover:bg-[#2A84BE] active:scale-95 transition-all duration-200 shadow-lg shadow-[#3B9DD8]/25"
                 >
                   Ver catálogo y precios
+                  <ArrowRight size={14} />
                 </Link>
                 <a
                   href={WA_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-white text-neutral-800 px-7 py-4 rounded-full font-semibold text-sm border border-neutral-200 hover:bg-neutral-50 transition-all active:scale-95 text-center"
+                  className="inline-flex items-center justify-center bg-white text-neutral-800 px-7 py-4 rounded-full font-semibold text-sm border border-neutral-200 hover:bg-neutral-50 active:scale-95 transition-all duration-200"
                 >
-                  Contáctanos por WhatsApp
+                  WhatsApp
                 </a>
-              </motion.div>
+              </div>
+            </motion.div>
 
-              {/* Stats — 4 cols on all sizes */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.38 }}
-                className="grid grid-cols-4 gap-3 pt-6 border-t border-neutral-100"
-              >
-                {[
-                  { value: "+200K", label: "Seguidores" },
-                  { value: "4", label: "Sedes" },
-                  { value: "1 año", label: "Garantía" },
-                  { value: "Gratis", label: "Envío" },
-                ].map((s) => (
-                  <div key={s.label}>
-                    <p className="text-base md:text-lg font-bold text-neutral-900">{s.value}</p>
-                    <p className="text-[10px] md:text-xs text-neutral-400 mt-0.5">{s.label}</p>
-                  </div>
-                ))}
-              </motion.div>
-            </div>
+            {/* Stats — vertical on desktop right side */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.72 }}
+              className="grid grid-cols-4 lg:grid-cols-2 gap-x-10 gap-y-5 lg:gap-x-14 lg:gap-y-6 shrink-0"
+            >
+              {heroStats.map((s, i) => (
+                <motion.div
+                  key={s.label}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.78 + i * 0.07 }}
+                >
+                  <p className="text-2xl md:text-3xl font-black text-neutral-900 leading-none">{s.value}</p>
+                  <p className="text-[11px] text-neutral-400 mt-1 uppercase tracking-wider font-medium">{s.label}</p>
+                </motion.div>
+              ))}
+            </motion.div>
           </div>
+
         </div>
       </section>
 
@@ -346,221 +253,216 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── POR QUÉ PROPHONE ─────────────────────────────────────── */}
-      <section className="py-14 md:py-24 bg-[#F5F5F7]">
-        <div className="max-w-6xl mx-auto">
-          <AnimatedSection className="mb-8 px-5 md:px-12">
-            <h2 className="text-2xl md:text-5xl font-bold tracking-tight text-neutral-900 mb-2">
-              ¿Por qué Macrocell?
+      {/* ── POR QUÉ MACROCELL — editorial numerado ───────────────── */}
+      <section className="py-20 md:py-32 bg-white">
+        <div className="max-w-6xl mx-auto px-5 md:px-12">
+          <AnimatedSection className="mb-14 md:mb-20 max-w-2xl">
+            <span className="text-[#3B9DD8] text-[11px] font-bold tracking-[0.25em] uppercase mb-4 block">
+              Por qué Macrocell
+            </span>
+            <h2 className="text-3xl md:text-6xl font-bold tracking-tight text-neutral-900 leading-[1.05]">
+              Tres razones por las que más de <span className="text-[#3B9DD8]">154K</span> personas confían en nosotros.
             </h2>
-            <p className="text-neutral-500 text-sm">Tu tienda de smartphones de confianza</p>
           </AnimatedSection>
 
-          {/* Mobile: horizontal scroll cards. Desktop: 3-col grid */}
-          <div className="flex gap-4 overflow-x-auto no-scrollbar px-5 md:px-12 pb-2 md:grid md:grid-cols-3 md:overflow-visible">
+          <div className="space-y-0">
             {[
               {
-                icon: <ShieldCheck size={22} className="text-[#3B9DD8]" />,
-                title: "Garantía Oficial",
-                description: "Todos nuestros equipos tienen garantía Apple de 1 año. Compra con total seguridad.",
+                title: "Garantía oficial Apple",
+                description:
+                  "Todos los equipos nuevos vienen con un año de garantía Apple oficial. Los de exhibición, con 3.5 meses de garantía Macrocell. Sin letra pequeña, sin sorpresas.",
+                icon: <ShieldCheck size={20} className="text-[#3B9DD8]" />,
               },
               {
-                icon: <BadgeDollarSign size={22} className="text-[#3B9DD8]" />,
-                title: "Los Mejores Precios",
-                description: "Sin intermediarios. Traemos lo mejor de Apple a los precios más bajos de Medellín.",
+                title: "Los mejores precios de Medellín",
+                description:
+                  "Sin intermediarios. Compramos directo y trasladamos el ahorro. Por eso encontrás un iPhone 14 desde $1.400.000 — precios imposibles en otro lado.",
+                icon: <BadgeDollarSign size={20} className="text-[#3B9DD8]" />,
               },
               {
-                icon: <HeadphonesIcon size={22} className="text-[#3B9DD8]" />,
-                title: "Asesoría Personalizada",
-                description: "Te ayudamos a elegir el equipo ideal. Respondemos rápido por WhatsApp.",
+                title: "Asesoría humana, sin presión",
+                description:
+                  "Atendemos por WhatsApp todos los días. Te ayudamos a elegir el equipo ideal según tu uso y presupuesto. Si no te conviene, te lo decimos.",
+                icon: <HeadphonesIcon size={20} className="text-[#3B9DD8]" />,
               },
             ].map((feature, i) => (
-              <div
+              <AnimatedSection
                 key={feature.title}
-                className="bg-white rounded-2xl p-5 border border-neutral-200 shrink-0 w-[72vw] sm:w-[55vw] md:w-auto"
+                delay={i * 0.08}
+                className="grid grid-cols-12 gap-4 md:gap-8 items-start py-10 md:py-14 border-t border-neutral-200 last:border-b last:border-neutral-200"
               >
-                <div className="mb-3">{feature.icon}</div>
-                <h3 className="text-sm font-bold text-neutral-900 mb-1.5">
-                  {feature.title}
-                </h3>
-                <p className="text-sm text-neutral-500 leading-relaxed">
-                  {feature.description}
-                </p>
-              </div>
+                {/* Number */}
+                <div className="col-span-2 md:col-span-2">
+                  <span
+                    className="font-black text-neutral-200 leading-none tabular-nums select-none"
+                    style={{ fontSize: "clamp(2.6rem, 8vw, 6.5rem)" }}
+                  >
+                    0{i + 1}
+                  </span>
+                </div>
+                {/* Title */}
+                <div className="col-span-10 md:col-span-5 pt-3 md:pt-6">
+                  <div className="flex items-center gap-2 mb-2">
+                    {feature.icon}
+                    <span className="text-[10px] text-[#3B9DD8] font-bold uppercase tracking-wider">
+                      Macrocell · {String(i + 1).padStart(2, "0")}
+                    </span>
+                  </div>
+                  <h3 className="text-2xl md:text-4xl font-bold tracking-tight text-neutral-900 leading-[1.1]">
+                    {feature.title}
+                  </h3>
+                </div>
+                {/* Description */}
+                <div className="col-span-12 md:col-span-5 pt-1 md:pt-7">
+                  <p className="text-neutral-500 text-base md:text-lg leading-relaxed">
+                    {feature.description}
+                  </p>
+                </div>
+              </AnimatedSection>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── TU COMPRA INCLUYE ─────────────────────────────────────── */}
-      <section className="py-14 md:py-24 bg-white">
-        <div className="max-w-5xl mx-auto px-5 md:px-12">
-          <AnimatedSection className="mb-7">
-            <h2 className="text-2xl md:text-5xl font-bold tracking-tight text-neutral-900 mb-2">
-              Tu compra incluye mucho más
+      {/* ── TU COMPRA INCLUYE — sección oscura ────────────────────── */}
+      <section className="relative py-20 md:py-32 bg-[#0C1014] text-white overflow-hidden">
+        {/* ambient blue glow */}
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#3B9DD8]/10 rounded-full blur-[120px] pointer-events-none" aria-hidden />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#3B9DD8]/5 rounded-full blur-[100px] pointer-events-none" aria-hidden />
+
+        <div className="relative max-w-7xl mx-auto px-5 md:px-12 grid md:grid-cols-12 gap-10 md:gap-16 items-start">
+          <AnimatedSection className="md:col-span-5">
+            <span className="text-[#3B9DD8] text-[11px] font-bold tracking-[0.25em] uppercase mb-4 block">
+              Compras de contado
+            </span>
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight leading-[1.05] mb-5">
+              Cada compra incluye más de lo que pagás.
             </h2>
-            <p className="text-neutral-500 text-sm">Solo en compras de contado</p>
+            <p className="text-neutral-400 text-base leading-relaxed max-w-md">
+              Te llevás tu equipo listo para usar. Sin gastos ocultos. Tres extras incluidos sin costo cuando pagás de contado.
+            </p>
           </AnimatedSection>
 
-          {/* 3 cols on all sizes — compact cards */}
-          <div className="grid grid-cols-3 gap-3 md:gap-5">
+          <div className="md:col-span-7 space-y-0">
             {[
               {
-                icon: <Gift size={20} className="text-[#3B9DD8]" />,
-                title: "Vidrio Protector",
-                desc: "Membresía 1 año para cambio de vidrio.",
+                icon: <Gift size={18} className="text-[#3B9DD8]" />,
+                title: "Vidrio templado",
+                desc: "+ Membresía 1 año para cambio de vidrio gratuito.",
               },
               {
-                icon: <ShieldCheck size={20} className="text-[#3B9DD8]" />,
-                title: "Estuche",
-                desc: "Estuche protector sin costo adicional.",
+                icon: <ShieldCheck size={18} className="text-[#3B9DD8]" />,
+                title: "Estuche protector",
+                desc: "Original, ajustado al modelo. Sin costo adicional.",
               },
               {
-                icon: <BadgeCheck size={20} className="text-[#3B9DD8]" />,
-                title: "Garantía 1 Año",
-                desc: "Respaldo oficial Apple + soporte nuestro.",
+                icon: <BadgeCheck size={18} className="text-[#3B9DD8]" />,
+                title: "Garantía oficial Apple",
+                desc: "1 año respaldado por Apple + soporte directo nuestro.",
               },
             ].map((item, i) => (
               <AnimatedSection
                 key={item.title}
                 delay={i * 0.08}
-                className="bg-[#F5F5F7] rounded-2xl p-4 md:p-6 border border-neutral-100 flex flex-col"
+                className="grid grid-cols-12 gap-4 py-6 md:py-7 border-t border-white/10 last:border-b last:border-white/10 items-center"
               >
-                <div className="mb-3">{item.icon}</div>
-                <h3 className="text-xs md:text-sm font-bold text-neutral-900 mb-1">
-                  {item.title}
-                </h3>
-                <p className="text-[11px] md:text-sm text-neutral-500 leading-snug">
-                  {item.desc}
-                </p>
+                <span className="col-span-2 md:col-span-1 text-[#3B9DD8]/70 text-2xl md:text-3xl font-black tabular-nums">
+                  0{i + 1}
+                </span>
+                <div className="col-span-10 md:col-span-11 flex flex-col md:flex-row md:items-center gap-1 md:gap-6">
+                  <div className="flex items-center gap-3 md:min-w-[260px]">
+                    {item.icon}
+                    <h3 className="text-base md:text-lg font-bold">
+                      {item.title}
+                    </h3>
+                  </div>
+                  <p className="text-neutral-400 text-sm leading-relaxed flex-1">
+                    {item.desc}
+                  </p>
+                </div>
               </AnimatedSection>
             ))}
-          </div>
-
-          <p className="text-xs text-neutral-400 mt-4">
-            * Aplica para compras en efectivo. Pregunta por condiciones.
-          </p>
-        </div>
-      </section>
-
-      {/* ── CRÉDITO BANCO DE BOGOTÁ ───────────────────────────────── */}
-      <section className="py-14 md:py-24 bg-[#F5F5F7]">
-        <div className="max-w-5xl mx-auto px-5 md:px-12">
-          <div className="bg-[#0C1014] rounded-3xl p-7 md:p-14 flex flex-col md:flex-row items-start md:items-center gap-8 md:gap-10">
-            <div className="flex-1 w-full">
-              <div className="flex items-center gap-3 mb-5">
-                <CreditCard size={18} className="text-[#3B9DD8]" />
-                <span className="text-neutral-400 text-xs font-medium">
-                  Crédito disponible
-                </span>
-              </div>
-              <h2 className="text-2xl md:text-4xl font-bold text-white mb-4 leading-snug">
-                ¿No tienes todo el efectivo?
-                <br />
-                <span className="text-[#3B9DD8]">Te financiamos.</span>
-              </h2>
-
-              <div className="flex items-center gap-3 mb-4">
-                <div className="relative w-24 h-9 rounded-lg overflow-hidden bg-white/10">
-                  <Image
-                    src="/banco-de-bogota-logo-png_seeklogo-16005-removebg-preview.png"
-                    alt="Banco de Bogotá"
-                    fill
-                    className="object-contain p-1.5"
-                  />
-                </div>
-                <span className="text-neutral-400 text-xs">Alianza oficial</span>
-              </div>
-
-              <p className="text-neutral-400 text-sm leading-relaxed mb-6">
-                Adquiere tu iPhone a crédito con{" "}
-                <strong className="text-white">Banco de Bogotá</strong>. Cuotas
-                accesibles, sin trámites complicados.
-              </p>
-
-              {/* Benefits visible on mobile too */}
-              <div className="grid grid-cols-2 gap-2 mb-6 md:hidden">
-                {["Aprobación rápida", "Cuotas flexibles", "Sin fiador", "Entrega inmediata"].map((b) => (
-                  <div key={b} className="flex items-center gap-2 border border-white/10 rounded-xl px-3 py-2">
-                    <span className="w-1.5 h-1.5 bg-[#3B9DD8] rounded-full shrink-0" />
-                    <span className="text-white text-xs">{b}</span>
-                  </div>
-                ))}
-              </div>
-
-              <a
-                href={WA_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-[#3B9DD8] text-white px-6 py-3.5 rounded-full text-sm font-semibold hover:bg-[#2A84BE] active:scale-95 transition-all w-full md:w-auto justify-center md:justify-start"
-              >
-                Solicitar crédito por WhatsApp
-              </a>
-            </div>
-
-            {/* Desktop benefits column */}
-            <div className="hidden md:flex flex-col gap-3 min-w-[200px]">
-              {["Aprobación rápida", "Cuotas flexibles", "Sin fiador", "Entrega inmediata"].map((benefit) => (
-                <div
-                  key={benefit}
-                  className="flex items-center gap-3 border border-white/10 rounded-xl px-4 py-2.5"
-                >
-                  <span className="w-1.5 h-1.5 bg-[#3B9DD8] rounded-full shrink-0" />
-                  <span className="text-white text-sm">{benefit}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── TESTIMONIOS ──────────────────────────────────────────── */}
-      <section className="py-14 md:py-24 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <AnimatedSection className="mb-7 px-5 md:px-12">
-            <h2 className="text-2xl md:text-4xl font-bold tracking-tight text-neutral-900 mb-1">
-              Lo que dicen nuestros clientes
-            </h2>
-            <p className="text-neutral-500 text-sm">
-              Miles de personas satisfechas en toda Antioquia
+            <p className="text-[11px] text-neutral-600 mt-5 italic">
+              * Aplica para compras en efectivo. Pregunta por condiciones.
             </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ── TESTIMONIOS — magazine style ────────────────────────── */}
+      <section className="py-20 md:py-32 bg-white">
+        <div className="max-w-6xl mx-auto px-5 md:px-12">
+          <AnimatedSection className="mb-12 md:mb-16">
+            <span className="text-[#3B9DD8] text-[11px] font-bold tracking-[0.25em] uppercase mb-4 block">
+              Lo que dicen
+            </span>
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-neutral-900 leading-[1.05] max-w-2xl">
+              Las historias detrás de las compras.
+            </h2>
           </AnimatedSection>
 
-          {/* Mobile: horizontal scroll. Desktop: grid */}
-          <div className="flex gap-4 overflow-x-auto no-scrollbar px-5 md:px-12 pb-2 md:grid md:grid-cols-3 md:overflow-visible">
+          {/* Featured quote */}
+          <AnimatedSection className="mb-14 md:mb-20 max-w-4xl">
+            <span
+              className="text-[#3B9DD8] font-serif leading-none block -mb-8 md:-mb-14 select-none"
+              style={{ fontSize: "clamp(8rem, 18vw, 14rem)" }}
+              aria-hidden
+            >
+              &ldquo;
+            </span>
+            <p className="text-2xl md:text-4xl lg:text-5xl font-light leading-[1.2] tracking-tight text-neutral-900">
+              Compré mi iPhone 16 Pro y el precio fue el mejor que encontré en Medellín. Me regalaron el vidrio y el estuche — atención impecable.
+            </p>
+            <div className="mt-8 flex items-center gap-4">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#3B9DD8] to-[#2A84BE] flex items-center justify-center text-white font-bold text-sm">
+                V
+              </div>
+              <div>
+                <p className="text-sm font-bold text-neutral-900">Valentina G.</p>
+                <p className="text-xs text-neutral-500 uppercase tracking-wider">Cliente verificada · Medellín</p>
+              </div>
+            </div>
+          </AnimatedSection>
+
+          {/* Secondary testimonials */}
+          <div className="grid md:grid-cols-2 gap-6 md:gap-10 pt-12 md:pt-16 border-t border-neutral-200">
             {[
               {
-                name: "Valentina G.",
-                text: "Compré mi iPhone 16 Pro y el precio fue el mejor que encontré en Medellín. Me regalaron el vidrio y el estuche, ¡increíble!",
-                rating: 5,
-              },
-              {
                 name: "Sebastián M.",
+                initial: "S",
+                location: "Itagüí",
                 text: "Ya llevo 3 años comprando en Macrocell. Siempre garantía real y precios que no consigo en otro lado. 100% recomendados.",
-                rating: 5,
               },
               {
                 name: "Camila R.",
-                text: "Muy fácil el crédito con Banco de Bogotá. En media hora ya tenía mi iPhone 15. Servicio rapidísimo.",
-                rating: 5,
+                initial: "C",
+                location: "El Poblado",
+                text: "Muy buena la atención. En media hora ya tenía mi iPhone 15 listo. Servicio rapidísimo y todo original.",
               },
             ].map((review, i) => (
-              <div
+              <AnimatedSection
                 key={review.name}
-                className="bg-[#F5F5F7] rounded-2xl p-5 border border-neutral-100 shrink-0 w-[78vw] sm:w-[55vw] md:w-auto"
+                delay={i * 0.1}
+                className="flex flex-col"
               >
-                <div className="flex gap-0.5 mb-3">
-                  {Array.from({ length: review.rating }).map((_, j) => (
-                    <Star key={j} size={13} className="text-yellow-400 fill-yellow-400" />
+                <div className="flex gap-0.5 mb-4">
+                  {Array.from({ length: 5 }).map((_, j) => (
+                    <Star key={j} size={13} className="text-amber-400 fill-amber-400" />
                   ))}
                 </div>
-                <p className="text-neutral-700 mb-4 leading-relaxed text-sm">
+                <p className="text-neutral-700 text-base md:text-lg leading-relaxed mb-6 flex-1">
                   &ldquo;{review.text}&rdquo;
                 </p>
-                <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">
-                  {review.name}
-                </p>
-              </div>
+                <div className="flex items-center gap-3 pt-4 border-t border-neutral-100">
+                  <div className="w-9 h-9 rounded-full bg-neutral-900 flex items-center justify-center text-white font-bold text-xs">
+                    {review.initial}
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-neutral-900">{review.name}</p>
+                    <p className="text-[11px] text-neutral-500 uppercase tracking-wider">{review.location}</p>
+                  </div>
+                </div>
+              </AnimatedSection>
             ))}
           </div>
         </div>
@@ -609,7 +511,7 @@ export default function HomePage() {
             ¿Listo para tu nuevo iPhone?
           </h2>
           <p className="text-neutral-400 text-sm md:text-base mb-8 max-w-sm md:max-w-lg mx-auto leading-relaxed">
-            Más de <strong className="text-white">200K seguidores</strong> confían
+            Más de <strong className="text-white">154K seguidores</strong> confían
             en Macrocell. Los mejores precios en Colombia.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">

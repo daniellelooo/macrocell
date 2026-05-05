@@ -10,7 +10,6 @@ import {
   ExternalLink,
   FileBarChart,
   LogOut,
-  MapPin,
   Settings,
   Sparkles,
   ShoppingBag,
@@ -36,7 +35,6 @@ const NAV_ADMIN: NavItem[] = [
   { href: "/admin/clientes", label: "Clientes", icon: Users },
   { href: "/admin/usuarios", label: "Equipo", icon: UserCog },
   { href: "/admin/promociones", label: "Promociones", icon: Sparkles },
-  { href: "/admin/sedes", label: "Sedes", icon: MapPin },
   { href: "/admin/configuracion", label: "Configuración", icon: Settings },
 ];
 
