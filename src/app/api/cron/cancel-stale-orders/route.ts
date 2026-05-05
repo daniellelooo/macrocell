@@ -9,11 +9,13 @@ import type { Database } from "@/lib/database.types";
  * sin pago aprobado. El trigger trg_restore_stock_on_cancel se encarga
  * de devolver el stock al inventario.
  *
- * Programado vía vercel.json (crons) para correr cada 15 minutos.
+ * Programado vía pg_cron en Supabase (corre cada 15 min llamando
+ * directamente a `public.cancel_stale_pending_orders(30)`). El cron
+ * de Vercel se removió porque el plan Hobby solo permite 1×/día.
  *
- * Auth: requiere header `Authorization: Bearer ${CRON_SECRET}` o que
- * Vercel mande el header `x-vercel-cron` (lo agrega automáticamente
- * cuando es invocado por el scheduler).
+ * Este endpoint queda disponible para invocaciones manuales (debug,
+ * cancelación forzada). Auth: header `Authorization: Bearer ${CRON_SECRET}`
+ * o `x-vercel-cron` si en algún momento se vuelve a usar el cron de Vercel.
  */
 export const runtime = "nodejs";
 
